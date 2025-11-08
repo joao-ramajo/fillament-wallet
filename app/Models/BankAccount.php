@@ -6,6 +6,7 @@ use App\BankAccountType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 class BankAccount extends Model
@@ -29,9 +30,14 @@ class BankAccount extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getBalanceAttribute($value): float
+    public function getBalanceAttribute(): float
     {
-        return $value / 100;
+        $user_id = $this->user_id;
+
+        $income = $this->expenses()->where('user_id', $user_id)->where('type', 'income')->where('status', 'paid')->sum('amount');
+        $expense = $this->expenses()->where('user_id', $user_id)->where('type', 'expense')->where('status', 'paid')->sum('amount');
+
+        return ($income - $expense) / 100;
     }
 
     public function setBalanceAttribute($value): void
@@ -42,6 +48,12 @@ class BankAccount extends Model
 
         $this->attributes['balance'] = (int) round($clean * 100);
     }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
 
     protected static function booted(): void
     {

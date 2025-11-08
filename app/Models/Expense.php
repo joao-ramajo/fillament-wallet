@@ -35,6 +35,11 @@ class Expense extends Model
         return $value / 100;
     }
 
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
     public function setAmountAttribute($value)
     {
         // Remove símbolos e converte para centavos antes de salvar

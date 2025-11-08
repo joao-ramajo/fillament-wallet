@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Expenses;
 use App\Filament\Resources\Expenses\Pages\ManageExpenses;
 use App\Filament\Resources\Expenses\Widgets\MyWidget;
 use App\Filament\Resources\Expenses\Widgets\TotalExpensesOverview;
+use App\Models\BankAccount;
 use App\Models\Expense;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -15,6 +16,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -30,7 +32,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use BackedEnum;
-use Filament\Forms\Components\DateTimePicker;
 
 class ExpenseResource extends Resource
 {
@@ -70,6 +71,14 @@ class ExpenseResource extends Resource
                     ->native(false)
                     ->seconds(false)
                     ->nullable(),
+                Select::make('bank_account_id')
+                    ->label('Bank Account')
+                    ->options(fn() => BankAccount::query()
+                        ->where('user_id', Auth::id())
+                        ->orderBy('name')
+                        ->pluck('name', 'id'))
+                    ->nullable()
+                    ->required(false),
                 Hidden::make('user_id')
                     ->default(fn() => Auth::id())
             ]);
@@ -128,6 +137,9 @@ class ExpenseResource extends Resource
                         'info' => 'income',
                         'gray' => 'expense',
                     ]),
+                TextColumn::make('bankAccount.name')
+                    ->label('Bank Account')
+                    ->sortable(),
                 TextColumn::make('payment_date')
                     ->label('Payment Date')
                     ->date('d/m/Y H:i:s')
@@ -144,8 +156,8 @@ class ExpenseResource extends Resource
                     ->label('Register at    ')
                     ->dateTime()
                     ->date('d/m/Y H:i:s')
-                    ->sortable(),
-                // ->toggleable(isToggledHiddenByDefault: false),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -184,17 +196,17 @@ class ExpenseResource extends Resource
             ])
             ->deferFilters(false)
             ->recordActions([
-                Action::make('paid')
-                    ->color('success')
-                    ->icon('heroicon-o-banknotes')
-                    ->button()
-                    ->tooltip('mark as paid')
-                    ->outlined()
-                    ->label('Mark as paid')
-                    ->requiresConfirmation()
-                    ->visible(fn(Expense $record): bool => in_array($record->status, ['pending', 'overdue']))
-                    ->action(fn(Expense $record) => $record->update(['status' => 'paid'])),
                 ActionGroup::make([
+                    Action::make('paid')
+                        ->color('success')
+                        ->icon('heroicon-o-banknotes')
+                        // ->button()
+                        ->tooltip('mark as paid')
+                        // ->outlined()
+                        ->label('Mark as paid')
+                        ->requiresConfirmation()
+                        ->visible(fn(Expense $record): bool => in_array($record->status, ['pending', 'overdue']))
+                        ->action(fn(Expense $record) => $record->update(['status' => 'paid'])),
                     ViewAction::make()
                         ->label('View expense')
                         ->tooltip('View')
