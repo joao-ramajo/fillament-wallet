@@ -7,6 +7,7 @@ use App\Filament\Resources\Expenses\Widgets\MyWidget;
 use App\Filament\Resources\Expenses\Widgets\TotalExpensesOverview;
 use App\Models\Expense;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,6 +22,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -89,6 +92,8 @@ class ExpenseResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $status = ['pending', 'paid', 'overdue'];
+
         return $table
             ->recordTitleAttribute('Expenses')
             ->columns([
@@ -101,8 +106,7 @@ class ExpenseResource extends Resource
                     ->formatStateUsing(fn($state, $record, $livewire) =>
                         $livewire->hideValues
                             ? '???'
-                            : 'R$ ' . number_format($state, 2, ',', '.')
-            ),
+                            : 'R$ ' . number_format($state, 2, ',', '.')),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -143,8 +147,37 @@ class ExpenseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('payment_date')
+                    ->form([
+                        DatePicker::make('date')
+                            ->label('Data de Pagamento')
+                            ->displayFormat('d/m/Y')  // mostra no formato brasileiro no formulário
+                            ->native(false)  // usa o calendário do Filament/Flatpickr (não o nativo do navegador)
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when(
+                                $data['date'],
+                                fn($query, $date) => $query->whereDate('payment_date', $date)
+                            );
+                    }),
+                SelectFilter::make('status')
+                    ->multiple()
+                    ->options([
+                        'paid' => 'paid',
+                        'pending' => 'pending',
+                        'overdue' => 'overdue',
+                    ])
+                    ->attribute('status'),
+                SelectFilter::make('type')
+                    ->multiple()
+                    ->options([
+                        'income' => 'income',
+                        'expense' => 'expense',
+                    ])
+                    ->attribute('type'),
             ])
+            ->deferFilters(false)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

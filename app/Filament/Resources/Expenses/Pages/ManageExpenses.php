@@ -5,12 +5,20 @@ namespace App\Filament\Resources\Expenses\Pages;
 use App\Filament\Resources\Expenses\ExpenseResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Support\Facades\Auth;
 
 class ManageExpenses extends ManageRecords
 {
     protected static string $resource = ExpenseResource::class;
+
     public bool $hideValues = false;
+
+    public function getTitle(): string
+    {
+        return 'Expenses';
+    }
 
     protected function getHeaderActions(): array
     {
