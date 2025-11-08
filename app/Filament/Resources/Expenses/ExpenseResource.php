@@ -6,6 +6,8 @@ use App\Filament\Resources\Expenses\Pages\ManageExpenses;
 use App\Filament\Resources\Expenses\Widgets\MyWidget;
 use App\Filament\Resources\Expenses\Widgets\TotalExpensesOverview;
 use App\Models\Expense;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -28,6 +30,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use BackedEnum;
+use Filament\Forms\Components\DateTimePicker;
 
 class ExpenseResource extends Resource
 {
@@ -58,12 +61,14 @@ class ExpenseResource extends Resource
                     ->options(['expense' => 'Expense', 'income' => 'Income'])
                     ->default('expense')
                     ->required(),
-                DatePicker::make('payment_date')
-                    ->label('Data de Pagamento')
+                DateTimePicker::make('payment_date')
+                    ->label('Payment Date')
+                    ->displayFormat('d/m/Y H:i:s')
+                    ->format('Y-m-d H:i:s')
+                    ->timezone('America/Sao_Paulo')
                     ->default(now())
-                    ->displayFormat('d/m/Y')  // mostra no formato brasileiro no formulário
-                    ->format('Y-m-d')  // salva no formato padrão do banco
-                    ->native(false)  // usa o calendário do Filament/Flatpickr (não o nativo do navegador)
+                    ->native(false)
+                    ->seconds(false)
                     ->nullable(),
                 Hidden::make('user_id')
                     ->default(fn() => Auth::id())
@@ -92,8 +97,6 @@ class ExpenseResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $status = ['pending', 'paid', 'overdue'];
-
         return $table
             ->recordTitleAttribute('Expenses')
             ->columns([
@@ -127,7 +130,7 @@ class ExpenseResource extends Resource
                     ]),
                 TextColumn::make('payment_date')
                     ->label('Payment Date')
-                    ->date('d/m/Y')
+                    ->date('d/m/Y H:i:s')
                     ->sortable()
                     ->color(fn($record) =>
                         $record->status === 'paid'
@@ -138,9 +141,11 @@ class ExpenseResource extends Resource
                             ? 'Due on ' . $record->payment_date->format('d/m/Y')
                             : 'No date set'),
                 TextColumn::make('created_at')
+                    ->label('Register at    ')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->date('d/m/Y H:i:s')
+                    ->sortable(),
+                // ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -179,9 +184,34 @@ class ExpenseResource extends Resource
             ])
             ->deferFilters(false)
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                Action::make('paid')
+                    ->color('success')
+                    ->icon('heroicon-o-banknotes')
+                    ->button()
+                    ->tooltip('mark as paid')
+                    ->outlined()
+                    ->label('Mark as paid')
+                    ->requiresConfirmation()
+                    ->visible(fn(Expense $record): bool => in_array($record->status, ['pending', 'overdue']))
+                    ->action(fn(Expense $record) => $record->update(['status' => 'paid'])),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('View expense')
+                        ->tooltip('View')
+                        ->icon('heroicon-o-eye')
+                        ->color('gray'),
+                    EditAction::make()
+                        ->label('Edit expense')
+                        ->tooltip('Edit')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('warning'),
+                    DeleteAction::make()
+                        ->label('Delete expense')
+                        ->tooltip('Delete')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation(),
+                ])->dropdownPlacement('top-start')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
