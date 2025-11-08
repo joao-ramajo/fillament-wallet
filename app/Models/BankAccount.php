@@ -6,6 +6,7 @@ use App\BankAccountType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class BankAccount extends Model
 {
@@ -40,5 +41,12 @@ class BankAccount extends Model
         $clean = str_replace(',', '.', $clean);
 
         $this->attributes['balance'] = (int) round($clean * 100);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function ($account) {
+            $account->user_id ??= Auth::id();
+        });
     }
 }
