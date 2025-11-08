@@ -2,26 +2,25 @@
 
 namespace App\Models;
 
+use App\BankAccountType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
-class Expense extends Model
+class BankAccount extends Model
 {
-    /** @use HasFactory<\Database\Factories\ExpenseFactory> */
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'amount',
         'user_id',
-        'status',
+        'name',
         'type',
-        'payment_date',
+        'balance',
     ];
 
     protected $casts = [
-        'payment_date' => 'datetime',
+        'balance' => 'integer',
+        'type' => BankAccountType::class,
     ];
 
     public function user(): BelongsTo
@@ -29,18 +28,17 @@ class Expense extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getAmountAttribute($value)
+    public function getBalanceAttribute($value): float
     {
-        // Exibe o valor em reais no painel
         return $value / 100;
     }
 
-    public function setAmountAttribute($value)
+    public function setBalanceAttribute($value): void
     {
-        // Remove símbolos e converte para centavos antes de salvar
+        // Remove símbolos e converte vírgula para ponto
         $clean = preg_replace('/[^\d.,]/', '', $value);
         $clean = str_replace(',', '.', $clean);
 
-        $this->attributes['amount'] = (int) round($clean * 100);
+        $this->attributes['balance'] = (int) round($clean * 100);
     }
 }
