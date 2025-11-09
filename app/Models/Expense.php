@@ -18,11 +18,13 @@ class Expense extends Model
         'status',
         'type',
         'payment_date',
-        'bank_account_id'
+        'bank_account_id',
+        'due_date',
     ];
 
     protected $casts = [
         'payment_date' => 'datetime',
+        'due_date' => 'date',
     ];
 
     public function user(): BelongsTo

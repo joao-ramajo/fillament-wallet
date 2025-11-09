@@ -70,7 +70,16 @@ class ExpenseResource extends Resource
                     ->default(now())
                     ->native(false)
                     ->seconds(false)
-                    ->nullable(),
+                    ->nullable()
+                    ->closeOnDateSelection(),
+                DatePicker::make('due_date')
+                    ->label('Due Date')
+                    ->displayFormat('d/m/Y')
+                    ->format('Y-m-d')
+                    ->timezone('America/Sao_Paulo')
+                    ->native(false)
+                    ->nullable()
+                    ->closeOnDateSelection(),
                 Select::make('bank_account_id')
                     ->label('Bank Account')
                     ->options(fn() => BankAccount::query()
@@ -88,19 +97,61 @@ class ExpenseResource extends Resource
     {
         return $schema
             ->components([
-                TextEntry::make('title'),
+                TextEntry::make('title')
+                    ->label('Title')
+                    ->icon('heroicon-o-document-text')
+                    ->weight('bold'),
                 TextEntry::make('amount')
-                    ->label('Valor')
+                    ->label('Amount')
                     ->numeric()
-                    ->formatStateUsing(fn($state) => 'R$ ' . number_format($state, 2, ',', '.')),
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color(fn($record) => $record->type === 'income' ? 'success' : 'gray')
+                    ->formatStateUsing(fn($state) => '$' . number_format($state, 2, '.', ',')),
+                TextEntry::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn($state) => $state === 'income' ? 'success' : 'gray')
+                    ->formatStateUsing(fn($state) => $state === 'income' ? 'Income' : 'Expense'),
                 TextEntry::make('status')
-                    ->badge(),
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'paid' => 'success',
+                        'pending' => 'warning',
+                        'overdue' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => ucfirst($state)),
+                TextEntry::make('bankAccount.name')
+                    ->label('Bank Account')
+                    ->icon('heroicon-o-building-office')
+                    ->placeholder('—'),
+                TextEntry::make('payment_date')
+                    ->label('Payment Date')
+                    ->date('m/d/Y H:i')
+                    ->icon('heroicon-o-calendar')
+                    ->placeholder('—'),
+                TextEntry::make('due_date')
+                    ->label('Due Date')
+                    ->icon('heroicon-o-clock')
+                    ->date('m/d/Y')
+                    ->color(fn($record) =>
+                        $record->due_date
+                            ? ($record->due_date->isPast() && $record->status !== 'paid'
+                                ? 'danger'
+                                : 'gray')
+                            : 'gray')
+                    ->placeholder('—'),
                 TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                    ->label('Created At')
+                    ->dateTime('m/d/Y H:i:s')
+                    ->icon('heroicon-o-calendar-days')
+                    ->placeholder('—'),
                 TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                    ->label('Last Updated')
+                    ->dateTime('m/d/Y H:i:s')
+                    ->icon('heroicon-o-arrow-path')
+                    ->placeholder('—'),
             ]);
     }
 
@@ -170,7 +221,7 @@ class ExpenseResource extends Resource
                             : ($record->payment_date && $record->payment_date->isPast() ? 'danger' : 'gray'))
                     ->tooltip(fn($record) =>
                         $record->payment_date
-                            ? 'Due on ' . $record->payment_date->format('d/m/Y')
+                            ? 'Paid on ' . $record->payment_date->format('d/m/Y')
                             : 'No date set'),
                 TextColumn::make('created_at')
                     ->label('Register at    ')

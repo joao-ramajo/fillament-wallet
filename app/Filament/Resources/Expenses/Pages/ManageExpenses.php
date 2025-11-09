@@ -30,16 +30,17 @@ class ManageExpenses extends ManageRecords
 
                     $total_income = Expense::where('user_id', $userId)
                         ->where('type', 'income')
-                        ->where('status', 'pending')->orWhere('status', 'pending')
+                        ->whereIn('status', ['paid', 'pending'])
                         ->sum('amount');
+
                     $total_expenses = Expense::where('user_id', $userId)
-                        ->where('status', 'pending')
-                        ->where('type', 'expense')->orWhere('status', 'pending')
+                        ->where('type', 'expense')
+                        ->whereIn('status', ['paid', 'pending'])
                         ->sum('amount');
 
                     $current_balance = $total_income - $total_expenses;
 
-                    if ($current_balance < 1_000_00) {
+                    if ($current_balance < 100_000) {
                         \Filament\Notifications\Notification::make()
                             ->title('Low Balance Warning')
                             ->body('Your account balance is running low. Please monitor your spending.')
