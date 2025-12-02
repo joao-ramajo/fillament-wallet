@@ -79,6 +79,19 @@ class ExpenseResource extends Resource
                     ->native(false)
                     ->nullable()
                     ->closeOnDateSelection(),
+                Select::make('category_id')
+                    ->label('Categoria')
+                    ->options(fn() => \App\Models\Category::query()
+                        ->where(function ($query) {
+                            $query
+                                ->where('user_id', Auth::id())
+                                ->orWhereNull('user_id');  // categorias padrão
+                        })
+                        ->orderBy('name')
+                        ->pluck('name', 'id'))
+                    ->searchable()
+                    ->required(false)
+                    ->nullable(),
                 Select::make('bank_account_id')
                     ->label('Bank Account')
                     ->options(fn() => BankAccount::query()

@@ -11,7 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->date('payment_date')->nullable()->after('status')->default(null);
+            $table
+                ->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')  // adiciona a foreign key
+                ->nullOnDelete();  // comportamento ao deletar categoria
         });
     }
 
@@ -21,7 +25,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('payment_date');
+            $table->dropForeign(['category_id']);
+            $table->dropColumn('category_id');
         });
     }
 };

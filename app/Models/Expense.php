@@ -22,6 +22,7 @@ class Expense extends Model
         'payment_date',
         'bank_account_id',
         'due_date',
+        'category_id',
     ];
 
     protected $casts = [
@@ -57,9 +58,14 @@ class Expense extends Model
     protected static function booted()
     {
         static::saving(function ($expense) {
-           if(!isset($expense->payment_date) && $expense->status === 'paid'){
+            if (!isset($expense->payment_date) && $expense->status === 'paid') {
                 $expense->payment_date = Carbon::parse($expense->payment_date);
-           }
+            }
         });
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
