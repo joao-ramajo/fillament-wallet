@@ -5,12 +5,12 @@ namespace App\Filament\Resources\Categories;
 use App\Filament\Resources\Categories\Pages\ManageCategories;
 use App\Filament\Resources\Categories\Widgets\ExpensesByCategory;
 use App\Models\Category;
-use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -19,23 +19,29 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use BackedEnum;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static ?string $recordTitleAttribute = 'Category';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationLabel = 'Categorias';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nome da categoria')
+                    ->placeholder('Ex: Alimentação, Aluguel, Transporte')
                     ->required(),
-                Select::make('user_id')
-                    ->relationship('user', 'name'),
+                Hidden::make('user_id')
+                    ->default(fn() => Auth::id()),
             ]);
     }
 
@@ -43,48 +49,51 @@ class CategoryResource extends Resource
     {
         return $schema
             ->components([
-                TextEntry::make('name'),
-                TextEntry::make('user.name')
-                    ->label('User')
-                    ->placeholder('-'),
+                TextEntry::make('name')
+                    ->label('Nome da categoria'),
                 TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                    ->label('Criada em')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
                 TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                    ->label('Última atualização')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Category')
+            ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('user.name')
-                    ->searchable(),
+                    ->label('Categoria')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criada em')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Última atualização')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
+            ->actions([
+                ViewAction::make()
+                    ->label('Visualizar'),
+                EditAction::make()
+                    ->label('Editar'),
+                DeleteAction::make()
+                    ->label('Excluir'),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Excluir selecionadas'),
                 ]),
             ]);
     }
@@ -95,6 +104,4 @@ class CategoryResource extends Resource
             'index' => ManageCategories::route('/'),
         ];
     }
-
-
 }
