@@ -15,15 +15,19 @@
             <div class="w-full max-w-md bg-zinc-900 border-4 border-zinc-100 p-10 shadow-[12px_12px_0_0_#000]">
                 <h2 class="text-3xl font-black uppercase mb-6 text-center">Criar Conta</h2>
 
-                <form action="" method="POST" class="space-y-6">
+                <form action="{{ route('api.register') }}" method="POST" class="space-y-6">
                     @csrf
 
+                    <!-- Nome -->
                     <!-- Nome -->
                     <div>
                         <label for="name" class="block font-bold mb-2">Nome</label>
                         <input type="text" name="name" id="name" placeholder="Seu nome completo"
                             class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400"
-                            required>
+                            value="{{ old('name') }}">
+                        @error('name')
+                            <x-utils.input-error :message="$message" />
+                        @enderror
                     </div>
 
                     <!-- Email -->
@@ -31,25 +35,46 @@
                         <label for="email" class="block font-bold mb-2">E-mail</label>
                         <input type="email" name="email" id="email" placeholder="seu@email.com"
                             class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400"
-                            required>
+                            value="{{ old('email') }}">
+                        @error('email')
+                            <x-utils.input-error :message="$message" />
+                        @enderror
                     </div>
 
                     <!-- Senha -->
                     <div>
                         <label for="password" class="block font-bold mb-2">Senha</label>
                         <input type="password" name="password" id="password" placeholder="••••••••"
-                            class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400"
-                            required>
+                            class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                        @error('password')
+                            <x-utils.input-error :message="$message" />
+                        @enderror
                     </div>
 
-                    <!-- Confirmar senha -->
+                    <!-- Confirmar Senha -->
                     <div>
                         <label for="password_confirmation" class="block font-bold mb-2">Confirmar Senha</label>
                         <input type="password" name="password_confirmation" id="password_confirmation"
                             placeholder="••••••••"
-                            class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400"
-                            required>
+                            class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                        @error('password_confirmation')
+                            <x-utils.input-error :message="$message" />
+                        @enderror
                     </div>
+
+                    {{-- Termos e condicoes --}}
+                    <div class="flex items-center gap-3 mt-4">
+                        <input type="checkbox" name="terms" id="terms"
+                            class="w-5 h-5 border-2 border-zinc-100 bg-zinc-950 text-lime-400 focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            {{ old('terms') ? 'checked' : '' }}>
+                        <label for="terms" class="text-zinc-300 text-sm">
+                            Aceito os <a href="{{  route('web.termos-e-condicoes') }}" class="underline text-lime-400">Termos e Condições</a>
+                        </label>
+                    </div>
+
+                    @error('terms')
+                        <x-utils.input-error :message="$message" />
+                    @enderror
 
                     <!-- Botão -->
                     <div class="flex justify-center">
@@ -69,6 +94,6 @@
         </div>
 
         <!-- Footer -->
-        <x-layout.footer/>
+        <x-layout.footer />
     </div>
 </x-layout.main-layout>

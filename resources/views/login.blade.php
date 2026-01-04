@@ -14,7 +14,7 @@
             <div class="w-full max-w-md bg-zinc-900 border-4 border-zinc-100 p-10 shadow-[12px_12px_0_0_#000]">
                 <h2 class="text-3xl font-black uppercase mb-6 text-center">Entrar</h2>
 
-                <form action="#" method="POST" class="space-y-6">
+                <form action="{{ route('api.login') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <!-- E-mail -->
@@ -22,7 +22,10 @@
                         <label for="email" class="block font-bold mb-2">E-mail</label>
                         <input type="email" name="email" id="email" placeholder="seu@email.com"
                             class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400"
-                            required>
+                            required value="{{ old('email') }}">
+                        @error('email')
+                            <x-utils.input-error :message="$message" />
+                        @enderror
                     </div>
 
                     <!-- Senha -->
