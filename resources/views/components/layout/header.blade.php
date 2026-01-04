@@ -119,7 +119,25 @@
         </nav>
     </div>
 </div>
+@auth
+    <div class="bg-lime-400 text-zinc-950 border-b-4 border-zinc-950 shadow-[0_4px_0_0_#000]">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+            <!-- Mensagem -->
+            <div class="flex items-center gap-3 flex-1">
+                <p class="font-bold text-sm md:text-base">
+                    <span class="font-black uppercase">Versão Beta:</span> Faça backup regular dos seus dados — pode ocorrer
+                    perda de informações
+                </p>
+            </div>
 
+            <!-- Botão Compacto -->
+            <a href="{{ route('web.export') }}"
+                class="flex-shrink-0 bg-zinc-950 text-lime-400 px-4 py-2 font-black uppercase text-xs hover:bg-zinc-800 transition-colors whitespace-nowrap hidden md:inline-block">
+                Exportar
+            </a>
+        </div>
+    </div>
+@endauth
 <script>
     // Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');

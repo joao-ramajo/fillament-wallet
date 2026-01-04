@@ -16,7 +16,7 @@ class ExportService
             'xlsx' => XlsxExportStrategy::class
         ];
 
-        $type = $request->get('type');
+        $type = $request->get('type') ?? 'csv';
 
         $final = app($mapper[$type]) ?? null;
 
