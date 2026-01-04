@@ -47,5 +47,10 @@ RUN chmod -R 775 storage bootstrap/cache
 # Porta usada pelo Railway
 ENV PORT=8000
 
+RUN php artisan config:clear
+RUN php artisan view:clear
+RUN php artisan cache:clear
+RUN php artisan route:clear
+
 # Rodar Laravel
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
