@@ -4,7 +4,3 @@ parameters:
     level: 5
     paths:
         - app
-    ignoreErrors:
-        - '#Match expression does not handle remaining value: mixed#'
-        - '#Access to an undefined property .*#' # útil para magic properties do Eloquent
-        - '#Call to an undefined method .*#'     # para Facades ou macros
