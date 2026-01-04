@@ -11,9 +11,18 @@ enum BankAccountType: string
     public function label(): string
     {
         return match ($this) {
-            self::Checking => 'Checking Account',
-            self::Savings => 'Savings Account',
-            self::Credit => 'Credit Card',
+            self::Checking => 'Conta Corrente',
+            self::Savings  => 'Conta Poupança',
+            self::Credit   => 'Cartão de Crédito',
+        };
+    }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::Checking => 'Conta usada no dia a dia para pagamentos e recebimentos',
+            self::Savings  => 'Conta destinada a guardar dinheiro e rendimentos',
+            self::Credit   => 'Cartão de crédito com fatura e limite',
         };
     }
 }
