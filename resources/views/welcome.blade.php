@@ -30,16 +30,16 @@
 
         <a href="/admin/login"
             class="
-                bg-primary 
-                text-white 
-                px-10 
-                py-4 
-                text-xl 
-                font-medium 
-                rounded-lg 
-                shadow-xl 
-                hover:bg-primary-dark 
-                transition 
+                bg-primary
+                text-white
+                px-10
+                py-4
+                text-xl
+                font-medium
+                rounded-lg
+                shadow-xl
+                hover:bg-primary-dark
+                transition
                 duration-300
                 transform hover:scale-105
            ">
