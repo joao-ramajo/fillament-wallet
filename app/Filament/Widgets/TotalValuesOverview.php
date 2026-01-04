@@ -36,32 +36,32 @@ class TotalValuesOverview extends StatsOverviewWidget
         $current_balance = $total_income - $total_expenses;
         $expected_balance = ($total_income + $expected_income) - ($total_expenses + $expected_expenses);
         return [
-            Stat::make('Total Income', 'R$ ' . number_format($total_income / 100, 2, ',', '.'))
-                ->description('Total of received incomes')
+            Stat::make('Total recebido', 'R$ ' . number_format($total_income / 100, 2, ',', '.'))
+                ->description('Total de valores recebidos')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Total Expenses', 'R$ ' . number_format($total_expenses / 100, 2, ',', '.'))
-                ->description('Total of all expenses')
+            Stat::make('Total de despesas', 'R$ ' . number_format($total_expenses / 100, 2, ',', '.'))
+                ->description('Total de despesas')
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('danger'),
-            Stat::make('Current Balance', 'R$ ' . number_format($current_balance / 100, 2, ',', '.'))
-                ->description('Incomes minus expenses (paid)')
+            Stat::make('Saldo atual', 'R$ ' . number_format($current_balance / 100, 2, ',', '.'))
+                ->description('Saldo considerando apenas despesas pagas')
                 ->descriptionIcon(
                     $current_balance >= 0
                         ? 'heroicon-m-banknotes'
                         : 'heroicon-m-exclamation-triangle'
                 )
                 ->color($current_balance >= 0 ? 'success' : 'warning'),
-            Stat::make('Expected Income', 'R$ ' . number_format($expected_income / 100, 2, ',', '.'))
-                ->description('Pending incomes to receive')
+            Stat::make('Recebimento esperado', 'R$ ' . number_format($expected_income / 100, 2, ',', '.'))
+                ->description('Valores a receber')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('info'),
-            Stat::make('Expected Expenses', 'R$ ' . number_format($expected_expenses / 100, 2, ',', '.'))
-                ->description('Upcoming expenses (not yet paid)')
+            Stat::make('Despesas esperadas', 'R$ ' . number_format($expected_expenses / 100, 2, ',', '.'))
+                ->description('Despesas a pagar')
                 ->descriptionIcon('heroicon-m-exclamation-circle')
                 ->color('warning'),
-            Stat::make('Expected Balance', 'R$ ' . number_format($expected_balance / 100, 2, ',', '.'))
-                ->description('Projected balance including pending incomes')
+            Stat::make('Saldo esperado', 'R$ ' . number_format($expected_balance / 100, 2, ',', '.'))
+                ->description('Saldo projetado considerando valores a receber e despesas a pagar')
                 ->descriptionIcon('heroicon-m-calculator')
                 ->color($expected_balance >= 0 ? 'success' : 'warning'),
         ];

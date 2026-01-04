@@ -3,64 +3,39 @@
 namespace App\Filament\Resources\Expenses\Pages;
 
 use App\Filament\Resources\Expenses\ExpenseResource;
-use App\Filament\Widgets\ExpenseChart;
 use App\Models\Expense;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Auth;
 
 class ManageExpenses extends ManageRecords
 {
+    protected const NOTIFY_DURATION = 6000;
+    protected const LOW_BALANCE = 100_000;
+    protected const CRITICAL_BALANCE = 50_000;
+
     protected static string $resource = ExpenseResource::class;
 
     public bool $hideValues = false;
 
     public function getTitle(): string
     {
-        return 'Expenses';
+        return 'Finanças';
     }
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
+                ->label('Novo')
+                ->icon('heroicon-o-plus')
+                ->color('primary')
                 ->after(function () {
-                    $userId = Auth::id();
-
-                    $total_income = Expense::where('user_id', $userId)
-                        ->where('type', 'income')
-                        ->whereIn('status', ['paid', 'pending'])
-                        ->sum('amount');
-
-                    $total_expenses = Expense::where('user_id', $userId)
-                        ->where('type', 'expense')
-                        ->whereIn('status', ['paid', 'pending'])
-                        ->sum('amount');
-
-                    $current_balance = $total_income - $total_expenses;
-
-                    if ($current_balance < 100_000) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Low Balance Warning')
-                            ->body('Your account balance is running low. Please monitor your spending.')
-                            ->icon('heroicon-o-exclamation-triangle')
-                            ->iconColor('warning')
-                            ->duration(6000)
-                            ->send();
-                    } elseif ($current_balance < 50000) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Critical Balance Alert')
-                            ->body('Your balance has reached a critical level. Immediate attention is required.')
-                            ->icon('heroicon-o-bolt')
-                            ->iconColor('danger')
-                            ->duration(8000)
-                            ->send();
-                    }
+                    $this->notify();
                 }),
             Action::make('toggle-values')
-                ->label($this->hideValues ? 'Show values' : 'Hide values')
+                ->label($this->hideValues ? 'Esconder valores' : 'Mostrar valores')
                 ->icon($this->hideValues ? 'heroicon-m-eye' : 'heroicon-m-eye-slash')
                 ->button()
                 ->color('gray')
@@ -73,5 +48,40 @@ class ManageExpenses extends ManageRecords
         return [
             \App\Filament\Widgets\TotalValuesOverview::class,
         ];
+    }
+
+    private function notify()
+    {
+        $userId = Auth::id();
+
+        $total_income = Expense::where('user_id', $userId)
+            ->where('type', 'income')
+            ->whereIn('status', ['paid', 'pending'])
+            ->sum('amount');
+
+        $total_expenses = Expense::where('user_id', $userId)
+            ->where('type', 'expense')
+            ->whereIn('status', ['paid', 'pending'])
+            ->sum('amount');
+
+        $current_balance = $total_income - $total_expenses;
+
+        if ($current_balance < self::LOW_BALANCE) {
+            \Filament\Notifications\Notification::make()
+                ->title('Alerta de saldo baixo')
+                ->body('O saldo da sua conta está ficando baixo. Por favor, acompanhe seus gastos.')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->iconColor('warning')
+                ->duration(self::NOTIFY_DURATION)
+                ->send();
+        } elseif ($current_balance < self::CRITICAL_BALANCE) {
+            \Filament\Notifications\Notification::make()
+                ->title('Alerta de saldo crítico')
+                ->body('Seu saldo atingiu um nível crítico. É necessária atenção imediata.')
+                ->icon('heroicon-o-bolt')
+                ->iconColor('danger')
+                ->duration(self::NOTIFY_DURATION)
+                ->send();
+        }
     }
 }

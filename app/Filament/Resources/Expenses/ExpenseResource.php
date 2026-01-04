@@ -3,20 +3,16 @@
 namespace App\Filament\Resources\Expenses;
 
 use App\Filament\Resources\Expenses\Pages\ManageExpenses;
-use App\Filament\Resources\Expenses\Widgets\MyWidget;
-use App\Filament\Resources\Expenses\Widgets\TotalExpensesOverview;
 use App\Models\BankAccount;
 use App\Models\Expense;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -24,11 +20,9 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -40,25 +34,24 @@ use BackedEnum;
 class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static ?string $recordTitleAttribute = 'Expenses';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+    protected static ?string $recordTitleAttribute = 'expense';
+    protected static ?string $navigationLabel = 'Finanças';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 // Main Section - Basic Information
-                Section::make('Basic Information')
-                    ->description('Main transaction details')
+                Section::make('Informações Básicas')
+                    ->description('Detalhes sobre a transação.')
                     ->schema([
                         // Type - First to influence other fields
                         ToggleButtons::make('type')
-                            ->label('Type')
+                            ->label('Tipo')
                             ->options([
-                                'expense' => 'Expense',
-                                'income' => 'Income'
+                                'expense' => 'Despesa',
+                                'income' => 'Entrada'
                             ])
                             ->icons([
                                 'expense' => 'heroicon-o-arrow-trending-down',
@@ -73,13 +66,13 @@ class ExpenseResource extends Resource
                             ->required()
                             ->live(),
                         TextInput::make('title')
-                            ->label('Description')
-                            ->placeholder('Ex: Electric bill, Salary, Groceries...')
+                            ->label('Descrição')
+                            ->placeholder('Ex: Conta de Luz, Salário, Mercado...')
                             ->required()
                             ->maxLength(255)
                             ->autocomplete('off'),
                         TextInput::make('amount')
-                            ->label('Amount (R$)')
+                            ->label('Valor (R$)')
                             ->numeric()
                             ->prefix('R$')
                             ->inputMode('decimal')
@@ -87,13 +80,13 @@ class ExpenseResource extends Resource
                             ->required()
                             ->minValue(0.01)
                             ->step(0.01)
-                            ->helperText('Use dot as decimal separator'),
+                            ->helperText('Use ponto (.) como separador decimal.'),
                         Select::make('status')
                             ->label('Status')
                             ->options([
-                                'paid' => 'Paid',
-                                'pending' => 'Pending',
-                                'overdue' => 'Overdue'
+                                'paid' => 'Pago',
+                                'pending' => 'Pendente',
+                                'overdue' => 'Atrasado'
                             ])
                             ->default('pending')
                             ->required()
@@ -101,11 +94,11 @@ class ExpenseResource extends Resource
                             ->live(),
                     ]),
                 // Categorization Section
-                Section::make('Categorization')
-                    ->description('Organize your transactions')
+                Section::make('Categorização')
+                    ->description('Organize suas contas separando por categoria adequada.')
                     ->schema([
                         Select::make('category_id')
-                            ->label('Category')
+                            ->label('Categoria')
                             ->options(fn() => \App\Models\Category::query()
                                 ->where(function ($query) {
                                     $query
@@ -119,14 +112,14 @@ class ExpenseResource extends Resource
                             ->native(false)
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Category Name')
+                                    ->label('Nome de Categoria')
                                     ->required(),
                             ])
                             ->createOptionModalHeading('New Category')
-                            ->placeholder('Select or create a category')
-                            ->helperText('Categories help organize your expenses'),
+                            ->placeholder('Selecione ou crie uma nova categoria')
+                            ->helperText('Categorias ajudam a organizar seus gastos.'),
                         Select::make('bank_account_id')
-                            ->label('Bank Account')
+                            ->label('Conta Bancária')
                             ->options(fn() => BankAccount::query()
                                 ->where('user_id', Auth::id())
                                 ->orderBy('name')
@@ -136,29 +129,29 @@ class ExpenseResource extends Resource
                             ->native(false)
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Account Name')
+                                    ->label('Nome do banco')
                                     ->required()
                                     ->placeholder('Ex: Nubank, Itaú...'),
                                 TextInput::make('initial_balance')
-                                    ->label('Initial Balance')
+                                    ->label('Saldo esperado')
                                     ->numeric()
                                     ->prefix('R$')
                                     ->default(0)
                             ])
                             ->createOptionModalHeading('New Bank Account')
-                            ->placeholder('Select an account (optional)')
-                            ->helperText('Leave blank for cash/other'),
+                            ->placeholder('Selecione um banco (opcional)')
+                            ->helperText('Indique a conta bancária à qual este lançamento pertence para um melhor controle financeiro.'),
                     ])
                     ->collapsible(),
                 // Dates Section - Conditional and Intelligent
-                Section::make('Dates')
-                    ->description('When the transaction occurred or will occur')
+                Section::make('Datas')
+                    ->description('Informe as datas de pagamento e vencimento para melhor controle')
                     ->schema([
                         DatePicker::make('payment_date')
                             ->label(fn(Get $get) =>
                                 $get('status') === 'paid'
-                                    ? 'Payment Date'
-                                    : 'Expected Payment Date')
+                                    ? 'Data de pagamento'
+                                    : 'Data de vencimento')
                             ->displayFormat('d/m/Y')
                             ->format('Y-m-d')
                             ->native(false)
@@ -166,12 +159,12 @@ class ExpenseResource extends Resource
                             ->default(now())
                             ->helperText(fn(Get $get) =>
                                 $get('status') === 'paid'
-                                    ? 'Date when payment was made'
-                                    : 'Expected date of payment')
+                                    ? 'Data de quando o pagamento foi efetuado.'
+                                    : 'Data de vencimento.')
                             ->visible(fn(Get $get) =>
                                 in_array($get('status'), ['paid', 'pending'])),
                         DatePicker::make('due_date')
-                            ->label('Due Date')
+                            ->label('Data de vencimento')
                             ->displayFormat('d/m/Y')
                             ->format('Y-m-d')
                             ->native(false)
@@ -259,9 +252,10 @@ class ExpenseResource extends Resource
             ->recordTitleAttribute('Expenses')
             ->columns([
                 TextColumn::make('title')
+                    ->label('Título')
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->label('Value')
+                    ->label('Valor')
                     ->sortable()
                     ->alignment('left')
                     ->formatStateUsing(fn($state, $record, $livewire) =>
@@ -279,7 +273,7 @@ class ExpenseResource extends Resource
                     ])
                     ->formatStateUsing(fn(string $state) => ucfirst($state)),
                 TextColumn::make('type')
-                    ->label('Type')
+                    ->label('Tipo')
                     ->badge()
                     ->sortable()
                     ->colors([
@@ -287,14 +281,14 @@ class ExpenseResource extends Resource
                         'gray' => 'expense',
                     ]),
                 TextColumn::make('category.name')
-                    ->label('Category')
+                    ->label('Categoria')
                     ->badge()
                     ->color('info')
-                    ->placeholder('Uncategorized')
+                    ->placeholder('Sem categoria')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('bankAccount.name')
-                    ->label('Bank')
+                    ->label('Banco')
                     ->formatStateUsing(function ($state) {
                         $lower = strtolower($state);
                         $icon = match (true) {
@@ -315,8 +309,8 @@ class ExpenseResource extends Resource
                     ->html()  // importante para renderizar o <img>
                     ->sortable(),
                 TextColumn::make('payment_date')
-                    ->label('Payment Date')
-                    ->date('d/m/Y H:i:s')
+                    ->label('Vencimento')
+                    ->date('d/m/Y')
                     ->sortable(query: function ($query, $direction) {
                         $query->orderBy('payment_date', $direction);
                     })
@@ -326,15 +320,16 @@ class ExpenseResource extends Resource
                             : ($record->payment_date && $record->payment_date->isPast() ? 'danger' : 'gray'))
                     ->tooltip(fn($record) =>
                         $record->payment_date
-                            ? 'Paid on ' . $record->payment_date->format('d/m/Y')
-                            : 'No date set'),
+                            ? 'Pago em ' . $record->payment_date->format('d/m/Y')
+                            : '-'),
                 TextColumn::make('created_at')
-                    ->label('Register at    ')
+                    ->label('Registrado em')
                     ->dateTime()
                     ->date('d/m/Y H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -357,16 +352,16 @@ class ExpenseResource extends Resource
                 SelectFilter::make('status')
                     ->multiple()
                     ->options([
-                        'paid' => 'paid',
-                        'pending' => 'pending',
-                        'overdue' => 'overdue',
+                        'paid' => 'Pago',
+                        'pending' => 'Pendente',
+                        'overdue' => 'Vencida',
                     ])
                     ->attribute('status'),
                 SelectFilter::make('type')
                     ->multiple()
                     ->options([
-                        'income' => 'income',
-                        'expense' => 'expense',
+                        'income' => 'Entrada',
+                        'expense' => 'Saída',
                     ])
                     ->attribute('type'),
                 Filter::make('month')
@@ -385,26 +380,24 @@ class ExpenseResource extends Resource
                     Action::make('paid')
                         ->color('success')
                         ->icon('heroicon-o-banknotes')
-                        // ->button()
-                        ->tooltip('mark as paid')
-                        // ->outlined()
-                        ->label('Mark as paid')
+                        ->tooltip('Marcar conta como paga')
+                        ->label('Marcar como pago')
                         ->requiresConfirmation()
                         ->visible(fn(Expense $record): bool => in_array($record->status, ['pending', 'overdue']))
                         ->action(fn(Expense $record) => $record->update(['status' => 'paid'])),
                     ViewAction::make()
-                        ->label('View expense')
-                        ->tooltip('View')
+                        ->label('Detalhes')
+                        ->tooltip('Ver mais detalhes sobre a conta')
                         ->icon('heroicon-o-eye')
                         ->color('gray'),
                     EditAction::make()
-                        ->label('Edit expense')
-                        ->tooltip('Edit')
+                        ->label('Editar')
+                        ->tooltip('Editar conta')
                         ->icon('heroicon-o-pencil-square')
                         ->color('warning'),
                     DeleteAction::make()
-                        ->label('Delete expense')
-                        ->tooltip('Delete')
+                        ->label('Apagar')
+                        ->tooltip('Apagar registro de conta')
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation(),
@@ -414,6 +407,25 @@ class ExpenseResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                Action::make('export')
+                    ->label('Exportar')
+                    ->color('primary')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->modalHeading('Exportar finanças')
+                    ->modalSubheading('Selecione o tipo de arquivo desejado')
+                    ->modalWidth('md')
+                    ->form([
+                        Select::make('type')
+                            ->label('Tipos')
+                            ->options([
+                                'csv' => 'CSV',
+                                'xlsx' => 'XLSX',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        return redirect()->route('web.export', ['type' => $data['type']]);
+                    }),
             ]);
     }
 
@@ -426,22 +438,12 @@ class ExpenseResource extends Resource
 
     public static function getWidgets(): array
     {
-        return [
-            // TotalExpensesOverview::class,
-        ];
+        return [];
     }
-
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     return parent::getEloquentQuery()
-    //         ->where('user_id', Auth::id());
-    //     // ou: ->whereBelongsTo(Auth::user());
-    // }
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            // Especifica a tabela expenses para evitar ambiguidade
             ->where('expenses.user_id', Auth::id());
     }
 }

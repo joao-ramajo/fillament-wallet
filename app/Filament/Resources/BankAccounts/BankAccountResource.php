@@ -24,25 +24,36 @@ use BackedEnum;
 class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static ?string $recordTitleAttribute = 'Bank Account';
+    protected static ?string $navigationLabel = 'Contas bancárias';
+    protected static ?string $modelLabel = 'Conta bancária';
+    protected static ?string $pluralModelLabel = 'Contas bancárias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nome da conta')
+                    ->placeholder('Ex: Nubank, Banco do Brasil, Carteira')
+                    ->helperText('Use um nome fácil de identificar esta conta')
                     ->required(),
                 Select::make('type')
-                    ->options(BankAccountType::class)
-                    ->default('checking')
+                    ->label('Tipo de conta')
+                    ->options(fn() => collect(BankAccountType::cases())
+                        ->mapWithKeys(fn($case) => [$case->value => $case->label()])
+                        ->toArray())
+                    ->default(BankAccountType::Checking->value)
+                    ->helperText('Escolha o tipo que melhor representa esta conta')
                     ->required(),
                 TextInput::make('balance')
-                    ->required()
+                    ->label('Saldo inicial')
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->prefix('R$')
+                    ->helperText('Informe o saldo atual desta conta')
+                    ->required(),
             ]);
     }
 
@@ -50,41 +61,58 @@ class BankAccountResource extends Resource
     {
         return $schema
             ->components([
+                TextEntry::make('name')
+                    ->label('Nome da conta')
+                    ->weight('bold'),
                 TextEntry::make('user.name')
-                    ->label('User'),
-                TextEntry::make('name'),
-                TextEntry::make('type')->badge()->color(fn($state) => match ($state->value) {
-                    'checking' => 'success',
-                    'savings' => 'success',
-                    'credit' => 'warning',
-                })->formatStateUsing(fn($state) => $state->label()),
+                    ->label('Usuário')
+                    ->placeholder('—'),
+                TextEntry::make('type')
+                    ->label('Tipo de conta')
+                    ->badge()
+                    ->color(fn($state) => match ($state->value) {
+                        'checking' => 'success',
+                        'savings' => 'info',
+                        'credit' => 'warning',
+                    })
+                    ->formatStateUsing(fn($state) => $state->label()),
                 TextEntry::make('balance')
-                    ->label('Current Balance')
+                    ->label('Saldo atual')
                     ->money('BRL', locale: 'pt_BR'),
-                // 👇 Novo bloco: últimas 10 transações
                 RepeatableEntry::make('recent_expenses')
-                    ->label('Recent Transactions')
+                    ->label('Últimas transações')
                     ->schema([
                         TextEntry::make('title')
-                            ->label('Title')
-                            ->limit(30),
+                            ->label('Descrição')
+                            ->limit(30)
+                            ->weight('medium'),
                         TextEntry::make('type')
+                            ->label('Tipo')
                             ->badge()
-                            ->color(fn($state) => $state === 'income' ? 'success' : 'danger'),
+                            ->color(fn($state) => $state === 'income' ? 'success' : 'danger')
+                            ->formatStateUsing(fn($state) => $state === 'income' ? 'Entrada' : 'Saída'),
                         TextEntry::make('amount')
-                            ->label('Value')
-                            ->formatStateUsing(fn($state) => 'R$ ' . number_format($state / 100, 2, ',', '.')),
+                            ->label('Valor')
+                            ->money('BRL', locale: 'pt_BR'),
                         TextEntry::make('status')
+                            ->label('Status')
                             ->badge()
                             ->color(fn($state) => match ($state) {
                                 'paid' => 'success',
                                 'pending' => 'warning',
                                 'overdue' => 'danger',
                                 default => 'gray',
+                            })
+                            ->formatStateUsing(fn($state) => match ($state) {
+                                'paid' => 'Pago',
+                                'pending' => 'Pendente',
+                                'overdue' => 'Em atraso',
+                                default => '—',
                             }),
                         TextEntry::make('payment_date')
-                            ->label('Payment Date')
-                            ->date('d/m/Y'),
+                            ->label('Data de pagamento')
+                            ->date('d/m/Y')
+                            ->placeholder('—'),
                     ])
                     ->columns(5)
                     ->state(fn($record) =>
@@ -96,53 +124,71 @@ class BankAccountResource extends Resource
                             ->toArray())
                     ->visible(fn($record) => $record->expenses()->exists())
                     ->columnSpanFull(),
-                TextEntry::make('created_at')->dateTime()->placeholder('-'),
-                TextEntry::make('updated_at')->dateTime()->placeholder('-'),
+                TextEntry::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
+                TextEntry::make('updated_at')
+                    ->label('Atualizado em')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Bank Account')
+            ->recordTitleAttribute('name')  // campo real do model
             ->columns([
-                TextColumn::make('user.name')
-                    ->searchable(),
+                // TextColumn::make('user.name')
+                //     ->label('Usuário')
+                //     ->searchable()
+                //     ->sortable(),
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('type')->badge()->color(fn($state) => match ($state->value) {
-                    'checking' => 'success',
-                    'savings' => 'success',
-                    'credit' => 'warning',
-                })->formatStateUsing(fn($state) => $state->label()),
-                TextColumn::make('balance')
-                    ->label('Balance')
-                    ->sortable()
-                    ->alignRight()
-                    ->formatStateUsing(fn($state) =>
-                        $state !== null
-                            ? 'R$ ' . number_format((float) $state, 2, ',', '.')
-                            : '-'),
+                    ->label('Nome da conta')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('type')
+                    ->label('Tipo de conta')
+                    ->badge()
+                    ->color(fn($state) => match ($state->value) {
+                        'checking' => 'success',
+                        'savings' => 'info',
+                        'credit' => 'warning',
+                    })
+                    ->formatStateUsing(fn($state) => $state->label())
+                    ->sortable(),
+                // TextColumn::make('balance')
+                //     ->label('Saldo atual')
+                //     ->sortable()
+                //     ->alignRight()
+                //     ->money('BRL', locale: 'pt_BR'),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criada em')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Atualizada em')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // aqui você pode adicionar filtros por tipo, saldo, usuário, etc.
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                ViewAction::make()
+                    ->label('Visualizar'),
+                EditAction::make()
+                    ->label('Editar'),
+                DeleteAction::make()
+                    ->label('Excluir'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Excluir selecionadas'),
                 ]),
             ]);
     }
