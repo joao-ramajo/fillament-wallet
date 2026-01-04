@@ -118,6 +118,7 @@
 
     <!-- Additional Scripts/Styles -->
     @stack('styles')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="bg-zinc-950 text-zinc-100 font-sans antialiased scroll-smooth">

@@ -23,7 +23,9 @@ class DashboardController extends Controller
                 'categories.name as category',  // nome da categoria, null se não tiver
                 'expenses.amount',
                 'expenses.payment_date',
-                'expenses.due_date'
+                'expenses.due_date',
+                'expenses.type',
+                'expenses.status',
             )
             ->get();
 

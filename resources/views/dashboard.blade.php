@@ -23,11 +23,11 @@
                 </div>
                 <div class="border-4 border-zinc-100 p-6 bg-zinc-900 shadow-[12px_12px_0_0_#000]">
                     <p class="font-bold uppercase text-zinc-300">Total Gasto</p>
-                    <p class="text-red-400 text-2xl font-black mt-2">{{ $stats['total_expense']}}</p>
+                    <p class="text-red-400 text-2xl font-black mt-2">{{ $stats['total_expense'] }}</p>
                 </div>
                 <div class="border-4 border-zinc-100 p-6 bg-zinc-900 shadow-[12px_12px_0_0_#000]">
                     <p class="font-bold uppercase text-zinc-300">Saldo Esperado</p>
-                    <p class="text-cyan-400 text-2xl font-black mt-2">{{ $stats['expected_total']}}</p>
+                    <p class="text-cyan-400 text-2xl font-black mt-2">{{ $stats['expected_total'] }}</p>
                 </div>
             </div>
 
@@ -41,39 +41,237 @@
         </section>
 
         <!-- Expenses List -->
-        <section class="relative z-10 px-6 py-16">
+        <section class="relative z-10 px-6 py-16" x-data="{ open: false }">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-3xl font-black text-white uppercase">Despesas Recentes</h3>
-                <button
+                <button @click="open = true"
                     class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
                     + Nova Despesa
                 </button>
             </div>
 
+            <!-- Modal -->
+            <div x-show="open" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+                <div class="bg-zinc-900 border-4 border-zinc-100 p-8 w-full max-w-lg shadow-[8px_8px_0_0_#000] relative"
+                    @click.away="open = false" x-transition:enter="transform transition ease-out duration-300"
+                    x-transition:enter-start="scale-90 opacity-0" x-transition:enter-end="scale-100 opacity-100"
+                    x-transition:leave="transform transition ease-in duration-200"
+                    x-transition:leave-start="scale-100 opacity-100" x-transition:leave-end="scale-90 opacity-0">
+
+                    <h4 class="text-2xl font-black uppercase text-white mb-6">Nova Despesa / Entrada</h4>
+
+                    <form action="{{ route('api.expense.store') }}" method="POST">
+                        @csrf
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <label for="title" class="block font-bold mb-2 text-zinc-100">Descrição</label>
+                            <input type="text" id="title" name="title" placeholder="Ex: Aluguel"
+                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                        </div>
+
+                        <!-- Valor -->
+                        <!-- Valor -->
+                        <div class="mb-4" x-data="{ displayAmount: '', cents: null }">
+                            <label for="amount" class="block font-bold mb-2 text-zinc-100">Valor (R$)</label>
+
+                            <!-- Input visível para o usuário -->
+                            <input type="text" id="amount" x-model="displayAmount"
+                                @input="
+
+            let numbers = $event.target.value.replace(/\D/g,''); 
+            
+            cents = numbers ? parseInt(numbers) : null; 
+            
+            displayAmount = cents ? (cents/100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '';
+        "
+                                placeholder="R$ 0,00"
+                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+
+                            <!-- Input real enviado ao backend -->
+                            <input type="hidden" name="amount" :value="cents">
+                        </div>
+
+
+                        <!-- Tipo -->
+                        <div class="mb-6">
+                            <label for="type" class="block font-bold mb-2 text-zinc-100">Tipo</label>
+                            <select id="type" name="type"
+                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                                <option value="income">Entrada</option>
+                                <option value="expense">Despesa</option>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end gap-4">
+                            <button type="button" @click="open = false"
+                                class="bg-red-500 text-zinc-100 px-6 py-3 font-black uppercase shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
+                                Cancelar
+                            </button>
+                            <button type="submit"
+                                class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </section>
+        <div class="overflow-x-auto">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
-                        <tr class="text-zinc-100 font-black uppercase border-b border-zinc-700">
-                            <th class="text-left px-4 py-2">Descrição</th>
-                            <th class="text-left px-4 py-2">Categoria</th>
-                            <th class="text-left px-4 py-2">Data Vencimento</th>
-                            <th class="text-left px-4 py-2">Data Pagamento</th>
-                            <th class="text-right px-4 py-2">Valor</th>
+                        <tr
+                            class="bg-zinc-900 text-zinc-100 font-black uppercase text-xs tracking-wider border-b-4 border-zinc-700">
+                            <th class="text-left px-4 py-3">Descrição</th>
+                            <th class="text-center px-4 py-3">Status</th>
+                            {{-- <th class="text-left px-4 py-3">Categoria</th> --}}
+                            <th class="text-center px-4 py-3">Tipo</th>
+                            {{-- <th class="text-center px-4 py-3">Vencimento</th> --}}
+                            {{-- <th class="text-center px-4 py-3">Pagamento</th> --}}
+                            <th class="text-right px-4 py-3">Valor</th>
                         </tr>
                     </thead>
                     <tbody class="text-zinc-200">
-                        @foreach ($expenses as $expense)
-                            <tr class="border-b border-zinc-700 hover:bg-zinc-800 transition">
-                                <td class="px-4 py-2">{{ $expense->title }}</td>
-                                <td class="px-4 py-2">{{ $expense->category}} </td>
-                                <td class="px-4 py-2">{{ $expense->due_date }}</td>
-                                <td class="px-4 py-2">{{ $expense->payment_date }} </td>
-                                <td class="px-4 py-2 text-right text-green-400 font-bold">{{ $expense->amount }}</td>
+                        @forelse ($expenses as $expense)
+                            <tr class="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group">
+                                <!-- Descrição -->
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-2 h-2 rounded-full {{ $expense->status === 'paid' ? 'bg-lime-400' : 'bg-red-500' }}">
+                                        </div>
+                                        <span
+                                            class="font-semibold group-hover:text-lime-400 transition-colors">{{ $expense->title }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Status -->
+                                <td class="px-4 py-4 text-center">
+                                    @if ($expense->status === 'paid')
+                                        <span
+                                            class="inline-flex items-center gap-1 px-3 py-1 bg-lime-400/20 border-2 border-lime-400 text-lime-400 text-xs font-black uppercase">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Pago
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border-2 border-red-500 text-red-400 text-xs font-black uppercase">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Pendente
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- Categoria -->
+                                {{-- <td class="px-4 py-4">
+                                    <span
+                                        class="inline-block px-3 py-1 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase rounded-sm">
+                                        {{ $expense->category }}
+                                    </span>
+                                </td> --}}
+
+                                <!-- Tipo -->
+                                <td class="px-4 py-4 text-center">
+                                    @if ($expense->type === 'expense')
+                                        <span class="inline-flex items-center gap-1 text-red-400 font-bold text-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                            </svg>
+                                            Saída
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 text-lime-400 font-bold text-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                            </svg>
+                                            Entrada
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- Data Vencimento -->
+                                {{-- <td class="px-4 py-4 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <span
+                                            class="text-sm font-semibold">{{ \Carbon\Carbon::parse($expense->due_date)->format('d/m/Y') }}</span>
+                                        <span
+                                            class="text-xs text-zinc-500">{{ \Carbon\Carbon::parse($expense->due_date)->diffForHumans() }}</span>
+                                    </div>
+                                </td> --}}
+
+                                <!-- Data Pagamento -->
+                                {{-- <td class="px-4 py-4 text-center">
+                                    @if ($expense->payment_date)
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-sm font-semibold">{{ \Carbon\Carbon::parse($expense->payment_date)->format('d/m/Y') }}</span>
+                                            <span
+                                                class="text-xs text-zinc-500">{{ \Carbon\Carbon::parse($expense->payment_date)->diffForHumans() }}</span>
+                                        </div>
+                                    @else
+                                        <span class="text-zinc-600 text-sm">—</span>
+                                    @endif
+                                </td> --}}
+
+                                <!-- Valor -->
+                                <td class="px-4 py-4 text-right">
+                                    <span
+                                        class="text-lg font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
+                                        {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$
+                                        {{ number_format((int) $expense->amount, 2, ',', '.') }}
+                                    </span>
+                                </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-4 py-16 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div
+                                            class="w-16 h-16 bg-zinc-900 border-4 border-zinc-800 flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-zinc-400 font-bold text-lg mb-1">Nenhuma transação
+                                                encontrada</p>
+                                            <p class="text-zinc-600 text-sm">Adicione sua primeira transação para
+                                                começar</p>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginação (se necessário) -->
+            {{-- @if ($expenses->hasPages())
+                <div class="mt-6 flex justify-center">
+                    {{ $expenses->links() }}
+                </div>
+            @endif --}}
+        </div>
         </section>
 
         <!-- Footer -->

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Dashboard\ExpenseController;
 use App\Http\Controllers\DashboardController;
 use App\Services\ExportService;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::get('termos-e-condicoes', function () {
 Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('web.dashboard');
 
 Route::prefix('api')->group(function () {
+    Route::post('expense', [ExpenseController::class, 'create'])->name('api.expense.store');
     Route::post('login', [AuthController::class, 'login'])->name('api.login');
     Route::post('register', [AuthController::class, 'register'])->name('api.register');
     Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
