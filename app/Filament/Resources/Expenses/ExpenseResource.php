@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Expenses;
 
+use App\Action\ImportCsvData;
 use App\Filament\Resources\Expenses\Pages\ManageExpenses;
 use App\Models\BankAccount;
 use App\Models\Expense;
@@ -29,6 +30,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use BackedEnum;
 
 class ExpenseResource extends Resource
@@ -407,6 +409,55 @@ class ExpenseResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                Action::make('import')
+                    ->label('Importar')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->modalHeading('Importar dados')
+                    ->modalDescription('Importe seus dados a partir de uma planilha. Somente planilhas geradas pelo Filament Wallet serão importadas corretamente.')
+                    ->modalWidth('md')
+                    ->form([
+                        \Filament\Forms\Components\FileUpload::make('csv_file')
+                            ->label('Arquivo CSV')
+                            ->acceptedFileTypes(['text/csv', 'application/csv'])
+                            ->required()
+                            ->helperText('Selecione uma planilha CSV válida gerada pelo Filament Wallet.')
+                            ->disk('local')  // Importante definir o disco
+                            ->directory('imports'),  // Diretório temporário
+                    ])
+                    ->action(function (array $data) {
+                        $file = $data['csv_file'];
+
+                        $path = storage_path('app/private/' . $file);
+
+                        $uploadedFile = new \Illuminate\Http\UploadedFile(
+                            $path,
+                            basename($file),
+                            'text/csv',
+                            null,
+                            true
+                        );
+
+                        $importer = new ImportCsvData();
+                        $valid = $importer->execute($uploadedFile);
+
+                        if ($valid) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Dados importados com sucesso')
+                                ->success()
+                                ->duration(6000)
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Houve um erro ao tentar importar os dados')
+                                ->danger()
+                                ->duration(6000)
+                                ->send();
+                        }
+
+                        // Limpar arquivo temporário
+                        Storage::disk('local')->delete($file);
+                    })
+                    ->color('gray'),
                 Action::make('export')
                     ->label('Exportar')
                     ->color('primary')
