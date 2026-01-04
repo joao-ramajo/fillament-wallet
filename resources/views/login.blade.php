@@ -39,7 +39,7 @@
                     <!-- Lembrar -->
                     <div class="flex items-center justify-between">
                         <label class="flex items-center space-x-2">
-                            <input type="checkbox" name="remember"
+                            <input type="checkbox" name="remember" id="remember"
                                 class="rounded border-zinc-100 text-lime-400 focus:ring-lime-400">
                             <span>Lembrar-me</span>
                         </label>
