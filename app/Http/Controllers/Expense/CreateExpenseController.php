@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Expense;
+
+use App\Action\Expense\CreateExpense;
+use App\Http\Requests\Expense\CreateExpenseRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class CreateExpenseController
+{
+    public function __construct(
+        protected readonly CreateExpense $createExpense
+    )
+    {}
+
+    public function __invoke(CreateExpenseRequest $request)
+    {
+        $data = $request->validated();
+
+        $data['userId'] = Auth::id();
+
+        $this->createExpense->execute($data);
+
+        return back()
+            ->with('success', 'Transação criada com sucesso');
+    }
+}
