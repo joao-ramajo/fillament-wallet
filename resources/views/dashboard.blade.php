@@ -51,22 +51,39 @@
                     </h3>
 
                     <div class="flex gap-4">
+                        {{-- Exportar --}}
+                        <a href="{{ route('web.export') }}"
+                            class="group relative bg-zinc-100 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] hover:-translate-x-1 hover:-translate-y-1 transition-all duration-200 inline-flex items-center gap-2">
+                            <svg class="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Exportar Dados
+                        </a>
                         <!-- Importar CSV -->
                         <button @click="openImport = true"
-                            class="bg-zinc-100 text-zinc-950 px-6 py-3 font-black uppercase
-                       shadow-[6px_6px_0_0_#000]
-                       hover:shadow-[2px_2px_0_0_#000]
-                       transition">
-                            ⬆ Importar CSV
+                            class="group relative bg-zinc-100 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] hover:-translate-x-1 hover:-translate-y-1 transition-all duration-200 inline-flex items-center gap-2">
+                            <svg class="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Importar CSV
                         </button>
-
                         <!-- Nova Despesa -->
                         <button @click="open = true"
-                            class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase
-                       shadow-[6px_6px_0_0_#000]
-                       hover:shadow-[2px_2px_0_0_#000]
-                       transition">
-                            + Nova Despesa
+                            class="group relative bg-lime-400 text-zinc-950 px-8 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] hover:-translate-x-1 hover:-translate-y-1 transition-all duration-200 inline-flex items-center gap-2">
+                            <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>Nova Despesa</span>
+                            <span
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs flex items-center justify-center rounded-full animate-pulse">
+                                !
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -133,40 +150,40 @@
                     </div>
                 </div>
 
-            </div>
 
 
-            <!-- Modal -->
-            <div x-show="open" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
-                <div class="bg-zinc-900 border-4 border-zinc-100 p-8 w-full max-w-lg shadow-[8px_8px_0_0_#000] relative"
-                    @click.away="open = false" x-transition:enter="transform transition ease-out duration-300"
-                    x-transition:enter-start="scale-90 opacity-0" x-transition:enter-end="scale-100 opacity-100"
-                    x-transition:leave="transform transition ease-in duration-200"
-                    x-transition:leave-start="scale-100 opacity-100" x-transition:leave-end="scale-90 opacity-0">
+                <!-- Modal -->
+                <div x-show="open" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
-                    <h4 class="text-2xl font-black uppercase text-white mb-6">Nova Despesa / Entrada</h4>
+                    <div class="bg-zinc-900 border-4 border-zinc-100 p-8 w-full max-w-lg shadow-[8px_8px_0_0_#000] relative"
+                        @click.away="open = false" x-transition:enter="transform transition ease-out duration-300"
+                        x-transition:enter-start="scale-90 opacity-0" x-transition:enter-end="scale-100 opacity-100"
+                        x-transition:leave="transform transition ease-in duration-200"
+                        x-transition:leave-start="scale-100 opacity-100" x-transition:leave-end="scale-90 opacity-0">
 
-                    <form action="{{ route('api.expense.store') }}" method="POST">
-                        @csrf
-                        <!-- Título -->
-                        <div class="mb-4">
-                            <label for="title" class="block font-bold mb-2 text-zinc-100">Descrição</label>
-                            <input type="text" id="title" name="title" placeholder="Ex: Aluguel"
-                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
-                        </div>
+                        <h4 class="text-2xl font-black uppercase text-white mb-6">Nova Despesa / Entrada</h4>
 
-                        <!-- Valor -->
-                        <!-- Valor -->
-                        <div class="mb-4" x-data="{ displayAmount: '', cents: null }">
-                            <label for="amount" class="block font-bold mb-2 text-zinc-100">Valor (R$)</label>
+                        <form action="{{ route('api.expense.store') }}" method="POST">
+                            @csrf
+                            <!-- Título -->
+                            <div class="mb-4">
+                                <label for="title" class="block font-bold mb-2 text-zinc-100">Descrição</label>
+                                <input type="text" id="title" name="title" placeholder="Ex: Aluguel"
+                                    class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                            </div>
 
-                            <!-- Input visível para o usuário -->
-                            <input type="text" id="amount" x-model="displayAmount"
-                                @input="
+                            <!-- Valor -->
+                            <!-- Valor -->
+                            <div class="mb-4" x-data="{ displayAmount: '', cents: null }">
+                                <label for="amount" class="block font-bold mb-2 text-zinc-100">Valor (R$)</label>
+
+                                <!-- Input visível para o usuário -->
+                                <input type="text" id="amount" x-model="displayAmount"
+                                    @input="
 
             let numbers = $event.target.value.replace(/\D/g,''); 
             
@@ -174,16 +191,16 @@
             
             displayAmount = cents ? (cents/100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '';
         "
-                                placeholder="R$ 0,00"
-                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
+                                    placeholder="R$ 0,00"
+                                    class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
 
-                            <!-- Input real enviado ao backend -->
-                            <input type="hidden" name="amount" :value="cents">
-                        </div>
+                                <!-- Input real enviado ao backend -->
+                                <input type="hidden" name="amount" :value="cents">
+                            </div>
 
 
-                        <!-- Tipo -->
-                        {{-- <div class="mb-6">
+                            <!-- Tipo -->
+                            {{-- <div class="mb-6">
                             <label for="type" class="block font-bold mb-2 text-zinc-100">Tipo</label>
                             <select id="type" name="type"
                                 class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
@@ -192,80 +209,82 @@
                             </select>
                         </div> --}}
 
-                        <div class="mb-6">
-                            <span class="block font-bold mb-2 text-zinc-100">Tipo</span>
+                            <div class="mb-6">
+                                <span class="block font-bold mb-2 text-zinc-100">Tipo</span>
 
-                            <div class="flex gap-6">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="type" value="income" class="hidden peer" checked>
-                                    <div
-                                        class="w-5 h-5 rounded-full border-2 border-zinc-100
+                                <div class="flex gap-6">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="type" value="income" class="hidden peer"
+                                            checked>
+                                        <div
+                                            class="w-5 h-5 rounded-full border-2 border-zinc-100
                        peer-checked:border-lime-400
                        peer-checked:bg-lime-400 transition">
-                                    </div>
-                                    <span class="text-zinc-100">Entrada</span>
-                                </label>
+                                        </div>
+                                        <span class="text-zinc-100">Entrada</span>
+                                    </label>
 
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="type" value="expense" class="hidden peer">
-                                    <div
-                                        class="w-5 h-5 rounded-full border-2 border-zinc-100
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="type" value="expense" class="hidden peer">
+                                        <div
+                                            class="w-5 h-5 rounded-full border-2 border-zinc-100
                        peer-checked:border-red-400
                        peer-checked:bg-red-400 transition">
-                                    </div>
-                                    <span class="text-zinc-100">Despesa</span>
-                                </label>
+                                        </div>
+                                        <span class="text-zinc-100">Despesa</span>
+                                    </label>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-6" x-data="{ status: 'pending' }">
-                            <label class="block font-bold mb-2 text-zinc-100">
-                                Status
-                            </label>
+                            <div class="mb-6" x-data="{ status: 'pending' }">
+                                <label class="block font-bold mb-2 text-zinc-100">
+                                    Status
+                                </label>
 
-                            <select name="status" x-model="status"
-                                :class="{
-                                    'border-yellow-400': status === 'pending',
-                                    'border-green-400': status === 'paid',
-                                    'border-red-400': status === 'overdue'
-                                }"
-                                class="w-full p-3 rounded border-2 bg-zinc-950 text-zinc-100 focus:outline-none">
-                                <option value="pending">Pendente</option>
-                                <option value="paid">Pago</option>
-                                <option value="overdue">Em atraso</option>
-                            </select>
-                        </div>
+                                <select name="status" x-model="status"
+                                    :class="{
+                                        'border-yellow-400': status === 'pending',
+                                        'border-green-400': status === 'paid',
+                                        'border-red-400': status === 'overdue'
+                                    }"
+                                    class="w-full p-3 rounded border-2 bg-zinc-950 text-zinc-100 focus:outline-none">
+                                    <option value="pending">Pendente</option>
+                                    <option value="paid">Pago</option>
+                                    <option value="overdue">Em atraso</option>
+                                </select>
+                            </div>
 
-                        <div class="mb-6">
-                            <label for="category_id" class="block font-bold mb-2 text-zinc-100">
-                                Categoria
-                            </label>
+                            <div class="mb-6">
+                                <label for="category_id" class="block font-bold mb-2 text-zinc-100">
+                                    Categoria
+                                </label>
 
-                            <select id="category_id" name="category_id"
-                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100
+                                <select id="category_id" name="category_id"
+                                    class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100
                focus:outline-none focus:border-lime-400">
-                                <option value="">Sem categoria</option>
+                                    <option value="">Sem categoria</option>
 
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <div class="flex justify-end gap-4">
-                            <button type="button" @click="open = false"
-                                class="bg-red-500 text-zinc-100 px-6 py-3 font-black uppercase shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
-                                Cancelar
-                            </button>
-                            <button type="submit"
-                                class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
-                                Salvar
-                            </button>
-                        </div>
-                    </form>
+                            <div class="flex justify-end gap-4">
+                                <button type="button" @click="open = false"
+                                    class="bg-red-500 text-zinc-100 px-6 py-3 font-black uppercase shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
+                                    Cancelar
+                                </button>
+                                <button type="submit"
+                                    class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
+                                    Salvar
+                                </button>
+                            </div>
+                        </form>
 
+                    </div>
                 </div>
             </div>
         </section>
@@ -383,7 +402,7 @@
                                     <span
                                         class="text-lg font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
                                         {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$
-                                        {{  $expense->amount }}
+                                        {{ $expense->amount }}
                                     </span>
                                 </td>
                             </tr>
