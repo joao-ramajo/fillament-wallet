@@ -34,6 +34,7 @@
                     <li><a href="{{ route('web.register') }}" class="text-zinc-400 hover:text-lime-400 transition-colors text-sm">Criar Conta</a></li>
                     <li><a href="{{ route('web.login') }}" class="text-zinc-400 hover:text-lime-400 transition-colors text-sm">Fazer Login</a></li>
                     <li><a href="{{ route('web.guia-de-uso') }}" class="text-zinc-400 hover:text-lime-400 transition-colors text-sm">Guia de uso</a></li>
+                    <li><a href="{{ route('web.apoie') }}" class="text-zinc-400 hover:text-lime-400 transition-colors text-sm">Apoie também</a></li>
                 </ul>
             </div>
 

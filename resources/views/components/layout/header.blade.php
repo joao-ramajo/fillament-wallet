@@ -37,6 +37,19 @@
                 </button>
             </form>
         @else
+            {{-- apoie --}}
+            <a href="{{ route('web.apoie') }}"
+                class="text-iznc-300 hover:text-lime-400 font-bold uppercase text-sm transition-colors">
+                Apoie
+            </a>
+
+            {{-- Guia de uso --}}
+            <a href="{{ route('web.guia-de-uso') }}"
+                class="text-zinc-300 hover:text-lime-400 font-bold uppercase text-sm transition-colors">
+                Guia
+            </a>
+
+
             <!-- Features Link -->
             <a href="{{ route('web.features') }}"
                 class="text-zinc-300 hover:text-lime-400 font-bold uppercase text-sm transition-colors">
@@ -95,6 +108,11 @@
                     Guia de uso
                 </a>
 
+                <a href="{{ route('web.apoie') }}"
+                    class="bg-lime-400 text-zinc-950 px-6 py-4 font-black uppercase text-center shadow-[6px_6px_0_0_#000]">
+                    Apoie
+                </a>
+
                 <!-- Logout Button Mobile -->
                 <form action="{{ route('api.logout') }}" method="POST" class="mt-2">
                     @csrf
@@ -116,6 +134,16 @@
                     Recursos
                 </a>
 
+                <a href="{{ route('web.guia-de-uso') }}"
+                    class="text-zinc-100 hover:text-lime-400 font-bold uppercase text-lg py-3 border-b border-zinc-800 transition-colors">
+                    Guia de uso
+                </a>
+
+                <a href="{{ route('web.apoie') }}"
+                    class="text-zinc-100 hover:text-lime-400 font-bold uppercase text-lg py-3 border-b border-zinc-800 transition-colors">
+                    Apoie
+                </a>
+
                 <a href="{{ route('web.login') }}"
                     class="bg-zinc-100 text-zinc-950 px-6 py-4 font-black uppercase text-center shadow-[6px_6px_0_0_#000] mt-4">
                     Entrar
@@ -124,7 +152,7 @@
         </nav>
     </div>
 </div>
-<x-utils.banner/>
+<x-utils.banner />
 <script>
     // Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');

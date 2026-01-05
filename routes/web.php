@@ -30,6 +30,10 @@ Route::get('guia-de-uso', function () {
     return view('guia-de-uso');
 })->name('web.guia-de-uso');
 
+Route::get('apoie', function () {
+    return view('apoie');
+})->name('web.apoie');
+
 Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('web.dashboard');
 
 Route::prefix('api')->group(function () {
