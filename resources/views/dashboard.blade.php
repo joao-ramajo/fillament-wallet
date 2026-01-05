@@ -323,38 +323,157 @@
         </section>
         <div class="overflow-x-auto">
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr
-                            class="bg-zinc-900 text-zinc-100 font-black uppercase text-xs tracking-wider border-b-4 border-zinc-700">
-                            <th class="text-center px-4 py-3">Descrição</th>
-                            <th class="text-center px-4 py-3">Status</th>
-                            <th class="text-left px-4 py-3">Categoria</th>
-                            <th class="text-center px-4 py-3">Tipo</th>
-                            {{-- <th class="text-center px-4 py-3">Vencimento</th> --}}
-                            {{-- <th class="text-center px-4 py-3">Pagamento</th> --}}
-                            <th class="text-left px-4 py-3">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-zinc-200">
-                        @forelse ($expenses as $expense)
-                            <tr class="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group">
-                                <!-- Descrição -->
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-2 h-2 rounded-full {{ $expense->status === 'paid' ? 'bg-lime-400' : 'bg-red-500' }}">
+                <!-- Desktop Table (hidden on mobile) -->
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-zinc-900 text-zinc-100 font-black uppercase text-xs tracking-wider border-b-4 border-zinc-700">
+                                <th class="text-center px-4 py-3">Descrição</th>
+                                <th class="text-center px-4 py-3">Status</th>
+                                <th class="text-left px-4 py-3">Categoria</th>
+                                <th class="text-center px-4 py-3">Tipo</th>
+                                <th class="text-left px-4 py-3">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-zinc-200">
+                            @forelse ($expenses as $expense)
+                                <tr class="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group">
+                                    <!-- Descrição -->
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-2 h-2 rounded-full {{ $expense->status === 'paid' ? 'bg-lime-400' : 'bg-red-500' }}">
+                                            </div>
+                                            <span
+                                                class="font-semibold group-hover:text-lime-400 transition-colors">{{ $expense->title }}</span>
                                         </div>
-                                        <span
-                                            class="font-semibold group-hover:text-lime-400 transition-colors">{{ $expense->title }}</span>
-                                    </div>
-                                </td>
+                                    </td>
 
+                                    <!-- Status -->
+                                    <td class="px-4 py-4 text-center">
+                                        @if ($expense->status === 'paid')
+                                            <span
+                                                class="inline-flex items-center gap-1 px-3 py-1 bg-lime-400/20 border-2 border-lime-400 text-lime-400 text-xs font-black uppercase">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                Pago
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border-2 border-red-500 text-red-400 text-xs font-black uppercase">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                Pendente
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    <!-- Categoria -->
+                                    <td class="px-4 py-4">
+                                        <span
+                                            class="inline-block px-3 py-1 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase rounded-sm">
+                                            {{ $expense->category }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Tipo -->
+                                    <td class="px-4 py-4 text-center">
+                                        @if ($expense->type === 'expense')
+                                            <span
+                                                class="inline-flex items-center gap-1 text-red-400 font-bold text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                                </svg>
+                                                Saída
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1 text-lime-400 font-bold text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                                </svg>
+                                                Entrada
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    <!-- Valor -->
+                                    <td class="px-4 py-4 text-left">
+                                        <span
+                                            class="text-lg font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
+                                            {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$ {{ $expense->amount }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-16 text-center">
+                                        <div class="flex flex-col items-center gap-4">
+                                            <div
+                                                class="w-16 h-16 bg-zinc-900 border-4 border-zinc-800 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-zinc-700" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-zinc-400 font-bold text-lg mb-1">Nenhuma transação
+                                                    encontrada</p>
+                                                <p class="text-zinc-600 text-sm">Adicione sua primeira transação para
+                                                    começar</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards (visible on mobile only) -->
+                <div class="md:hidden space-y-4">
+                    @forelse ($expenses as $expense)
+                        <div
+                            class="bg-zinc-900 border-2 border-zinc-800 p-4 shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+                            <!-- Header do Card -->
+                            <div class="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-zinc-800">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <div
+                                        class="w-3 h-3 rounded-full {{ $expense->status === 'paid' ? 'bg-lime-400' : 'bg-red-500' }}">
+                                    </div>
+                                    <h3 class="font-bold text-white text-base">{{ $expense->title }}</h3>
+                                </div>
+
+                                <!-- Valor Destaque -->
+                                <div class="text-right">
+                                    <span
+                                        class="text-xl font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
+                                        {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$ {{ $expense->amount }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Informações do Card -->
+                            <div class="space-y-2">
                                 <!-- Status -->
-                                <td class="px-4 py-4 text-center">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-zinc-500 uppercase font-bold">Status</span>
                                     @if ($expense->status === 'paid')
                                         <span
-                                            class="inline-flex items-center gap-1 px-3 py-1 bg-lime-400/20 border-2 border-lime-400 text-lime-400 text-xs font-black uppercase">
+                                            class="inline-flex items-center gap-1 px-2 py-1 bg-lime-400/20 border border-lime-400 text-lime-400 text-xs font-black uppercase">
                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -364,7 +483,7 @@
                                         </span>
                                     @else
                                         <span
-                                            class="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border-2 border-red-500 text-red-400 text-xs font-black uppercase">
+                                            class="inline-flex items-center gap-1 px-2 py-1 bg-red-500/20 border border-red-500 text-red-400 text-xs font-black uppercase">
                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -373,18 +492,11 @@
                                             Pendente
                                         </span>
                                     @endif
-                                </td>
-
-                                <!-- Categoria -->
-                                <td class="px-4 py-4">
-                                    <span
-                                        class="inline-block px-3 py-1 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase rounded-sm">
-                                        {{ $expense->category }}
-                                    </span>
-                                </td>
+                                </div>
 
                                 <!-- Tipo -->
-                                <td class="px-4 py-4 text-center">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-zinc-500 uppercase font-bold">Tipo</span>
                                     @if ($expense->type === 'expense')
                                         <span class="inline-flex items-center gap-1 text-red-400 font-bold text-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -404,65 +516,35 @@
                                             Entrada
                                         </span>
                                     @endif
-                                </td>
+                                </div>
 
-                                <!-- Data Vencimento -->
-                                {{-- <td class="px-4 py-4 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <span
-                                            class="text-sm font-semibold">{{ \Carbon\Carbon::parse($expense->due_date)->format('d/m/Y') }}</span>
-                                        <span
-                                            class="text-xs text-zinc-500">{{ \Carbon\Carbon::parse($expense->due_date)->diffForHumans() }}</span>
-                                    </div>
-                                </td> --}}
-
-                                <!-- Data Pagamento -->
-                                {{-- <td class="px-4 py-4 text-center">
-                                    @if ($expense->payment_date)
-                                        <div class="flex flex-col items-center">
-                                            <span
-                                                class="text-sm font-semibold">{{ \Carbon\Carbon::parse($expense->payment_date)->format('d/m/Y') }}</span>
-                                            <span
-                                                class="text-xs text-zinc-500">{{ \Carbon\Carbon::parse($expense->payment_date)->diffForHumans() }}</span>
-                                        </div>
-                                    @else
-                                        <span class="text-zinc-600 text-sm">—</span>
-                                    @endif
-                                </td> --}}
-
-                                <!-- Valor -->
-                                <td class="px-4 py-4 text-left">
+                                <!-- Categoria -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-zinc-500 uppercase font-bold">Categoria</span>
                                     <span
-                                        class="text-lg font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
-                                        {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$
-                                        {{ $expense->amount }}
+                                        class="px-2 py-1 bg-zinc-950 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase">
+                                        {{ $expense->category }}
                                     </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-16 text-center">
-                                    <div class="flex flex-col items-center gap-4">
-                                        <div
-                                            class="w-16 h-16 bg-zinc-900 border-4 border-zinc-800 flex items-center justify-center">
-                                            <svg class="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-zinc-400 font-bold text-lg mb-1">Nenhuma transação
-                                                encontrada</p>
-                                            <p class="text-zinc-600 text-sm">Adicione sua primeira transação para
-                                                começar</p>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="flex flex-col items-center gap-4 py-16">
+                            <div
+                                class="w-16 h-16 bg-zinc-900 border-4 border-zinc-800 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-zinc-400 font-bold text-lg mb-1">Nenhuma transação encontrada</p>
+                                <p class="text-zinc-600 text-sm">Adicione sua primeira transação para começar</p>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
             </div>
 
             <!-- Paginação (se necessário) -->
