@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -82,6 +83,13 @@ class DashboardController extends Controller
             $stats[$key] = 'R$ ' . number_format($value / 100, 2, ',', '.');
         }
 
-        return view('dashboard', compact('expenses', 'stats'));
+        $categories = $this->getCategories();
+
+        return view('dashboard', compact('expenses', 'stats', 'categories'));
+    }
+
+    private function getCategories()
+    {
+        return Category::where('user_id', Auth::id())->orWhereNull('user_id')->get();
     }
 }
