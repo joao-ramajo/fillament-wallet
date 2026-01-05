@@ -26,6 +26,10 @@ Route::get('termos-e-condicoes', function () {
     return view('termos-e-condicoes');
 })->name('web.termos-e-condicoes');
 
+Route::get('guia-de-uso', function () {
+    return view('guia-de-uso');
+})->name('web.guia-de-uso');
+
 Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('web.dashboard');
 
 Route::prefix('api')->group(function () {
