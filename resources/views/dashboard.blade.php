@@ -275,13 +275,13 @@
                     <thead>
                         <tr
                             class="bg-zinc-900 text-zinc-100 font-black uppercase text-xs tracking-wider border-b-4 border-zinc-700">
-                            <th class="text-left px-4 py-3">Descrição</th>
+                            <th class="text-center px-4 py-3">Descrição</th>
                             <th class="text-center px-4 py-3">Status</th>
                             <th class="text-left px-4 py-3">Categoria</th>
                             <th class="text-center px-4 py-3">Tipo</th>
                             {{-- <th class="text-center px-4 py-3">Vencimento</th> --}}
                             {{-- <th class="text-center px-4 py-3">Pagamento</th> --}}
-                            <th class="text-right px-4 py-3">Valor</th>
+                            <th class="text-left px-4 py-3">Valor</th>
                         </tr>
                     </thead>
                     <tbody class="text-zinc-200">
@@ -379,11 +379,11 @@
                                 </td> --}}
 
                                 <!-- Valor -->
-                                <td class="px-4 py-4 text-right">
+                                <td class="px-4 py-4 text-left">
                                     <span
                                         class="text-lg font-black tabular-nums {{ $expense->type === 'expense' ? 'text-red-400' : 'text-lime-400' }}">
                                         {{ $expense->type === 'expense' ? '- ' : '+ ' }}R$
-                                        {{ number_format((int) $expense->amount, 2, ',', '.') }}
+                                        {{  $expense->amount }}
                                     </span>
                                 </td>
                             </tr>
