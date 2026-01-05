@@ -42,13 +42,99 @@
 
         <!-- Expenses List -->
         <section class="relative z-10 px-6 py-16" x-data="{ open: false }">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-3xl font-black text-white uppercase">Despesas Recentes</h3>
-                <button @click="open = true"
-                    class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase shadow-[6px_6px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] transition">
-                    + Nova Despesa
-                </button>
+            <div x-data="{ open: false, openImport: false }">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-3xl font-black text-white uppercase">
+                        Despesas Recentes
+                    </h3>
+
+                    <div class="flex gap-4">
+                        <!-- Importar CSV -->
+                        <button @click="openImport = true"
+                            class="bg-zinc-100 text-zinc-950 px-6 py-3 font-black uppercase
+                       shadow-[6px_6px_0_0_#000]
+                       hover:shadow-[2px_2px_0_0_#000]
+                       transition">
+                            ⬆ Importar CSV
+                        </button>
+
+                        <!-- Nova Despesa -->
+                        <button @click="open = true"
+                            class="bg-lime-400 text-zinc-950 px-6 py-3 font-black uppercase
+                       shadow-[6px_6px_0_0_#000]
+                       hover:shadow-[2px_2px_0_0_#000]
+                       transition">
+                            + Nova Despesa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MODAL IMPORT CSV -->
+                <div x-show="openImport" x-transition
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+                    <div @click.outside="openImport = false"
+                        class="bg-zinc-950 border-4 border-zinc-100 w-full max-w-lg p-8
+                   shadow-[10px_10px_0_0_#000]">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-black uppercase text-white">
+                                Importar CSV
+                            </h3>
+                            <button @click="openImport = false" class="text-zinc-100 font-black text-xl">
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- Descrição -->
+                        <p class="text-zinc-300 mb-6 text-sm">
+                            Apenas planilhas geradas pelo
+                            <strong>Filament Wallet</strong>
+                            são compatíveis com esta importação.
+                        </p>
+
+                        <!-- Form -->
+                        <form method="POST" action="{{ route('api.import') }}" enctype="multipart/form-data"
+                            class="space-y-6">
+                            @csrf
+
+                            <!-- Upload -->
+                            <div>
+                                <label class="block font-bold mb-2 text-zinc-100">
+                                    Arquivo CSV
+                                </label>
+                                <input type="file" name="file" accept=".csv" required
+                                    class="w-full p-3 bg-zinc-950 text-zinc-100
+                               border-2 border-zinc-100
+                               file:bg-lime-400 file:text-zinc-950
+                               file:font-black file:px-4 file:py-2
+                               file:border-0 file:mr-4
+                               focus:outline-none">
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex justify-end gap-4">
+                                <button type="button" @click="openImport = false"
+                                    class="px-6 py-3 font-black uppercase bg-zinc-800 text-white
+                               shadow-[4px_4px_0_0_#000]">
+                                    Cancelar
+                                </button>
+
+                                <button type="submit"
+                                    class="px-6 py-3 font-black uppercase bg-lime-400 text-zinc-950
+                               shadow-[4px_4px_0_0_#000]
+                               hover:shadow-[2px_2px_0_0_#000]
+                               transition">
+                                    Importar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
+
 
             <!-- Modal -->
             <div x-show="open" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
@@ -97,12 +183,74 @@
 
 
                         <!-- Tipo -->
-                        <div class="mb-6">
+                        {{-- <div class="mb-6">
                             <label for="type" class="block font-bold mb-2 text-zinc-100">Tipo</label>
                             <select id="type" name="type"
                                 class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100 focus:outline-none focus:border-lime-400">
                                 <option value="income">Entrada</option>
                                 <option value="expense">Despesa</option>
+                            </select>
+                        </div> --}}
+
+                        <div class="mb-6">
+                            <span class="block font-bold mb-2 text-zinc-100">Tipo</span>
+
+                            <div class="flex gap-6">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="type" value="income" class="hidden peer" checked>
+                                    <div
+                                        class="w-5 h-5 rounded-full border-2 border-zinc-100
+                       peer-checked:border-lime-400
+                       peer-checked:bg-lime-400 transition">
+                                    </div>
+                                    <span class="text-zinc-100">Entrada</span>
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="type" value="expense" class="hidden peer">
+                                    <div
+                                        class="w-5 h-5 rounded-full border-2 border-zinc-100
+                       peer-checked:border-red-400
+                       peer-checked:bg-red-400 transition">
+                                    </div>
+                                    <span class="text-zinc-100">Despesa</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-6" x-data="{ status: 'pending' }">
+                            <label class="block font-bold mb-2 text-zinc-100">
+                                Status
+                            </label>
+
+                            <select name="status" x-model="status"
+                                :class="{
+                                    'border-yellow-400': status === 'pending',
+                                    'border-green-400': status === 'paid',
+                                    'border-red-400': status === 'overdue'
+                                }"
+                                class="w-full p-3 rounded border-2 bg-zinc-950 text-zinc-100 focus:outline-none">
+                                <option value="pending">Pendente</option>
+                                <option value="paid">Pago</option>
+                                <option value="overdue">Em atraso</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="category_id" class="block font-bold mb-2 text-zinc-100">
+                                Categoria
+                            </label>
+
+                            <select id="category_id" name="category_id"
+                                class="w-full p-3 rounded border-2 border-zinc-100 bg-zinc-950 text-zinc-100
+               focus:outline-none focus:border-lime-400">
+                                <option value="">Sem categoria</option>
+
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -129,7 +277,7 @@
                             class="bg-zinc-900 text-zinc-100 font-black uppercase text-xs tracking-wider border-b-4 border-zinc-700">
                             <th class="text-left px-4 py-3">Descrição</th>
                             <th class="text-center px-4 py-3">Status</th>
-                            {{-- <th class="text-left px-4 py-3">Categoria</th> --}}
+                            <th class="text-left px-4 py-3">Categoria</th>
                             <th class="text-center px-4 py-3">Tipo</th>
                             {{-- <th class="text-center px-4 py-3">Vencimento</th> --}}
                             {{-- <th class="text-center px-4 py-3">Pagamento</th> --}}
@@ -176,12 +324,12 @@
                                 </td>
 
                                 <!-- Categoria -->
-                                {{-- <td class="px-4 py-4">
+                                <td class="px-4 py-4">
                                     <span
                                         class="inline-block px-3 py-1 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase rounded-sm">
                                         {{ $expense->category }}
                                     </span>
-                                </td> --}}
+                                </td>
 
                                 <!-- Tipo -->
                                 <td class="px-4 py-4 text-center">
