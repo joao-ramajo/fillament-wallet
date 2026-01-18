@@ -55,14 +55,19 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /var/www
 
 # Copia app
-COPY . .
+COPY --chown=www-data:www-data . .
+
+# Criar diretório public/build antes de copiar
+RUN mkdir -p public/build
 
 # Copia dependências
-COPY --from=composer /app/vendor vendor
-COPY --from=node /app/public/build public/build
+COPY --from=composer --chown=www-data:www-data /app/vendor vendor
+COPY --from=node --chown=www-data:www-data /app/public/build public/build
 
 # Permissões
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache public/build \
+    && chmod -R 755 /var/www \
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 9000
 
