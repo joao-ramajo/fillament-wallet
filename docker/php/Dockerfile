@@ -1,11 +1,27 @@
 # ========================
 # STAGE 1 – Composer
 # ========================
-FROM composer:2 AS composer
+FROM php:8.4-cli AS composer
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip unzip git curl \
+&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+&& docker-php-ext-install gd intl pdo_mysql bcmath zip
+
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-scripts
+RUN composer install --no-dev --prefer-dist --no-scripts --no-autoloader
+COPY . .
+RUN composer dump-autoload --optimize --classmap-authoritative
 
 # ========================
 # STAGE 2 – Node build
@@ -25,7 +41,16 @@ RUN npm run build
 FROM php:8.4-fpm
 
 # Extensões necessárias
-RUN docker-php-ext-install pdo pdo_mysql
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip unzip git curl \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd intl pdo pdo_mysql bcmath zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www
 
@@ -40,3 +65,5 @@ COPY --from=node /app/public/build public/build
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 9000
+
+CMD ["php-fpm"]
