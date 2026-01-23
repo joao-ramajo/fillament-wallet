@@ -94,6 +94,9 @@ return [
     | are secure. You should do this prior to deploying the application.
     |
     */
+    // 'providers' => [
+    //     App\Providers\EventServiceProvider::class,
+    // ],
 
     'cipher' => 'AES-256-CBC',
 
@@ -123,4 +126,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+  
 ];

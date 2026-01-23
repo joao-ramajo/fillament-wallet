@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\ExpenseController;
 use App\Http\Controllers\DashboardController;
+use App\Mail\User\WelcomeMail;
 use App\Services\ExportService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -50,10 +51,15 @@ Route::get('export', [ExportService::class, 'execute'])->name('web.export');
 Route::get('/teste-email', function () {
     $toEmail = 'joaoramajo744@gmail.com';
 
-    Mail::raw('Olá! Este é um email de teste enviado pelo Laravel.', function ($message) use ($toEmail) {
-        $message->to($toEmail)
-                ->subject('Teste de Email Laravel');
-    });
+    // Mail::raw('Olá! Este é um email de teste enviado pelo Laravel.', function ($message) use ($toEmail) {
+    //     $message->to($toEmail)
+    //             ->subject('Teste de Email Laravel');
+    // });
 
-    return 'Email de teste enviado!';
+    Mail::to('joaoramajo744@gmail.com')->send(new WelcomeMail('João Ramajo'));
+
+    return view('mail.welcome', [
+        'name' => 'John doe',
+        'link' => 'https://localhost:80808'
+    ]);
 });

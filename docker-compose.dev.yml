@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     container_name: fillament-app-dev
+    user: "${UID}:${GID}"
     volumes:
       - ./:/var/www       # monta o projeto todo
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini

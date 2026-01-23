@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -60,6 +62,9 @@ class AuthController extends Controller
 
         // Login automático
         Auth::login($user);
+
+        event(new UserRegistered($user->name, $user->email));
+        Log::info('evento disparado');
 
         // Redirecionar para dashboard personalizado
         return redirect()->route('web.dashboard');  // ajuste para sua rota
