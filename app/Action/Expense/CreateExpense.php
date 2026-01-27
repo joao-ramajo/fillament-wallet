@@ -2,7 +2,6 @@
 
 namespace App\Action\Expense;
 
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 class CreateExpense

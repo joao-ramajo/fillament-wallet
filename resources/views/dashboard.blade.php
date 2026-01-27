@@ -341,8 +341,11 @@
                             </tr>
                         </thead>
                         <tbody class="text-zinc-200">
-                            @forelse ($expenses as $expense)
-                                <tr class="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group">
+                            @forelse ($expenses as $expense)    
+                            <tr
+                                    onclick="window.location='{{ route('web.expense.details', ['id' => Crypt::encrypt($expense->id)]) }}'"
+                                    class="cursor-pointer border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group"
+                                >
                                     <!-- Descrição -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center gap-3">

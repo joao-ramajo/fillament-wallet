@@ -20,6 +20,7 @@ class DashboardController extends Controller
             ->where('expenses.user_id', $user->id)
             ->orderBy('expenses.created_at', 'desc')
             ->select(
+                'expenses.id',
                 'expenses.title',
                 'categories.name as category',  // nome da categoria, null se não tiver
                 'expenses.amount',
@@ -78,7 +79,6 @@ class DashboardController extends Controller
         $stats['expected_total'] = ($stats['total_receive'] + $total_income_pending)
             - ($stats['total_expense'] + $total_expense_pending);
 
-        // Formata os valores para reais (opcional)
         foreach ($stats as $key => $value) {
             $stats[$key] = 'R$ ' . number_format($value / 100, 2, ',', '.');
         }

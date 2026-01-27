@@ -47,11 +47,22 @@ class Expense extends Model
 
     public function setAmountAttribute($value)
     {
-        // Remove símbolos e converte para centavos antes de salvar
-        $clean = preg_replace('/[^\d.,]/', '', $value);
-        $clean = str_replace(',', '.', $clean);
+        // Se já for inteiro ou string só com números → já está em centavos
+        if (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, ',')) {
+            $this->attributes['amount'] = (int) $value;
+            return;
+        }
 
-        $this->attributes['amount'] = (int) round((int) $clean * 100);
+        // Se tiver pontuação, trata como valor em reais
+        $clean = preg_replace('/[^\d.,]/', '', (string) $value);
+
+        // Remove milhares e normaliza decimal
+        if (str_contains($clean, ',')) {
+            $clean = str_replace('.', '', $clean);
+            $clean = str_replace(',', '.', $clean);
+        }
+
+        $this->attributes['amount'] = (int) round(((float) $clean) * 100);
     }
 
     protected static function booted()
