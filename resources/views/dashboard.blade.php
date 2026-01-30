@@ -1,9 +1,9 @@
 <x-layout.main-layout title="Dashboard">
     <div class="min-h-screen relative overflow-hidden">
 
-    @if (session('success'))
-        <x-utils.success-toast :message="session('success')" />
-    @endif
+        @if (session('success'))
+            <x-utils.success-toast :message="session('success')" />
+        @endif
 
         <!-- Background brutal shapes -->
         <div class="pointer-events-none fixed inset-0">
@@ -341,11 +341,9 @@
                             </tr>
                         </thead>
                         <tbody class="text-zinc-200">
-                            @forelse ($expenses as $expense)    
-                            <tr
-                                    onclick="window.location='{{ route('web.expense.details', ['id' => Crypt::encrypt($expense->id)]) }}'"
-                                    class="cursor-pointer border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group"
-                                >
+                            @forelse ($expenses as $expense)
+                                <tr onclick="window.location='{{ route('web.expense.details', ['id' => Crypt::encrypt($expense->id)]) }}'"
+                                    class="cursor-pointer border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors group">
                                     <!-- Descrição -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center gap-3">
@@ -453,7 +451,7 @@
                 <!-- Mobile Cards (visible on mobile only) -->
                 <div class="md:hidden space-y-4">
                     @forelse ($expenses as $expense)
-                        <div
+                        <div onclick="window.location='{{ route('web.expense.details', ['id' => Crypt::encrypt($expense->id)]) }}'"
                             class="bg-zinc-900 border-2 border-zinc-800 p-4 shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
                             <!-- Header do Card -->
                             <div class="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-zinc-800">
