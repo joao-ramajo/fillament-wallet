@@ -31,7 +31,7 @@ class ExpenseController extends Controller
             'type' => $request->type,
             'status' => $request->status,
             'user_id' => Auth::id(),
-            'category_id' => $request?->category_id,
+            'category_id' => $request->category_id,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

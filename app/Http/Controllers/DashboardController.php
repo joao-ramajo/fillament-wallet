@@ -90,6 +90,6 @@ class DashboardController extends Controller
 
     private function getCategories()
     {
-        return Category::where('user_id', Auth::id())->orWhereNull('user_id')->get();
+        return Category::where('user_id', Auth::id())->orWhereNull('user_id')->orderBy('name', 'asc')->get();
     }
 }
