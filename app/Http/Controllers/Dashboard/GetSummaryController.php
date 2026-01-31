@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class GetSummaryController extends Controller
 {
-    public function dashboard()
+    public function __invoke()
     {
         $user = Auth::user();
 
@@ -79,17 +79,11 @@ class DashboardController extends Controller
         $stats['expected_total'] = ($stats['total_receive'] + $total_income_pending)
             - ($stats['total_expense'] + $total_expense_pending);
 
-        foreach ($stats as $key => $value) {
-            $stats[$key] = 'R$ ' . number_format($value / 100, 2, ',', '.');
-        }
-
-        $categories = $this->getCategories();
-
-        return view('dashboard.index', compact('expenses', 'stats', 'categories'));
-    }
-
-    private function getCategories()
-    {
-        return Category::where('user_id', Auth::id())->orWhereNull('user_id')->orderBy('name', 'asc')->get();
+        return response()
+            ->json([
+                'total_receive' => $stats['total_receive'],
+                'total_expense' => $stats['total_expense'],
+                'expected_total' => $stats['expected_total']
+            ]);
     }
 }

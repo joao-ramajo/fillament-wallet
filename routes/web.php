@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\ExpenseController;
+use App\Http\Controllers\Dashboard\GenerateExpenseCsv;
 use App\Http\Controllers\Expense\CreateExpenseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\DeleteExpenseController;
@@ -48,16 +49,7 @@ Route::get('despesa/editar/{id}', ShowExpenseEditController::class)->name('web.e
 Route::put('despesa/atualizar/{id}', UpdateExpenseController::class)->name('web.expenses.update');
 Route::delete('despesa/excluir/{uuid}', DeleteExpenseController::class)->name('web.expenses.destroy');
 
-Route::prefix('api')->group(function () {
-    Route::post('expense', CreateExpenseController::class)->name('web.expense.store');
-    Route::post('login', [AuthController::class, 'login'])->name('api.login');
-    Route::post('register', [AuthController::class, 'register'])->name('api.register');
-    Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
-    Route::post('import', [ExpenseController::class, 'import'])->name('api.import');
-});
-
-Route::get('export', [ExportService::class, 'execute'])->name('web.export');
-
+Route::get('export-csv-data', GenerateExpenseCsv::class)->name('web.export');
 Route::get('/teste-email', function () {
     $toEmail = 'joaoramajo744@gmail.com';
 

@@ -128,53 +128,17 @@
         Pular para o conteúdo principal
     </a>
 
+    <x-layout.header/>
+    <x-bricks/>
+
     <!-- Main Content -->
     <main id="main-content">
         {{ $slot }}
     </main>
 
+    <x-layout.footer/>
     <!-- Scripts -->
     @stack('scripts')
-
-    <!-- Analytics (adicione seu código aqui) -->
-    {{-- 
-    @production
-        <!-- Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-XXXXXXXXXX');
-        </script>
-    @endproduction
-    --}}
-
-    <!-- Cookie Consent (opcional) -->
-    {{--
-    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t-4 border-lime-400 p-4 z-50 hidden">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p class="text-sm text-zinc-300">
-                Usamos cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa 
-                <a href="{{ route('web.termos-e-condicoes') }}" class="text-lime-400 hover:underline">política de privacidade</a>.
-            </p>
-            <button onclick="acceptCookies()" class="bg-lime-400 text-zinc-950 px-6 py-2 font-bold uppercase whitespace-nowrap">
-                Aceitar
-            </button>
-        </div>
-    </div>
-    
-    <script>
-        function acceptCookies() {
-            localStorage.setItem('cookiesAccepted', 'true');
-            document.getElementById('cookie-banner').classList.add('hidden');
-        }
-        
-        if (!localStorage.getItem('cookiesAccepted')) {
-            document.getElementById('cookie-banner').classList.remove('hidden');
-        }
-    </script>
-    --}}
 </body>
 
 </html>

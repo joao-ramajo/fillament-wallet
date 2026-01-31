@@ -41,13 +41,11 @@ class CsvExportStrategy implements ExportStrategyInterface
                 'PAYMENT_DATE',
                 'DUE_DATE',
                 'CREATED_AT',
-                'CATEGORY_NAME',
-                'BANK_ACCOUNT_NAME'
+                'CATEGORY_NAME'
             ], ';');
 
             DB::table('expenses')
                 ->leftJoin('categories', 'categories.id', '=', 'expenses.category_id')
-                ->leftJoin('bank_accounts', 'bank_accounts.id', '=', 'expenses.bank_account_id')
                 ->where('expenses.user_id', $userId)
                 ->select(
                     'expenses.title',
@@ -58,7 +56,6 @@ class CsvExportStrategy implements ExportStrategyInterface
                     'expenses.due_date',
                     'expenses.created_at',
                     'categories.name as category_name',
-                    'bank_accounts.name as bank_account_name'
                 )
                 ->orderBy('expenses.created_at', 'desc')
                 ->chunk(1000, function ($expenses) use ($file) {
@@ -72,7 +69,6 @@ class CsvExportStrategy implements ExportStrategyInterface
                             $expense->due_date ?? '-',
                             $expense->created_at ?? '-',
                             $expense->category_name ?? '-',
-                            $expense->bank_account_name ?? '-',
                         ], ';');
                     }
                 });
