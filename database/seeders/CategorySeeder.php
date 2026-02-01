@@ -12,24 +12,23 @@ class CategorySeeder extends Seeder
         $categories = [
             'Alimentação',
             'Transporte',
-            'Moradia',
-            'Educação',
-            'Saúde',
-            'Lazer',
+            
+        
+        
+        
             'Investimentos',
-            'Compras',
+        
             'Supermercado',
-            'Água',
-            'Luz',
-            'Internet',
-            'Telefone',
+        
+        
+        
             'Assinaturas',
-            'Impostos',
+        
             'Farmácia',
-            'Roupas',
-            'Pets',
-            'Carro / Moto',
-            'Emergências',
+        
+        
+        
+        
         ];
 
         foreach ($categories as $name) {
