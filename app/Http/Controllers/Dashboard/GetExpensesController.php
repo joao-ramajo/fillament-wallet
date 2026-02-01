@@ -31,6 +31,6 @@ class GetExpensesController extends Controller
             ->get();
 
         return response()
-            ->json([]);
+            ->json($expenses->toArray());
     }
 }
