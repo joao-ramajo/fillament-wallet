@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
@@ -12,23 +12,7 @@ class CategorySeeder extends Seeder
         $categories = [
             'Alimentação',
             'Transporte',
-            
-        
-        
-        
-            'Investimentos',
-        
-            'Supermercado',
-        
-        
-        
-            'Assinaturas',
-        
-            'Farmácia',
-        
-        
-        
-        
+            'Contas & Serviços',
         ];
 
         foreach ($categories as $name) {

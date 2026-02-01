@@ -22,6 +22,7 @@ class GetExpensesController extends Controller
                 'expenses.id',
                 'expenses.title',
                 'categories.name as category',
+                'categories.id as category_id',
                 'expenses.amount',
                 'expenses.payment_date',
                 'expenses.due_date',
