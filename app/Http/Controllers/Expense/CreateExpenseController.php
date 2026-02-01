@@ -1,20 +1,16 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Http\Controllers\Expense;
 
 use App\Action\Expense\CreateExpense;
 use App\Http\Requests\Expense\CreateExpenseRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class CreateExpenseController
 {
     public function __construct(
         protected readonly CreateExpense $createExpense
-    )
-    {}
+    ) {}
 
     public function __invoke(CreateExpenseRequest $request)
     {
@@ -24,7 +20,8 @@ class CreateExpenseController
 
         $this->createExpense->execute($data);
 
-        return back()
-            ->with('success', 'Transação criada com sucesso');
+        return response()->json([
+            'message' => 'Movimentação registrada com sucesso.'
+        ], 201);
     }
 }
