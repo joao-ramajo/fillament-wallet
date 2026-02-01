@@ -28,8 +28,8 @@ class UpdateExpenseRequest extends FormRequest
             'type' => 'required',
             'status' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'due_date' => 'nullable',
-            'payment_date' => 'nullable',
+            // 'due_date' => 'sometimes',
+            // 'payment_date' => 'sometimes',
         ];
     }
 }
