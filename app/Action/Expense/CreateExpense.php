@@ -16,6 +16,7 @@ class CreateExpense
             'status' => $data['status'],
             'user_id' => $data['userId'],
             'category_id' => $data['category_id'] ?? null,
+            'payment_date' => $data['status'] === 'paid' ? now() : null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
