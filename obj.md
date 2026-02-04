@@ -31,7 +31,7 @@ Esses fluxos não podem quebrar em nenhuma refatoração.
 - [x] Login
 - [x] Criar despesa
 - [x] Editar despesa
-- [ ] Excluir despesa
+- [x] Excluir despesa
 - [ ] Marcar como paga
 - [ ] Listar despesas
 - [ ] Visualizar resumo financeiro (dashboard)
