@@ -29,8 +29,8 @@ Esses fluxos não podem quebrar em nenhuma refatoração.
 ### Core
 - [x] Cadastro de usuário
 - [x] Login
-- [ ] Criar despesa
-- [ ] Editar despesa
+- [x] Criar despesa
+- [x] Editar despesa
 - [ ] Excluir despesa
 - [ ] Marcar como paga
 - [ ] Listar despesas

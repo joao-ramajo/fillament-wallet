@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Expense;
 
+use App\Action\Expense\DeleteExpenseAction;
 use App\Domain\Uuid;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
@@ -11,22 +12,20 @@ use Illuminate\Support\Facades\Auth;
 
 class DeleteExpenseController extends Controller
 {
+    public function __construct(
+        protected readonly DeleteExpenseAction $deleteExpenseAction
+    ) {
+    }
+
     public function __invoke(string $id)
     {
         try {
-            $expense = Expense::find((int) $id);
-
             $userId = Auth::id();
 
-            if ($expense->user_id !== $userId) {
-                throw new DomainException('Você não tem permissão para deletar esta despesa.');
-            }
-
-            if (!$expense) {
-                throw new DomainException('Despesa não encontrada.');
-            }
-
-            $expense->delete();
+            $this->deleteExpenseAction->execute(
+                $id,
+                $userId
+            );
 
             return response()
                 ->json([

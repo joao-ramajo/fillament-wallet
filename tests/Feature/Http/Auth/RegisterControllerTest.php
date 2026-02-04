@@ -9,8 +9,6 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
         'terms' => true,
     ]));
 
-    $response->dump();
-
     $response->assertJsonStructure([
         'message',
         'user' => ['name'],

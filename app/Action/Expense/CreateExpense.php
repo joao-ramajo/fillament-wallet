@@ -8,9 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class CreateExpense
 {
-    public function execute(array $data)
+    public function execute(array $data): void
     {
-
         DB::table('expenses')->insert([
             'title' => $data['title'],
             'amount' => $data['amount'],

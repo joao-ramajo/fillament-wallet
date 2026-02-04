@@ -8,7 +8,7 @@ use App\Http\Controllers\Dashboard\GetSummaryController;
 use App\Http\Controllers\Expense\CreateCategoryController;
 use App\Http\Controllers\Expense\CreateExpenseController;
 use App\Http\Controllers\Expense\DeleteExpenseController;
-use App\Http\Controllers\Expense\getCategoryListController;
+use App\Http\Controllers\Expense\GetCategoryListController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
 use Illuminate\Support\Facades\Route;
