@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Action\Auth\LoginAction;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,6 +11,11 @@ use DomainException;
 
 class LoginController extends Controller
 {
+    public function __construct(
+        protected readonly LoginAction $loginAction
+    ) {
+    }
+
     public function __invoke(Request $request)
     {
         try {
@@ -19,21 +25,14 @@ class LoginController extends Controller
                 'remember' => ['nullable', 'boolean'],
             ]);
 
-            $user = User::where('email', $credentials['email'])->first();
-
-            if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-                throw new DomainException('Credenciais inválidas.');
-            }
-
-            // Gerar token Sanctum
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $result = $this->loginAction->execute($credentials);
 
             return response()->json([
                 'message' => 'Login realizado com sucesso.',
                 'user' => [
-                    'name' => $user->name,
+                    'name' => $result['name'],
                 ],
-                'token' => $token,
+                'token' => $result['token'],
             ], 200);
         } catch (DomainException $e) {
             return response()->json([

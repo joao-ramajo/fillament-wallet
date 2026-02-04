@@ -27,7 +27,8 @@ Action = cérebro
 Esses fluxos não podem quebrar em nenhuma refatoração.
 
 ### Core
-- [ ] Cadastro de usuário
+- [x] Cadastro de usuário
+    - organização nas pastas e criação de testes
 - [ ] Login
 - [ ] Criar despesa
 - [ ] Editar despesa

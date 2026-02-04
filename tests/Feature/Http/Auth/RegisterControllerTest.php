@@ -1,6 +1,5 @@
 <?php
 
-
 test('cria uma conta de usuário com sucesso e retorna seu nome e token', function () {
     $response = $this->postJson(route('api.register', [
         'name' => 'John Doe',

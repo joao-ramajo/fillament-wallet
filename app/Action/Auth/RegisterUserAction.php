@@ -22,7 +22,6 @@ class RegisterUserAction
 
         event(new UserRegistered($user->name, $user->email));
 
-
         return ['name' => $user->name, 'token' => $token];
     }
 }
