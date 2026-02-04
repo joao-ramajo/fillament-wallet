@@ -3,10 +3,7 @@
 namespace App\Http\Controllers\Expense;
 
 use App\Action\Expense\DeleteExpenseAction;
-use App\Domain\Uuid;
 use App\Http\Controllers\Controller;
-use App\Models\Expense;
-use Illuminate\Http\Request;
 use DomainException;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,7 +20,7 @@ class DeleteExpenseController extends Controller
             $userId = Auth::id();
 
             $this->deleteExpenseAction->execute(
-                $id,
+                (int) $id,
                 $userId
             );
 

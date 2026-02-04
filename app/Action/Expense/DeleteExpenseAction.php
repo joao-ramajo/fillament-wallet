@@ -9,9 +9,9 @@ use DomainException;
 
 class DeleteExpenseAction
 {
-    public function execute(string $expenseUuid, int $userId): void
+    public function execute(int $expenseId, int $userId): void
     {
-        $expense = Expense::where('uuid', $expenseUuid)->first();
+        $expense = Expense::find($expenseId);
 
         if ($expense->user_id !== $userId) {
             throw new DomainException('Você não tem permissão para deletar esta despesa.');
