@@ -21,6 +21,7 @@ class Expense extends Model
         'payment_date',
         'due_date',
         'category_id',
+        'source_id',
     ];
 
     protected $casts = [
@@ -70,5 +71,10 @@ class Expense extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function source()
+    {
+        return $this->belongsTo(Source::class);
     }
 }

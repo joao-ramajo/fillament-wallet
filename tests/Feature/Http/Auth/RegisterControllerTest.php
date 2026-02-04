@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 test('cria uma conta de usuário com sucesso e retorna seu nome e token', function () {
     $response = $this->postJson(route('api.register', [
         'name' => 'John Doe',
@@ -9,6 +11,7 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
         'terms' => true,
     ]));
 
+    $response->dump();
     $response->assertJsonStructure([
         'message',
         'user' => ['name'],
@@ -17,6 +20,12 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
 
     $this->assertDatabaseHas('users', [
         'email' => 'john.doe@gmail.com'
+    ]);
+
+    $id = User::where('email', 'john.doe@gmail.com')->first()->id;
+
+    $this->assertDatabaseHas('sources', [
+        'user_id' => $id
     ]);
 
     $response->assertStatus(201);

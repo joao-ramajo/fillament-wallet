@@ -16,6 +16,11 @@
       networks:
         - kado-network
       restart: unless-stopped
+      healthcheck:
+          test: ["CMD", "php", "-v"]
+          interval: 5s
+          timeout: 2s
+          retries: 10
 
     nginx:
       image: nginx:alpine
@@ -27,7 +32,8 @@
         - app_public:/var/www/public:ro
         - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
       depends_on:
-        - app
+        app:
+          condition: service_healthy
       networks:
         - kado-network
       restart: unless-stopped

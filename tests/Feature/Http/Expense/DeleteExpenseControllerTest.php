@@ -5,8 +5,8 @@ use App\Models\User;
 
 test('usuário pode deletar uma despesa', function () {
     $user = User::factory()->create();
-
-    $expense = Expense::factory()->create(['user_id' => $user->id]);
+    $source = $user->sources()->first();
+    $expense = Expense::factory()->create(['user_id' => $user->id, 'source_id' => $source->id]);
 
     $token = $user->createToken('test')->plainTextToken;
 
