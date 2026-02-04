@@ -24,19 +24,7 @@ COPY . .
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # ========================
-# STAGE 2 – Node build
-# ========================
-FROM node:20 AS node
-
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY resources resources
-COPY vite.config.js .
-RUN npm run build
-
-# ========================
-# STAGE 3 – PHP Final
+# STAGE 2 – PHP Final
 # ========================
 FROM php:8.4-fpm
 
@@ -62,7 +50,6 @@ RUN mkdir -p public/build
 
 # Copia dependências
 COPY --from=composer --chown=www-data:www-data /app/vendor vendor
-COPY --from=node --chown=www-data:www-data /app/public/build public/build
 
 # Permissões
 RUN chown -R www-data:www-data storage bootstrap/cache public/build \
