@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Dashboard;
 
@@ -8,9 +10,11 @@ class GenerateExpenseCsv
 {
     public function __construct(
         protected readonly CsvExportStrategy $csvExport
-    ) {}
+    ) {
+    }
 
-    public function __invoke() {
+    public function __invoke()
+    {
         return $this->csvExport->execute();
     }
 }

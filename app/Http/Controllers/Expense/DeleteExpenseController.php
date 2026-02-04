@@ -18,7 +18,7 @@ class DeleteExpenseController extends Controller
 
             $userId = Auth::id();
 
-            if($expense->user_id !== $userId) {
+            if ($expense->user_id !== $userId) {
                 throw new DomainException('Você não tem permissão para deletar esta despesa.');
             }
 

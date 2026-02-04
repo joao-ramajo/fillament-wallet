@@ -23,10 +23,12 @@ class AuthController extends Controller
 
         $remember = $request->has('remember');
 
-        if (Auth::attempt([
+        if (
+            Auth::attempt([
             'email' => $credentials['email'],
             'password' => $credentials['password']
-        ], $remember)) {
+            ], $remember)
+        ) {
             $request->session()->regenerate();
             return redirect()->route('web.dashboard');
         }

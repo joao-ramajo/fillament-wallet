@@ -12,12 +12,15 @@ use Illuminate\Queue\SerializesModels;
 
 class UserRegistered
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public function __construct(
         public readonly string $name,
         public readonly string $email
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, \Illuminate\Broadcasting\Channel>

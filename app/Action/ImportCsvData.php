@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Action;
 
@@ -53,7 +55,6 @@ class ImportCsvData
             $batch = [];
 
             while (($data = fgetcsv($handle, 0, ';')) !== false) {
-
                 $row = array_combine($header, $data);
 
                 if ($this->isDuplicate($row)) {

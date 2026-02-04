@@ -31,7 +31,7 @@ class CsvExportStrategy implements ExportStrategyInterface
         return function () use ($userId) {
             $file = fopen('php://output', 'w');
 
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($file, [
                 'TITLE',

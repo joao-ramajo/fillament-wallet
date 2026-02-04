@@ -13,14 +13,16 @@ use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/register', RegisterController::class)->name('api.register');
+Route::post('/login', LoginController::class)->name('api.login');
+
 Route::post('/expenses', CreateExpenseController::class)->middleware(['auth:sanctum'])->name('api.expenses.create');
 Route::put('/expenses/{id}', UpdateExpenseController::class)->middleware(['auth:sanctum'])->name('api.expenses.update');
 Route::post('/expenses/{id}/mark-as-paid', MarkExpenseAsPaidController::class)->middleware(['auth:sanctum'])->name('api.expenses.mark-as-paid');
 Route::delete('/expenses/{id}', DeleteExpenseController::class)->middleware(['auth:sanctum'])->name('api.expenses.delete');
 Route::get('/categories', getCategoryListController::class)->middleware(['auth:sanctum'])->name('api.categories.list');
 Route::post('/categories', CreateCategoryController::class)->middleware(['auth:sanctum'])->name('api.categories.create');
-Route::post('/register', RegisterController::class)->name('api.register');
-Route::post('/login', LoginController::class)->name('api.login');
+
 Route::get('/dashboard/summary', GetSummaryController::class)->middleware([
     'auth:sanctum'
 ])->name('api.get-summary');

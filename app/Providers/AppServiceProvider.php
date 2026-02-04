@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Observers\ExpenseObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**

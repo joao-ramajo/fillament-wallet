@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Expense;
 
@@ -10,7 +12,8 @@ class CreateExpenseController
 {
     public function __construct(
         protected readonly CreateExpense $createExpense
-    ) {}
+    ) {
+    }
 
     public function __invoke(CreateExpenseRequest $request)
     {

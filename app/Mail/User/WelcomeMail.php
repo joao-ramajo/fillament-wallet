@@ -11,13 +11,15 @@ use Illuminate\Queue\SerializesModels;
 
 class WelcomeMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     const LINK = 'http://localhost:8080/';
 
     public function __construct(
         public string $name,
-    ) {}
+    ) {
+    }
 
     public function envelope(): Envelope
     {
