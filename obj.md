@@ -17,7 +17,7 @@ Sem reescrita total, sem overengineering, sem perder produtividade.
 > **Controllers não contêm regra de negócio.**  
 > Toda regra de negócio deve viver em uma `Action`.
 
-Controller = orquestrador  
+Controller = orquestrador
 Action = cérebro
 
 ---
@@ -28,8 +28,7 @@ Esses fluxos não podem quebrar em nenhuma refatoração.
 
 ### Core
 - [x] Cadastro de usuário
-    - organização nas pastas e criação de testes
-- [ ] Login
+- [x] Login
 - [ ] Criar despesa
 - [ ] Editar despesa
 - [ ] Excluir despesa

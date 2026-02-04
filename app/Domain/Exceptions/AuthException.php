@@ -13,7 +13,7 @@ class AuthException extends DomainException
         parent::__construct($message, $code);
     }
 
-    public static function EmailHasAlreadTaken(): self
+    public static function emailHasAlreadTaken(): self
     {
         return new self('Email não disponivel', 400);
     }

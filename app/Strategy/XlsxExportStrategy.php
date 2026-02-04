@@ -43,7 +43,17 @@ class XlsxExportStrategy
                 ],
             ];
 
-            $headers = ['TÍTULO', 'VALOR', 'STATUS', 'DATA PAGAMENTO', 'DATA VENCIMENTO', 'CRIADO EM', 'CATEGORIA', 'CONTA'];
+            $headers = [
+                'TÍTULO',
+                'VALOR',
+                'STATUS',
+                'DATA PAGAMENTO',
+                'DATA VENCIMENTO',
+                'CRIADO EM',
+                'CATEGORIA',
+                'CONTA'
+            ];
+
             $sheet->fromArray([$headers], null, 'A1');
             $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
 

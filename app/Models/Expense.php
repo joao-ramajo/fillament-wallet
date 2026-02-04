@@ -20,7 +20,6 @@ class Expense extends Model
         'status',
         'type',
         'payment_date',
-        'bank_account_id',
         'due_date',
         'category_id',
     ];
@@ -38,11 +37,6 @@ class Expense extends Model
     public function getAmountAttribute($value)
     {
         return $value / 100;
-    }
-
-    public function bankAccount(): BelongsTo
-    {
-        return $this->belongsTo(BankAccount::class);
     }
 
     public function setAmountAttribute($value)

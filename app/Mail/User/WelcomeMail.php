@@ -14,7 +14,7 @@ class WelcomeMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    const LINK = 'http://localhost:8080/';
+    public const LINK = 'http://localhost:8080/';
 
     public function __construct(
         public string $name,
