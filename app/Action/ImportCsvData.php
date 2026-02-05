@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\Models\Category;
-use App\Models\Expense;
-use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,9 +18,6 @@ class ImportCsvData
         'DUE_DATE', 'CREATED_AT', 'CATEGORY_NAME'
     ];
 
-    /**
-     * Executa a importação do CSV.
-     */
     public function execute(UploadedFile $file): bool
     {
         $validator = Validator::make(
@@ -36,7 +31,10 @@ class ImportCsvData
 
         try {
             DB::beginTransaction();
+
+            // 👇 ESSENCIAL EM PRODUÇÃO
             ini_set('auto_detect_line_endings', '1');
+
             $handle = fopen($file->getRealPath(), 'r');
             if (!$handle) {
                 return false;
@@ -50,15 +48,28 @@ class ImportCsvData
                 return false;
             }
 
-            $imported = 0;
-            $skipped = 0;
             $batch = [];
 
             while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                // 👇 proteção contra linhas quebradas
+                if (count($data) !== count($header)) {
+                    Log::warning('Linha CSV inválida ignorada', [
+                        'data' => $data
+                    ]);
+                    continue;
+                }
+
+                // 👇 normaliza encoding
+                $data = array_map(
+                    fn ($v) => trim(
+                        mb_convert_encoding($v, 'UTF-8', 'UTF-8,ISO-8859-1,WINDOWS-1252')
+                    ),
+                    $data
+                );
+
                 $row = array_combine($header, $data);
 
                 if ($this->isDuplicate($row)) {
-                    $skipped++;
                     continue;
                 }
 
@@ -71,7 +82,7 @@ class ImportCsvData
 
                 $batch[] = [
                     'title' => $row['TITLE'],
-                    'amount' => $row['AMOUNT'],
+                    'amount' => (int) $row['AMOUNT'],
                     'status' => $row['STATUS'],
                     'type' => $row['TYPE'],
                     'payment_date' => $row['PAYMENT_DATE'] !== '-' ? $row['PAYMENT_DATE'] : null,
@@ -85,26 +96,23 @@ class ImportCsvData
 
                 if (count($batch) >= 100) {
                     DB::table('expenses')->insert($batch);
-                    $imported += count($batch);
-                    Log::info('dados exportados', [
-                        'batch' => $batch
-                    ]);
                     $batch = [];
                 }
             }
 
             if (!empty($batch)) {
                 DB::table('expenses')->insert($batch);
-                $imported += count($batch);
             }
 
             fclose($handle);
             DB::commit();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Erro ao importar CSV: ' . $e->getMessage());
+            Log::error('Erro ao importar CSV', [
+                'error' => $e->getMessage()
+            ]);
             return false;
         }
     }
