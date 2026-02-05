@@ -28,7 +28,7 @@ class CreateExpenseRequest extends FormRequest
             'type' => 'required|string',
             'status' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'source_id' => 'sometimes|exists:sources,id'
+            'source_id' => 'nullable|exists:sources,id'
         ];
     }
 }

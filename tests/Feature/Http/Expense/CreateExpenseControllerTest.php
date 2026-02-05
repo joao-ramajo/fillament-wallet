@@ -39,7 +39,8 @@ test('usuário autenticado cria uma despesa sem especificar a fonte e a despesa 
             'title' => 'Aluguel',
             'amount' => 120000,
             'type' => 'expense',
-            'status' => 'pending'
+            'status' => 'pending',
+            'source_id' => null
         ]);
 
 

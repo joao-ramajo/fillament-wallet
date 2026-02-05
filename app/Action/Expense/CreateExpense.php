@@ -11,7 +11,7 @@ class CreateExpense
 {
     public function execute(array $data): void
     {
-        if (empty($data['source_id'])) {
+        if ($data['source_id'] === null) {
             $data['source_id'] = DB::table('sources')
                 ->where('user_id', Auth::id())
                 ->where('is_default', true)
