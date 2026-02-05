@@ -36,7 +36,7 @@ class ImportCsvData
 
         try {
             DB::beginTransaction();
-
+            ini_set('auto_detect_line_endings', '1');
             $handle = fopen($file->getRealPath(), 'r');
             if (!$handle) {
                 return false;
