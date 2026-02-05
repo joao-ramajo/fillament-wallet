@@ -11,6 +11,13 @@ class CreateExpense
 {
     public function execute(array $data): void
     {
+        if (empty($data['source_id'])) {
+            $data['source_id'] = DB::table('sources')
+                ->where('user_id', Auth::id())
+                ->where('is_default', true)
+                ->value('id');
+        }
+
         DB::table('expenses')->insert([
             'title' => $data['title'],
             'amount' => $data['amount'],

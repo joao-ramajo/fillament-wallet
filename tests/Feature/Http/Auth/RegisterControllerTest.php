@@ -11,7 +11,6 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
         'terms' => true,
     ]));
 
-    $response->dump();
     $response->assertJsonStructure([
         'message',
         'user' => ['name'],
@@ -25,7 +24,8 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
     $id = User::where('email', 'john.doe@gmail.com')->first()->id;
 
     $this->assertDatabaseHas('sources', [
-        'user_id' => $id
+        'user_id' => $id,
+        'is_default' => true,
     ]);
 
     $response->assertStatus(201);

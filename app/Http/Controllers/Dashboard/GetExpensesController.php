@@ -28,6 +28,7 @@ class GetExpensesController extends Controller
                 'expenses.due_date',
                 'expenses.type',
                 'expenses.status',
+                'expenses.source_id',
             )
             ->get();
 

@@ -28,6 +28,7 @@ class UpdateExpenseRequest extends FormRequest
             'type' => 'required',
             'status' => 'required',
             'category_id' => 'nullable|exists:categories,id',
+            'source_id' => 'sometimes|exists:sources,id'
             // 'due_date' => 'sometimes',
             // 'payment_date' => 'sometimes',
         ];

@@ -27,6 +27,7 @@ class RegisterUserAction
             'user_id' => $user->id,
             'name' => 'Carteira principal',
             'color' => '#34c38f',
+            'is_default' => true,
         ]);
 
         return ['name' => $user->name, 'token' => $token];

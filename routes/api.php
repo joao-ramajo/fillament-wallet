@@ -11,10 +11,15 @@ use App\Http\Controllers\Expense\DeleteExpenseController;
 use App\Http\Controllers\Expense\GetCategoryListController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
+use App\Http\Controllers\User\GetSourceListController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', RegisterController::class)->name('api.register');
 Route::post('/login', LoginController::class)->name('api.login');
+
+Route::get('/users/sources', GetSourceListController::class)
+    ->middleware(['auth:sanctum'])
+    ->name('api.users.sources');
 
 Route::post('/expenses', CreateExpenseController::class)
     ->middleware(['auth:sanctum'])
