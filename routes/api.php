@@ -9,6 +9,7 @@ use App\Http\Controllers\Expense\CreateCategoryController;
 use App\Http\Controllers\Expense\CreateExpenseController;
 use App\Http\Controllers\Expense\DeleteExpenseController;
 use App\Http\Controllers\Expense\GetCategoryListController;
+use App\Http\Controllers\Expense\ImportExpenseCsvController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
 use App\Http\Controllers\User\CreateSourceController;
@@ -61,3 +62,6 @@ Route::get('/dashboard/expenses', GetExpensesController::class)
 Route::get('/dashboard/spreadsheet/csv/export', GenerateExpenseCsv::class)
     ->middleware(['auth:sanctum'])
     ->name('api.csv.export');
+Route::post('/dashboard/spreadsheet/csv/import', ImportExpenseCsvController::class)
+    ->middleware(['auth:sanctum'])
+    ->name('api.csv.import');

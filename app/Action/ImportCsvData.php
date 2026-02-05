@@ -64,6 +64,11 @@ class ImportCsvData
 
                 $category = $this->findOrCreateCategory($row['CATEGORY_NAME']);
 
+                $defaultSourceId = DB::table('sources')
+                    ->where('user_id', Auth::id())
+                    ->where('is_default', true)
+                    ->value('id');
+
                 $batch[] = [
                     'title' => $row['TITLE'],
                     'amount' => $row['AMOUNT'],
@@ -75,6 +80,7 @@ class ImportCsvData
                     'updated_at' => now(),
                     'user_id' => Auth::id(),
                     'category_id' => $category?->id,
+                    'source_id' => $defaultSourceId,
                 ];
 
                 if (count($batch) >= 100) {
