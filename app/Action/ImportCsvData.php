@@ -86,6 +86,9 @@ class ImportCsvData
                 if (count($batch) >= 100) {
                     DB::table('expenses')->insert($batch);
                     $imported += count($batch);
+                    Log::info('dados exportados', [
+                        'batch' => $batch
+                    ]);
                     $batch = [];
                 }
             }
