@@ -15,7 +15,8 @@ class GetExpensesController extends Controller
         $user = Auth::user();
 
         $expenses = DB::table('expenses')
-            ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')  // join opcional
+            ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
+            ->join('sources', 'expenses.source_id', '=', 'sources.id')
             ->where('expenses.user_id', $user->id)
             ->orderBy('expenses.created_at', 'desc')
             ->select(
@@ -29,6 +30,7 @@ class GetExpensesController extends Controller
                 'expenses.type',
                 'expenses.status',
                 'expenses.source_id',
+                'sources.name as source_name',
             )
             ->get();
 
