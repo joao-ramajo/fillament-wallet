@@ -23,6 +23,7 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            git config --global --add safe.directory /var/www/filament-wallet
             cd /var/www/filament-wallet
             ./deploy.sh
           EOF
