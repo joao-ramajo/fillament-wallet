@@ -13,7 +13,7 @@
         "laravel/tinker": "^2.10.1",
         "lucascudo/laravel-pt-br-localization": "^3.0",
         "openspout/openspout": "^4.32",
-        "phpoffice/phpspreadsheet": "^5.3",
+        "phpoffice/phpspreadsheet": "^5.4",
         "smalot/pdfparser": "^2.12"
     },
     "require-dev": {
