@@ -8,6 +8,7 @@ use App\Domain\Interfaces\XlsxSheet;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -278,7 +279,7 @@ class ExpensesListSheet implements XlsxSheet
         return array_map(function ($row) {
             return [
                 $row['title'],
-                $this->formatMoney($row['amount']),
+                $this->formatMoney((int) $row['amount']),
                 $this->translateStatus($row['status']),
                 $row['category'] ?? '-',
                 $this->translateType($row['type']),
@@ -288,9 +289,11 @@ class ExpensesListSheet implements XlsxSheet
         }, $values);
     }
 
-    private function formatMoney($amount): string
+    private function formatMoney(int|float|string|null $amount): string
     {
-        return 'R$ ' . number_format(((int) $amount) / 100, 2, ',', '.');
+        $value = (float) ($amount ?? 0);
+
+        return 'R$ ' . number_format($value, 2, ',', '.');
     }
 
     private function formatDate(?string $date): string
