@@ -130,7 +130,6 @@ class ExpensesListSheet implements XlsxSheet
                 'horizontal' => Alignment::HORIZONTAL_LEFT,
             ],
             'font' => [
-                'bold' => true,
                 'size' => 10,
             ],
         ]);
