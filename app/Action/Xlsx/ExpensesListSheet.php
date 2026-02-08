@@ -268,6 +268,7 @@ class ExpensesListSheet implements XlsxSheet
                 'sources.name as source',
                 'expenses.payment_date'
             )
+            ->orderByDesc('expenses.created_at')
             ->get()
             ->toArray();
     }
