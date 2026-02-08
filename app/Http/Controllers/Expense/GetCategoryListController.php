@@ -10,11 +10,6 @@ class GetCategoryListController extends Controller
 {
     public function __invoke()
     {
-        return response()
-            ->json([
-                'deploy funcionou' => 'ok'
-            ]);
-
         return Category::query()
             ->where(function ($q) {
                 $q->where('user_id', Auth::id())
