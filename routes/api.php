@@ -68,4 +68,4 @@ Route::post('/dashboard/spreadsheet/csv/import', ImportExpenseCsvController::cla
     ->middleware(['auth:sanctum'])
     ->name('api.csv.import');
 
-Route::post('/dashboard/spreadsheet/xlsx/import', GenerateExpensesXlsx::class);
+Route::get('/dashboard/spreadsheet/xlsx/export', GenerateExpensesXlsx::class);
