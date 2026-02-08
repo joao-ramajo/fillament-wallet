@@ -17,7 +17,7 @@ class ExpensesListSheet implements XlsxSheet
 {
     private const HEADER_RANGE = 'A1:G1';
     private const HEADER_ROW_HEIGHT = 32;
-    private const DATA_ROW_HEIGHT = 28;
+    private const DATA_ROW_HEIGHT = 18;
 
     public function addTo(Spreadsheet $spreadsheet): void
     {
@@ -35,7 +35,6 @@ class ExpensesListSheet implements XlsxSheet
 
         $this->setupRowHeights($sheet, $lastRow);
         $this->applyHeaderStyles($sheet);
-        $this->applyRowAlternation($sheet, $lastRow);
         $this->applyColumnAlignments($sheet, $lastRow);
         $this->applyConditionalFormatting($sheet, $rawData);
         $this->freezeHeader($sheet);
@@ -102,34 +101,6 @@ class ExpensesListSheet implements XlsxSheet
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
-    }
-
-    private function applyRowAlternation($sheet, int $lastRow): void
-    {
-        for ($i = 2; $i <= $lastRow; $i++) {
-            $isEven = ($i % 2 == 0);
-            $fillColor = $isEven ? 'FAFAFA' : 'FFFFFF';
-
-            $sheet->getStyle("A{$i}:G{$i}")->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => $fillColor],
-                ],
-                'borders' => [
-                    'bottom' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => 'F3F4F6'],
-                    ],
-                ],
-                'alignment' => [
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-                'font' => [
-                    'size' => 10,
-                    'color' => ['rgb' => '374151'],
-                ],
-            ]);
-        }
     }
 
     private function applyColumnAlignments($sheet, int $lastRow): void
