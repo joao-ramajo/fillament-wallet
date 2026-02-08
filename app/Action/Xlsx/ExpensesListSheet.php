@@ -8,6 +8,7 @@ use App\Domain\Interfaces\XlsxSheet;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -175,8 +176,8 @@ class ExpensesListSheet implements XlsxSheet
         foreach ($rawData as $index => $row) {
             $rowNum = $index + 2;
 
-            $this->formatStatus($sheet, $rowNum, $row['status']);
-            $this->formatType($sheet, $rowNum, $row['type']);
+            $this->formatStatus($sheet, $rowNum, $row->status);
+            $this->formatType($sheet, $rowNum, $row->type);
         }
     }
 
@@ -256,10 +257,11 @@ class ExpensesListSheet implements XlsxSheet
 
     private function getValues(): array
     {
-        return Expense::query()
+        return DB::table('expenses')
             ->where('expenses.user_id', $this->getUserId())
             ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
-            ->leftJoin('sources', 'sources.id', '=', 'expenses.source_id')
+            ->leftJoin('sources', 'expenses.source_id', '=', 'sources.id')
+            ->orderByDesc('expenses.created_at')
             ->select(
                 'expenses.title',
                 'expenses.amount',
@@ -269,7 +271,6 @@ class ExpensesListSheet implements XlsxSheet
                 'sources.name as source',
                 'expenses.payment_date'
             )
-            ->orderByDesc('expenses.created_at')
             ->get()
             ->toArray();
     }
@@ -278,24 +279,24 @@ class ExpensesListSheet implements XlsxSheet
     {
         return array_map(function ($row) {
             return [
-                $row['title'],
-                $this->formatMoney((int) $row['amount']),
-                $this->translateStatus($row['status']),
-                $row['category'] ?? '-',
-                $this->translateType($row['type']),
-                $row['source'] ?? '-',
-                $this->formatDate($row['payment_date'])
+                $row->title,
+                $this->formatMoney((int) $row->amount),
+                $this->translateStatus($row->status),
+                $row->category ?? '-',
+                $this->translateType($row->type),
+                $row->source ?? '-',
+                $this->formatDate($row->payment_date),
             ];
         }, $values);
     }
 
-    private function formatMoney(int|float|string|null $amount): string
+    private function formatMoney(int|string $amount): string
     {
-        $value = (float) ($amount ?? 0);
+        $cents = (int) $amount;
+        $value = $cents / 100;
 
         return 'R$ ' . number_format($value, 2, ',', '.');
     }
-
     private function formatDate(?string $date): string
     {
         return $date ? Carbon::parse($date)->format('d/m/Y') : '-';
