@@ -22,7 +22,7 @@ class GetCategoryListController extends Controller
             ])
             ->withSum([
             'expenses as expenses_total_amount' => function ($q) {
-                $q->where('user_id', Auth::id());
+                $q->where('user_id', Auth::id())->where('type', 'expense');
             }
             ], 'amount')
             ->orderBy('name', 'asc')
