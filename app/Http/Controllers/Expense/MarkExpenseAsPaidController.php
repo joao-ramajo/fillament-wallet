@@ -2,31 +2,39 @@
 
 namespace App\Http\Controllers\Expense;
 
+use App\Action\Expense\MarkExpenseAsPaidAction;
+use App\DTO\Expense\MarkExpenseAsPaidInput;
 use App\Http\Controllers\Controller;
-use App\Models\Expense;
-use Illuminate\Http\Request;
+use App\Support\Logging\FormatsLogMessage;
 use DomainException;
+use Illuminate\Support\Facades\Auth;
+use Psr\Log\LoggerInterface;
 
 class MarkExpenseAsPaidController extends Controller
 {
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly MarkExpenseAsPaidAction $markExpenseAsPaidAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     public function __invoke(string $id)
     {
         try {
-            $expense = Expense::find((int) $id);
-
-            if (!$expense) {
-                throw new DomainException('Despesa não encontrada.');
-            }
-
-            $expense->update([
-                'status' => 'paid',
-                'payment_date' => now(),
+            $expenseId = (int) $id;
+            $userId = Auth::id();
+            $this->logger->info($this->formatLogMessage('request received'), [
+                'user_id' => $userId,
+                'expense_id' => $expenseId,
             ]);
 
-            return response()
-                ->json([
-                    'message' => 'Despesa marcada como paga com sucesso.'
-                ], 200);
+            $output = $this->markExpenseAsPaidAction->execute(
+                new MarkExpenseAsPaidInput($expenseId, $userId)
+            );
+
+            return response()->json($output->toArray(), 200);
         } catch (DomainException $e) {
             return response()
                 ->json([

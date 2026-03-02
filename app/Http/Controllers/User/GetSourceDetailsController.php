@@ -2,44 +2,34 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Action\Source\GetSourceDetailsAction;
+use App\DTO\Source\GetSourceDetailsInput;
 use App\Http\Controllers\Controller;
-use App\Models\Expense;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Support\Facades\Auth;
+use Psr\Log\LoggerInterface;
 
 class GetSourceDetailsController extends Controller
 {
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly GetSourceDetailsAction $getSourceDetailsAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     public function __invoke()
     {
-        $user = Auth::user();
+        $userId = Auth::id();
+        $this->logger->info($this->formatLogMessage('request received'), [
+            'user_id' => $userId,
+        ]);
 
-        $sources = $user->sources()->get();
+        $output = $this->getSourceDetailsAction->execute(
+            new GetSourceDetailsInput($userId)
+        );
 
-        $result = $sources->map(function ($source) use ($user) {
-            $totalIncome = Expense::where('user_id', $user->id)
-                ->where('source_id', $source->id)
-                ->where('type', 'income')
-                ->sum('amount');
-
-            $totalExpense = Expense::where('user_id', $user->id)
-                ->where('source_id', $source->id)
-                ->where('type', 'expense')
-                ->sum('amount');
-
-            $expensesCount = Expense::where('user_id', $user->id)
-                ->where('source_id', $source->id)
-                ->count();
-
-            return [
-                'id' => $source->id,
-                'name' => $source->name,
-                'color' => $source->color,
-                'expenses_count' => $expensesCount,
-                'total_income' => $totalIncome,
-                'total_expense' => $totalExpense,
-                'balance' => $totalIncome - $totalExpense,
-            ];
-        });
-
-        return response()->json($result);
+        return response()->json($output->toArray());
     }
 }

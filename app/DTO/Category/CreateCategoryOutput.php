@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\DTO\Category;
+
+readonly class CreateCategoryOutput
+{
+    public function __construct(
+        public string $message,
+    ) {
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'message' => $this->message,
+        ];
+    }
+}

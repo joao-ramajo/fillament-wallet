@@ -2,34 +2,43 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Action\Source\CreateSourceAction;
+use App\DTO\Source\CreateSourceInput;
 use App\Http\Controllers\Controller;
-use App\Models\Source;
-use Illuminate\Http\Request;
+use App\Http\Requests\User\CreateSourceRequest;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Support\Facades\Auth;
+use Psr\Log\LoggerInterface;
 
 class CreateSourceController extends Controller
 {
-    public function __invoke(Request $request)
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly CreateSourceAction $createSourceAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
+    public function __invoke(CreateSourceRequest $request)
     {
-        $user = Auth::user();
+        $userId = Auth::id();
+        $validated = $request->validated();
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'color' => ['required', 'string', 'size:7'],
-            'allow_negative' => ['boolean'],
+        $this->logger->info($this->formatLogMessage('request received'), [
+            'user_id' => $userId,
+            'name' => $validated['name'],
         ]);
 
-        $source = Source::create([
-            'user_id' => $user->id,
-            'name' => $data['name'],
-            'color' => $data['color'],
-            'allow_negative' => $data['allow_negative'] ?? false,
-            'is_default' => false,
-        ]);
+        $input = new CreateSourceInput(
+            userId: $userId,
+            name: $validated['name'],
+            color: $validated['color'],
+            allowNegative: $validated['allow_negative'] ?? false,
+        );
 
-        return response()->json([
-            'message' => 'Fonte criada com sucesso',
-            'data' => $source,
-        ], 201);
+        $output = $this->createSourceAction->execute($input);
+
+        return response()->json($output->toArray(), 201);
     }
 }

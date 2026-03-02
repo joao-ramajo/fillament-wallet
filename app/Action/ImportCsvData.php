@@ -5,27 +5,44 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\Models\Category;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Psr\Log\LoggerInterface;
 
 class ImportCsvData
 {
+    use FormatsLogMessage;
+
     private const REQUIRED_HEADERS = [
         'TITLE', 'AMOUNT', 'STATUS', 'TYPE', 'PAYMENT_DATE',
         'DUE_DATE', 'CREATED_AT', 'CATEGORY_NAME'
     ];
 
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     public function execute(UploadedFile $file): bool
     {
+        $startedAt = microtime(true);
+        $this->logger->info($this->formatLogMessage('started'), [
+            'user_id' => Auth::id(),
+            'file' => $file->getClientOriginalName(),
+        ]);
+
         $validator = Validator::make(
             ['file' => $file],
             ['file' => 'required|file|mimes:csv,txt|max:10240']
         );
 
         if ($validator->fails()) {
+            $this->logger->warning($this->formatLogMessage('validation failed'), [
+                'user_id' => Auth::id(),
+            ]);
             return false;
         }
 
@@ -53,7 +70,7 @@ class ImportCsvData
             while (($data = fgetcsv($handle, 0, ';')) !== false) {
                 // 👇 proteção contra linhas quebradas
                 if (count($data) !== count($header)) {
-                    Log::warning('Linha CSV inválida ignorada', [
+                    $this->logger->warning($this->formatLogMessage('invalid csv row ignored'), [
                         'data' => $data
                     ]);
                     continue;
@@ -107,10 +124,16 @@ class ImportCsvData
             fclose($handle);
             DB::commit();
 
+            $this->logger->info($this->formatLogMessage('completed'), [
+                'user_id' => Auth::id(),
+                'import_time_ms' => (int) ((microtime(true) - $startedAt) * 1000),
+            ]);
+
             return true;
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Erro ao importar CSV', [
+            $this->logger->error($this->formatLogMessage('failed'), [
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage()
             ]);
             return false;

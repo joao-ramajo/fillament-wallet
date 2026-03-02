@@ -2,44 +2,38 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Action\Dashboard\GetExpensesAction;
+use App\DTO\Dashboard\GetExpensesInput;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use App\Http\Requests\Dashboard\GetExpensesRequest;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Psr\Log\LoggerInterface;
 
 class GetExpensesController extends Controller
 {
-    public function __invoke(Request $request)
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly GetExpensesAction $getExpensesAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
+    public function __invoke(GetExpensesRequest $request)
     {
-        $user = Auth::user();
+        $userId = Auth::id();
+        $status = $request->validated('status');
 
-        $query = DB::table('expenses')
-        ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
-        ->join('sources', 'expenses.source_id', '=', 'sources.id')
-        ->where('expenses.user_id', $user->id);
+        $this->logger->info($this->formatLogMessage('request received'), [
+            'user_id' => $userId,
+            'status_filter' => $status,
+        ]);
 
-        if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('expenses.status', $request->status);
-        }
+        $output = $this->getExpensesAction->execute(
+            new GetExpensesInput($userId, $status)
+        );
 
-        $expenses = $query
-        ->orderBy('expenses.created_at', 'desc')
-        ->select(
-            'expenses.id',
-            'expenses.title',
-            'categories.name as category',
-            'categories.id as category_id',
-            'expenses.amount',
-            'expenses.payment_date',
-            'expenses.due_date',
-            'expenses.type',
-            'expenses.status',
-            'expenses.source_id',
-            'sources.name as source_name',
-        )
-        ->get();
-
-        return response()->json($expenses);
+        return response()->json($output->toArray());
     }
 }

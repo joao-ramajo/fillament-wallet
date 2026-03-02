@@ -13,7 +13,6 @@ use App\Http\Controllers\Expense\GetCategoryListController;
 use App\Http\Controllers\Expense\ImportExpenseCsvController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
-use App\Http\Controllers\SpreadSheet\XlsxImport;
 use App\Http\Controllers\User\CreateSourceController;
 use App\Http\Controllers\User\GetSourceDetailsController;
 use App\Http\Controllers\User\GetSourceListController;
@@ -22,52 +21,45 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', RegisterController::class)->name('api.register');
 Route::post('/login', LoginController::class)->name('api.login');
 
-Route::get('/users/sources', GetSourceListController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.users.sources');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users/sources', GetSourceListController::class)
+        ->name('api.users.sources');
 
-Route::get('/sources', GetSourceDetailsController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.sources.details');
-Route::post('/sources', CreateSourceController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.sources.create');
+    Route::prefix('sources')->group(function () {
+        Route::get('/', GetSourceDetailsController::class)
+            ->name('api.sources.details');
+        Route::post('/', CreateSourceController::class)
+            ->name('api.sources.create');
+    });
 
+    Route::prefix('expenses')->group(function () {
+        Route::post('/', CreateExpenseController::class)
+            ->name('api.expenses.create');
+        Route::put('/{id}', UpdateExpenseController::class)
+            ->name('api.expenses.update');
+        Route::post('/{id}/mark-as-paid', MarkExpenseAsPaidController::class)
+            ->name('api.expenses.mark-as-paid');
+        Route::delete('/{id}', DeleteExpenseController::class)
+            ->name('api.expenses.delete');
+    });
 
-Route::post('/expenses', CreateExpenseController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.expenses.create');
-Route::put('/expenses/{id}', UpdateExpenseController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.expenses.update');
-Route::post('/expenses/{id}/mark-as-paid', MarkExpenseAsPaidController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.expenses.mark-as-paid');
-Route::delete('/expenses/{id}', DeleteExpenseController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.expenses.delete');
-Route::get('/categories', GetCategoryListController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.categories.list');
-Route::post('/categories', CreateCategoryController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.categories.create');
+    Route::prefix('categories')->group(function () {
+        Route::get('/', GetCategoryListController::class)
+            ->name('api.categories.list');
+        Route::post('/', CreateCategoryController::class)
+            ->name('api.categories.create');
+    });
 
-Route::get('/dashboard/summary', GetSummaryController::class)
-    ->middleware([
-    'auth:sanctum'
-])->name('api.get-summary');
-Route::get('/dashboard/expenses', GetExpensesController::class)
-    ->middleware([
-    'auth:sanctum'
-])->name('api.get-expenses');
-Route::get('/dashboard/spreadsheet/csv/export', GenerateExpenseCsv::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.csv.export');
-Route::post('/dashboard/spreadsheet/csv/import', ImportExpenseCsvController::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.csv.import');
-
-Route::get('/dashboard/spreadsheet/xlsx/export', GenerateExpensesXlsx::class)
-    ->middleware(['auth:sanctum'])
-    ->name('api.xlsx.export');
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/summary', GetSummaryController::class)
+            ->name('api.get-summary');
+        Route::get('/expenses', GetExpensesController::class)
+            ->name('api.get-expenses');
+        Route::get('/spreadsheet/csv/export', GenerateExpenseCsv::class)
+            ->name('api.csv.export');
+        Route::post('/spreadsheet/csv/import', ImportExpenseCsvController::class)
+            ->name('api.csv.import');
+        Route::get('/spreadsheet/xlsx/export', GenerateExpensesXlsx::class)
+            ->name('api.xlsx.export');
+    });
+});

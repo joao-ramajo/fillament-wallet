@@ -2,79 +2,86 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\UserRegistered;
+use App\Action\Auth\WebLoginAction;
+use App\Action\Auth\WebLogoutAction;
+use App\Action\Auth\WebRegisterAction;
+use App\DTO\Auth\WebLoginInput;
+use App\DTO\Auth\WebLogoutInput;
+use App\DTO\Auth\WebRegisterInput;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Auth\WebLoginRequest;
+use App\Http\Requests\Auth\WebRegisterRequest;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rules\Password;
+use Psr\Log\LoggerInterface;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly WebLoginAction $webLoginAction,
+        private readonly WebRegisterAction $webRegisterAction,
+        private readonly WebLogoutAction $webLogoutAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
+    public function login(WebLoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-            'remember' => ['nullable']
+        $validated = $request->validated();
+
+        $this->logger->info($this->formatLogMessage('login request received'), [
+            'email' => $validated['email'],
+            'remember' => $request->has('remember'),
         ]);
 
-        $remember = $request->has('remember');
+        $output = $this->webLoginAction->execute(
+            new WebLoginInput(
+                email: $validated['email'],
+                password: $validated['password'],
+                remember: $request->has('remember')
+            )
+        );
 
-        if (
-            Auth::attempt([
-            'email' => $credentials['email'],
-            'password' => $credentials['password']
-            ], $remember)
-        ) {
+        if ($output->success) {
             $request->session()->regenerate();
             return redirect()->route('web.dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'Credenciais inválidas.',
+            'email' => $output->errorMessage,
         ])->withInput();
     }
 
-    public function register(Request $request)
+    public function register(WebRegisterRequest $request)
     {
-        // Validação dos campos
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => [
-                'required',
-                'confirmed',  // Confirmação com password_confirmation
-                Password::min(8)  // mínimo 8 caracteres
-                    ->mixedCase()  // precisa ter letra maiúscula e minúscula
-                    ->letters()  // precisa ter pelo menos uma letra
-                    ->numbers()  // precisa ter pelo menos um número
-            ],
-            'terms' => ['accepted'],  // Deve ser aceito (checkbox)
-        ]);
-
-        // Criar usuário
-        $user = User::create([
-            'name' => $validated['name'],
+        $validated = $request->validated();
+        $this->logger->info($this->formatLogMessage('register request received'), [
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
         ]);
 
-        // Login automático
-        Auth::login($user);
+        $this->webRegisterAction->execute(
+            new WebRegisterInput(
+                name: $validated['name'],
+                email: $validated['email'],
+                password: $validated['password'],
+            )
+        );
 
-        event(new UserRegistered($user->name, $user->email));
-        Log::info('evento disparado');
-
-        // Redirecionar para dashboard personalizado
-        return redirect()->route('web.dashboard');  // ajuste para sua rota
+        return redirect()->route('web.dashboard');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        $userId = Auth::id() ?? 0;
+        $this->logger->info($this->formatLogMessage('logout request received'), [
+            'user_id' => $userId,
+        ]);
+
+        $this->webLogoutAction->execute(new WebLogoutInput($userId));
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

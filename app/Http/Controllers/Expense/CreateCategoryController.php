@@ -2,36 +2,45 @@
 
 namespace App\Http\Controllers\Expense;
 
+use App\Action\Category\CreateCategoryAction;
+use App\DTO\Category\CreateCategoryInput;
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Http\Requests\Expense\CreateCategoryRequest;
+use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Support\Facades\Auth;
 use DomainException;
+use Psr\Log\LoggerInterface;
 
 class CreateCategoryController extends Controller
 {
-    public function __invoke(Request $request)
+    use FormatsLogMessage;
+
+    public function __construct(
+        private readonly CreateCategoryAction $createCategoryAction,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
+    public function __invoke(CreateCategoryRequest $request)
     {
         try {
-            $request->validate([
-                'name' => 'required',
-                'color' => 'required'
+            $validated = $request->validated();
+            $userId = Auth::id();
+
+            $this->logger->info($this->formatLogMessage('request received'), [
+                'user_id' => $userId,
+                'name' => $validated['name'],
             ]);
 
-            if (Category::whereName($request->input('name'))->whereUserId(Auth::id())->exists()) {
-                throw new DomainException('Categoria já registrada.');
-            }
+            $input = new CreateCategoryInput(
+                userId: $userId,
+                name: $validated['name'],
+                color: $validated['color'],
+            );
 
-            Category::create([
-                'name' => $request->input('name'),
-                'user_id' => Auth::id(),
-                'color' => $request->input('color')
-            ]);
+            $output = $this->createCategoryAction->execute($input);
 
-            return response()
-                ->json([
-                    'message' => 'Categoria registrada com sucesso.'
-                ], 201);
+            return response()->json($output->toArray(), 201);
         } catch (DomainException $e) {
             return response()
                 ->json([
