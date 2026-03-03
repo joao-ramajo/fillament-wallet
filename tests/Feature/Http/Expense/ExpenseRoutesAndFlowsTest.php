@@ -120,6 +120,66 @@ test('quero lsitar todas as despesas pendentes', function () {
     expect($statuses)->toBe(['pending']);
 });
 
+test('na listagem de despesas devo conseguir buscar por query ignorando maiusculas minusculas e pontuacao', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => 'Uber - Corrida Centro',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => 'U.B.E.R* aeroporto',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => '99 Taxi',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.get-expenses', ['query' => 'uber']));
+
+    $response->assertOk()
+        ->assertJsonCount(2);
+});
+
+test('na listagem de despesas devo conseguir buscar por query ignorando acentos', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => 'Compra de Maçã',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => 'Pão frances',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'title' => 'Mercado',
+    ]);
+
+    $responseMaca = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.get-expenses', ['query' => 'maca']));
+    $responseMaca->assertOk()
+        ->assertJsonCount(1);
+
+    $responsePao = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.get-expenses', ['query' => 'pao']));
+    $responsePao->assertOk()
+        ->assertJsonCount(1);
+});
+
 test('quero editar uma despesa com sucesso', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;

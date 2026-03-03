@@ -18,6 +18,7 @@ class GetExpensesRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'in:all,paid,pending,overdue'],
+            'query' => ['nullable', 'string'],
         ];
     }
 }

@@ -24,14 +24,16 @@ class GetExpensesController extends Controller
     {
         $userId = Auth::id();
         $status = $request->validated('status');
+        $query = $request->validated('query');
 
         $this->logger->info($this->formatLogMessage('request received'), [
             'user_id' => $userId,
             'status_filter' => $status,
+            'query_filter' => $query,
         ]);
 
         $output = $this->getExpensesAction->execute(
-            new GetExpensesInput($userId, $status)
+            new GetExpensesInput($userId, $status, $query)
         );
 
         return response()->json($output->toArray());

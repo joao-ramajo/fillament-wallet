@@ -9,6 +9,7 @@ readonly class GetExpensesInput
     public function __construct(
         public int $userId,
         public ?string $status,
+        public ?string $query,
     ) {
     }
 }

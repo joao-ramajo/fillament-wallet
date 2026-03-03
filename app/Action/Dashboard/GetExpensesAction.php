@@ -7,6 +7,7 @@ namespace App\Action\Dashboard;
 use App\DTO\Dashboard\GetExpensesInput;
 use App\DTO\Dashboard\GetExpensesOutput;
 use App\Support\Logging\FormatsLogMessage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Psr\Log\LoggerInterface;
 
@@ -24,6 +25,7 @@ class GetExpensesAction
         $this->logger->info($this->formatLogMessage('started'), [
             'user_id' => $input->userId,
             'status_filter' => $input->status,
+            'query_filter' => $input->query,
         ]);
 
         $startedAt = microtime(true);
@@ -52,8 +54,18 @@ class GetExpensesAction
                 'expenses.source_id',
                 'sources.name as source_name',
             )
-            ->get()
-            ->toArray();
+            ->get();
+
+        if ($input->query !== null && trim($input->query) !== '') {
+            $normalizedQuery = $this->normalizeSearchTerm($input->query);
+            $expenses = $expenses->filter(function ($expense) use ($normalizedQuery) {
+                $normalizedTitle = $this->normalizeSearchTerm((string) $expense->title);
+
+                return str_contains($normalizedTitle, $normalizedQuery);
+            })->values();
+        }
+
+        $expenses = $expenses->toArray();
 
         $this->logger->info($this->formatLogMessage('completed'), [
             'user_id' => $input->userId,
@@ -62,5 +74,14 @@ class GetExpensesAction
         ]);
 
         return new GetExpensesOutput($expenses);
+    }
+
+    private function normalizeSearchTerm(string $value): string
+    {
+        $normalized = Str::ascii(mb_strtolower($value));
+        $normalized = preg_replace('/[^\pL\pN\s]/u', '', $normalized) ?? '';
+        $normalized = preg_replace('/\s+/', ' ', $normalized) ?? '';
+
+        return trim($normalized);
     }
 }
