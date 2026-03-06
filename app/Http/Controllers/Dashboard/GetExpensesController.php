@@ -25,15 +25,19 @@ class GetExpensesController extends Controller
         $userId = Auth::id();
         $status = $request->validated('status');
         $query = $request->validated('query');
+        $categoryId = $request->validated('category_id');
+        $month = $request->validated('month');
 
         $this->logger->info($this->formatLogMessage('request received'), [
             'user_id' => $userId,
             'status_filter' => $status,
             'query_filter' => $query,
+            'category_id_filter' => $categoryId,
+            'month_filter' => $month,
         ]);
 
         $output = $this->getExpensesAction->execute(
-            new GetExpensesInput($userId, $status, $query)
+            new GetExpensesInput($userId, $status, $query, $categoryId, $month)
         );
 
         return response()->json($output->toArray());

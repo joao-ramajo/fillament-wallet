@@ -8,6 +8,7 @@ readonly class GetCategoryListInput
 {
     public function __construct(
         public int $userId,
+        public ?int $month,
     ) {
     }
 }

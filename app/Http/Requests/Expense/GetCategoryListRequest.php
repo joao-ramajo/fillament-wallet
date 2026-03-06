@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Dashboard;
+namespace App\Http\Requests\Expense;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class GetExpensesRequest extends FormRequest
+class GetCategoryListRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,9 +17,6 @@ class GetExpensesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['nullable', 'in:all,paid,pending,overdue'],
-            'query' => ['nullable', 'string'],
-            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'month' => ['nullable', 'integer', 'between:1,12'],
         ];
     }

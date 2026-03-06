@@ -10,6 +10,8 @@ readonly class GetExpensesInput
         public int $userId,
         public ?string $status,
         public ?string $query,
+        public ?int $categoryId,
+        public ?int $month,
     ) {
     }
 }

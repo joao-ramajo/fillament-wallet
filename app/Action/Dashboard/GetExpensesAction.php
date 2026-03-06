@@ -26,6 +26,8 @@ class GetExpensesAction
             'user_id' => $input->userId,
             'status_filter' => $input->status,
             'query_filter' => $input->query,
+            'category_id_filter' => $input->categoryId,
+            'month_filter' => $input->month,
         ]);
 
         $startedAt = microtime(true);
@@ -37,6 +39,14 @@ class GetExpensesAction
 
         if ($input->status !== null && $input->status !== 'all') {
             $query->where('expenses.status', $input->status);
+        }
+
+        if ($input->categoryId !== null) {
+            $query->where('expenses.category_id', $input->categoryId);
+        }
+
+        if ($input->month !== null) {
+            $query->whereMonth('expenses.created_at', $input->month);
         }
 
         $expenses = $query
@@ -69,6 +79,8 @@ class GetExpensesAction
 
         $this->logger->info($this->formatLogMessage('completed'), [
             'user_id' => $input->userId,
+            'category_id_filter' => $input->categoryId,
+            'month_filter' => $input->month,
             'count' => count($expenses),
             'query_time_ms' => (int) ((microtime(true) - $startedAt) * 1000),
         ]);

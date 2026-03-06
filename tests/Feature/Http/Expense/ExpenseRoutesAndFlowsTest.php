@@ -94,6 +94,47 @@ test('quero listar apenas as despesas pagas com sucesso', function () {
     expect($statuses)->toBe(['paid']);
 });
 
+test('na listagem de despesas devo conseguir filtrar por categoria e mes', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+    $categoryA = Category::factory()->create(['user_id' => $user->id]);
+    $categoryB = Category::factory()->create(['user_id' => $user->id]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryA->id,
+        'created_at' => '2026-01-10 10:00:00',
+        'updated_at' => '2026-01-10 10:00:00',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryA->id,
+        'created_at' => '2026-02-10 10:00:00',
+        'updated_at' => '2026-02-10 10:00:00',
+    ]);
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryB->id,
+        'created_at' => '2026-01-12 10:00:00',
+        'updated_at' => '2026-01-12 10:00:00',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.get-expenses', [
+            'category_id' => $categoryA->id,
+            'month' => 1,
+        ]));
+
+    $response->assertOk()
+        ->assertJsonCount(1);
+
+    expect($response->json()[0]['category_id'])->toBe($categoryA->id);
+});
+
 test('quero lsitar todas as despesas pendentes', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
@@ -430,6 +471,66 @@ test('ao apagar uma despesa a categoria deve ser decrementada a quantidade de de
         ->getJson(route('api.categories.list'));
     $afterCategory = collect($after->json())->firstWhere('id', $category->id);
     expect($afterCategory['expenses_count'])->toBe(0);
+});
+
+test('na listagem de categorias devo conseguir filtrar por mes via query param', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+    $category = Category::factory()->create([
+        'user_id' => $user->id,
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $category->id,
+        'type' => 'expense',
+        'amount' => 1000,
+        'created_at' => '2026-01-10 10:00:00',
+        'updated_at' => '2026-01-10 10:00:00',
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $category->id,
+        'type' => 'income',
+        'amount' => 3000,
+        'created_at' => '2026-01-11 10:00:00',
+        'updated_at' => '2026-01-11 10:00:00',
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $category->id,
+        'type' => 'expense',
+        'amount' => 7000,
+        'created_at' => '2026-02-10 10:00:00',
+        'updated_at' => '2026-02-10 10:00:00',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.categories.list', ['month' => 1]));
+
+    $response->assertOk();
+    $selected = collect($response->json())->firstWhere('id', $category->id);
+
+    expect($selected)->not->toBeNull();
+    expect($selected['expenses_count'])->toBe(2);
+    expect($selected['expenses_total_amount'])->toBe(1000);
+});
+
+test('ao filtrar categorias por mes invalido deve retornar erro de validacao', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson(route('api.categories.list', ['month' => 13]));
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['month']);
 });
 
 test('nas fontes devo conseguir ver corretamente os valores de total recebido, total gasto e saldo final e a quantidade de registros nela', function () {
