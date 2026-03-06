@@ -563,6 +563,99 @@ test('ao filtrar categorias por mes invalido deve retornar erro de validacao', f
         ->assertJsonValidationErrors(['month']);
 });
 
+test('quero editar uma categoria com sucesso alterando apenas nome e cor', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+
+    $category = Category::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Lazer',
+        'color' => '#111111',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.categories.update', ['id' => $category->id]), [
+            'name' => 'Lazer e viagens',
+            'color' => '#22c55e',
+        ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'message' => 'Categoria atualizada com sucesso.',
+        ]);
+
+    $this->assertDatabaseHas('categories', [
+        'id' => $category->id,
+        'name' => 'Lazer e viagens',
+        'color' => '#22c55e',
+    ]);
+});
+
+test('na edicao de categoria deve retornar erro de validacao para payload invalido', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+
+    $category = Category::factory()->create([
+        'user_id' => $user->id,
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.categories.update', ['id' => $category->id]), [
+            'name' => '',
+            'color' => '#fff',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['name', 'color']);
+});
+
+test('na edicao de categoria nao devo conseguir usar um nome ja existente para o mesmo usuario', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+
+    Category::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Transporte',
+    ]);
+
+    $categoryToUpdate = Category::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Lazer',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.categories.update', ['id' => $categoryToUpdate->id]), [
+            'name' => 'Transporte',
+            'color' => '#3b82f6',
+        ]);
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'message' => 'Categoria já registrada.',
+        ]);
+});
+
+test('na edicao de categoria nao devo conseguir alterar categoria de outro usuario', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $otherUser = User::factory()->create();
+
+    $category = Category::factory()->create([
+        'user_id' => $otherUser->id,
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.categories.update', ['id' => $category->id]), [
+            'name' => 'Tentativa',
+            'color' => '#ef4444',
+        ]);
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'message' => 'Você não pode alterar esta categoria.',
+        ]);
+});
+
 test('nas fontes devo conseguir ver corretamente os valores de total recebido, total gasto e saldo final e a quantidade de registros nela', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;

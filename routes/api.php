@@ -12,6 +12,7 @@ use App\Http\Controllers\Expense\DeleteExpenseController;
 use App\Http\Controllers\Expense\GetCategoryListController;
 use App\Http\Controllers\Expense\ImportExpenseCsvController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
+use App\Http\Controllers\Expense\UpdateCategoryController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
 use App\Http\Controllers\User\CreateSourceController;
 use App\Http\Controllers\User\GetSourceDetailsController;
@@ -48,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.categories.list');
         Route::post('/', CreateCategoryController::class)
             ->name('api.categories.create');
+        Route::put('/{id}', UpdateCategoryController::class)
+            ->name('api.categories.update');
     });
 
     Route::prefix('dashboard')->group(function () {
