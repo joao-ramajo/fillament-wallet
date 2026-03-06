@@ -101,26 +101,54 @@ test('na listagem de despesas devo conseguir filtrar por categoria e mes', funct
     $categoryA = Category::factory()->create(['user_id' => $user->id]);
     $categoryB = Category::factory()->create(['user_id' => $user->id]);
 
-    Expense::factory()->create([
+    $paidInMonth = Expense::factory()->create([
         'user_id' => $user->id,
         'source_id' => $defaultSourceId,
         'category_id' => $categoryA->id,
-        'created_at' => '2026-01-10 10:00:00',
-        'updated_at' => '2026-01-10 10:00:00',
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'category_id' => $categoryA->id,
+        'status' => 'paid',
+        'payment_date' => '2026-01-20 10:00:00',
         'created_at' => '2026-02-10 10:00:00',
         'updated_at' => '2026-02-10 10:00:00',
     ]);
+
+    $pendingCreatedInMonth = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryA->id,
+        'status' => 'pending',
+        'payment_date' => null,
+        'created_at' => '2026-01-10 10:00:00',
+        'updated_at' => '2026-01-10 10:00:00',
+    ]);
+
     Expense::factory()->create([
         'user_id' => $user->id,
         'source_id' => $defaultSourceId,
+        'status' => 'paid',
+        'payment_date' => '2026-02-10 10:00:00',
         'category_id' => $categoryB->id,
         'created_at' => '2026-01-12 10:00:00',
         'updated_at' => '2026-01-12 10:00:00',
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryA->id,
+        'status' => 'paid',
+        'payment_date' => '2026-02-12 10:00:00',
+        'created_at' => '2026-01-12 10:00:00',
+        'updated_at' => '2026-01-12 10:00:00',
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'category_id' => $categoryA->id,
+        'status' => 'pending',
+        'payment_date' => null,
+        'created_at' => '2026-02-13 10:00:00',
+        'updated_at' => '2026-02-13 10:00:00',
     ]);
 
     $response = $this->withHeader('Authorization', "Bearer {$token}")
@@ -130,9 +158,11 @@ test('na listagem de despesas devo conseguir filtrar por categoria e mes', funct
         ]));
 
     $response->assertOk()
-        ->assertJsonCount(1);
+        ->assertJsonCount(2);
 
-    expect($response->json()[0]['category_id'])->toBe($categoryA->id);
+    $ids = collect($response->json())->pluck('id')->all();
+    expect($ids)->toContain($paidInMonth->id);
+    expect($ids)->toContain($pendingCreatedInMonth->id);
 });
 
 test('quero lsitar todas as despesas pendentes', function () {

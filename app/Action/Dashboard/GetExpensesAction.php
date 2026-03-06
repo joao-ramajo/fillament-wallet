@@ -46,7 +46,24 @@ class GetExpensesAction
         }
 
         if ($input->month !== null) {
-            $query->whereMonth('expenses.created_at', $input->month);
+            if ($input->categoryId !== null) {
+                $query->where(function ($monthQuery) use ($input) {
+                    $monthQuery
+                        ->where(function ($paidQuery) use ($input) {
+                            $paidQuery
+                                ->where('expenses.status', 'paid')
+                                ->whereNotNull('expenses.payment_date')
+                                ->whereMonth('expenses.payment_date', $input->month);
+                        })
+                        ->orWhere(function ($unpaidQuery) use ($input) {
+                            $unpaidQuery
+                                ->where('expenses.status', '!=', 'paid')
+                                ->whereMonth('expenses.created_at', $input->month);
+                        });
+                });
+            } else {
+                $query->whereMonth('expenses.created_at', $input->month);
+            }
         }
 
         $expenses = $query
