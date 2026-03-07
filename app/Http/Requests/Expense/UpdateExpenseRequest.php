@@ -23,14 +23,18 @@ class UpdateExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'amount' => 'required|integer',
-            'type' => 'required',
+            'title' => 'required|string|max:255',
+            'amount' => 'required|integer|min:0',
+            'type' => 'required|string',
             'status' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'source_id' => 'sometimes|exists:sources,id'
-            // 'due_date' => 'sometimes',
-            // 'payment_date' => 'sometimes',
+            'source_id' => 'sometimes|exists:sources,id',
+            'payment_date' => [
+                'nullable',
+                'date_format:Y-m-d',
+                'date',
+                'before_or_equal:today',
+            ],
         ];
     }
 }

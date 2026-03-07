@@ -314,6 +314,88 @@ test('quero editar uma despesa para uma entrada com sucesso', function () {
     ]);
 });
 
+test('ao editar uma despesa paga devo conseguir informar payment_date somente com data', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+    $paymentDate = '2026-03-02';
+
+    $expense = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'status' => 'pending',
+        'payment_date' => null,
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
+            'title' => 'Parcela cartao',
+            'amount' => 15000,
+            'type' => 'expense',
+            'status' => 'paid',
+            'source_id' => $defaultSourceId,
+            'payment_date' => $paymentDate,
+        ]);
+
+    $response->assertOk();
+
+    $expense->refresh();
+    expect($expense->payment_date?->format('Y-m-d H:i:s'))->toBe('2026-03-02 00:00:00');
+});
+
+test('ao editar uma despesa paga com payment_date invalido deve retornar erro de validacao', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+
+    $expense = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'status' => 'pending',
+        'payment_date' => null,
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
+            'title' => 'Conta internet',
+            'amount' => 12000,
+            'type' => 'expense',
+            'status' => 'paid',
+            'source_id' => $defaultSourceId,
+            'payment_date' => '2026-02-30',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['payment_date']);
+});
+
+test('ao editar uma despesa paga com payment_date no futuro deve retornar erro de validacao', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('test')->plainTextToken;
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+    $futureDate = now()->addDay()->format('Y-m-d');
+
+    $expense = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $defaultSourceId,
+        'status' => 'pending',
+        'payment_date' => null,
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
+            'title' => 'Conta energia',
+            'amount' => 18000,
+            'type' => 'expense',
+            'status' => 'paid',
+            'source_id' => $defaultSourceId,
+            'payment_date' => $futureDate,
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['payment_date']);
+});
+
 test('quero ver meus resumos gerais com o total recebido, total gasto e saldo esperado com sucesso', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
