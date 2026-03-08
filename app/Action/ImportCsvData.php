@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\Models\Category;
+use App\Models\Source;
 use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class ImportCsvData
 
     private const REQUIRED_HEADERS = [
         'TITLE', 'AMOUNT', 'STATUS', 'TYPE', 'PAYMENT_DATE',
-        'DUE_DATE', 'CREATED_AT', 'CATEGORY_NAME'
+        'DUE_DATE', 'CREATED_AT', 'CATEGORY_NAME', 'SOURCE_NAME',
     ];
 
     public function __construct(
@@ -91,11 +92,7 @@ class ImportCsvData
                 }
 
                 $category = $this->findOrCreateCategory($row['CATEGORY_NAME']);
-
-                $defaultSourceId = DB::table('sources')
-                    ->where('user_id', Auth::id())
-                    ->where('is_default', true)
-                    ->value('id');
+                $sourceId = $this->findOrCreateSourceId($row['SOURCE_NAME'] ?? null);
 
                 $batch[] = [
                     'title' => $row['TITLE'],
@@ -108,7 +105,7 @@ class ImportCsvData
                     'updated_at' => now(),
                     'user_id' => Auth::id(),
                     'category_id' => $category?->id,
-                    'source_id' => $defaultSourceId,
+                    'source_id' => $sourceId,
                 ];
 
                 if (count($batch) >= 100) {
@@ -181,5 +178,39 @@ class ImportCsvData
         }
 
         return $category;
+    }
+
+    private function findOrCreateSourceId(?string $sourceName): ?int
+    {
+        $normalizedSourceName = trim((string) $sourceName);
+
+        if ($normalizedSourceName === '' || $normalizedSourceName === '-') {
+            return $this->getDefaultSourceId();
+        }
+
+        $source = Source::query()
+            ->where('user_id', Auth::id())
+            ->where('name', $normalizedSourceName)
+            ->first();
+
+        if (!$source) {
+            $source = Source::query()->create([
+                'user_id' => Auth::id(),
+                'name' => $normalizedSourceName,
+                'color' => '#64748B',
+                'is_default' => false,
+                'allow_negative' => false,
+            ]);
+        }
+
+        return $source->id;
+    }
+
+    private function getDefaultSourceId(): ?int
+    {
+        return DB::table('sources')
+            ->where('user_id', Auth::id())
+            ->where('is_default', true)
+            ->value('id');
     }
 }

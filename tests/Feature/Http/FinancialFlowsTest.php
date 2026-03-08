@@ -177,11 +177,12 @@ test('deve marcar despesa como paga e manter expected_total consistente', functi
 test('deve importar csv e criar categoria automaticamente vinculando registros na fonte padrao', function () {
     $user = User::factory()->create();
     $token = authTokenFor($user);
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
 
     $csv = <<<'CSV'
-TITLE;AMOUNT;STATUS;TYPE;PAYMENT_DATE;DUE_DATE;CREATED_AT;CATEGORY_NAME
-Mercado;15000;paid;expense;2026-02-01 10:00:00;2026-02-05;2026-02-01 10:00:00;Compras Casa
-Salario;300000;paid;income;2026-02-02 10:00:00;-;2026-02-02 10:00:00;-
+TITLE;AMOUNT;STATUS;TYPE;PAYMENT_DATE;DUE_DATE;CREATED_AT;CATEGORY_NAME;SOURCE_NAME
+Mercado;15000;paid;expense;2026-02-01 10:00:00;2026-02-05;2026-02-01 10:00:00;Compras Casa;Cartao Nubank
+Salario;300000;paid;income;2026-02-02 10:00:00;-;2026-02-02 10:00:00;-;-
 CSV;
 
     $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
@@ -199,9 +200,83 @@ CSV;
         'user_id' => $user->id,
     ]);
 
-    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
     $this->assertDatabaseHas('expenses', [
-        'title' => 'Mercado',
+        'title' => 'Salario',
         'source_id' => $defaultSourceId,
     ]);
+
+    $this->assertDatabaseHas('sources', [
+        'name' => 'Cartao Nubank',
+        'user_id' => $user->id,
+    ]);
+
+    $customSourceId = Source::query()
+        ->where('user_id', $user->id)
+        ->where('name', 'Cartao Nubank')
+        ->value('id');
+
+    $this->assertDatabaseHas('expenses', [
+        'title' => 'Mercado',
+        'source_id' => $customSourceId,
+    ]);
+});
+
+test('deve importar csv reutilizando fonte existente pelo nome', function () {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+
+    $existingSource = Source::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Inter',
+        'is_default' => false,
+    ]);
+
+    $csv = <<<'CSV'
+TITLE;AMOUNT;STATUS;TYPE;PAYMENT_DATE;DUE_DATE;CREATED_AT;CATEGORY_NAME;SOURCE_NAME
+Assinatura;4900;paid;expense;2026-03-01 10:00:00;-;2026-03-01 10:00:00;-;Inter
+CSV;
+
+    $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson(route('api.csv.import'), [
+            'file' => $file,
+        ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseCount('sources', 2);
+    $this->assertDatabaseHas('expenses', [
+        'title' => 'Assinatura',
+        'source_id' => $existingSource->id,
+    ]);
+});
+
+test('deve exportar csv com coluna de fonte', function () {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+
+    $source = Source::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Conta PJ',
+        'is_default' => false,
+    ]);
+
+    Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $source->id,
+        'title' => 'Servico',
+        'amount' => 90000,
+        'status' => 'paid',
+        'type' => 'income',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->get(route('api.csv.export'));
+
+    $response->assertOk();
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('SOURCE_NAME');
+    expect($content)->toContain('Conta PJ');
 });
