@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class SourcesSummarySheet implements XlsxSheet
 {
@@ -38,6 +39,7 @@ class SourcesSummarySheet implements XlsxSheet
         $this->setupColumnWidths($sheet);
         $this->applyHeaderStyles($sheet);
         $this->applyRowStyles($sheet, $lastRow, $totalRow);
+        $this->applyCellFormats($sheet, $lastRow);
         $this->freezeHeader($sheet);
         $sheet->setAutoFilter("A1:D{$lastRow}");
     }
@@ -91,18 +93,18 @@ class SourcesSummarySheet implements XlsxSheet
 
             return [
             $row->source ?? '—',
-            $this->formatMoney($income),
-            $this->formatMoney($expense),
-            $this->formatMoney($income - $expense),
+            $this->normalizeMoney($income),
+            $this->normalizeMoney($expense),
+            $this->normalizeMoney($income - $expense),
             ];
         }, $values);
 
         // Linha de total
         $rows[] = [
         'TOTAL',
-        $this->formatMoney($totalIncome),
-        $this->formatMoney($totalExpense),
-        $this->formatMoney($totalIncome - $totalExpense),
+        $this->normalizeMoney($totalIncome),
+        $this->normalizeMoney($totalExpense),
+        $this->normalizeMoney($totalIncome - $totalExpense),
         ];
 
         return $rows;
@@ -193,8 +195,19 @@ class SourcesSummarySheet implements XlsxSheet
         $sheet->freezePane('A2');
     }
 
-    private function formatMoney(int|string $amount): string
+    private function applyCellFormats(Worksheet $sheet, int $lastRow): void
     {
-        return 'R$ ' . number_format((int) $amount / 100, 2, ',', '.');
+        if ($lastRow < 2) {
+            return;
+        }
+
+        $sheet->getStyle("B2:D{$lastRow}")
+            ->getNumberFormat()
+            ->setFormatCode('[$R$-416] #,##0.00');
+    }
+
+    private function normalizeMoney(int|string $amount): float
+    {
+        return ((int) $amount) / 100;
     }
 }

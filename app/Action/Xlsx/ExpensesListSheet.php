@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Action\Xlsx;
 
 use App\Domain\Interfaces\XlsxSheet;
-use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +12,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ExpensesListSheet implements XlsxSheet
 {
@@ -42,6 +43,7 @@ class ExpensesListSheet implements XlsxSheet
         $this->applyHeaderStyles($sheet);
         $this->applyTableStyles($sheet, $lastRow);
         $this->applyColumnAlignments($sheet, $lastRow);
+        $this->applyCellFormats($sheet, $lastRow);
         $this->applyConditionalFormatting($sheet, $rawData);
         $this->freezeHeader($sheet);
         $sheet->setAutoFilter("A1:G{$lastRow}");
@@ -212,6 +214,21 @@ class ExpensesListSheet implements XlsxSheet
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
+    private function applyCellFormats($sheet, int $lastRow): void
+    {
+        if ($lastRow < 2) {
+            return;
+        }
+
+        $sheet->getStyle("B2:B{$lastRow}")
+            ->getNumberFormat()
+            ->setFormatCode('[$R$-416] #,##0.00');
+
+        $sheet->getStyle("G2:G{$lastRow}")
+            ->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
+    }
+
     private function applyConditionalFormatting($sheet, array $rawData): void
     {
         foreach ($rawData as $index => $row) {
@@ -325,26 +342,29 @@ class ExpensesListSheet implements XlsxSheet
         return array_map(function ($row) {
             return [
                 $row->title,
-                $this->formatMoney((int) $row->amount),
+                $this->normalizeMoney((int) $row->amount),
                 $this->translateStatus($row->status),
                 $row->category ?? '-',
                 $this->translateType($row->type),
                 $row->source ?? '-',
-                $this->formatDate($row->payment_date),
+                $this->toExcelDate($row->payment_date),
             ];
         }, $values);
     }
 
-    private function formatMoney(int|string $amount): string
+    private function normalizeMoney(int|string $amount): float
     {
         $cents = (int) $amount;
-        $value = $cents / 100;
-
-        return 'R$ ' . number_format($value, 2, ',', '.');
+        return $cents / 100;
     }
-    private function formatDate(?string $date): string
+
+    private function toExcelDate(?string $date): float|null
     {
-        return $date ? Carbon::parse($date)->format('d/m/Y') : '-';
+        if (!$date) {
+            return null;
+        }
+
+        return ExcelDate::PHPToExcel(Carbon::parse($date));
     }
 
     private function translateStatus(string $status): string
