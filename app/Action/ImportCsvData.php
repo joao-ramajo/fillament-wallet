@@ -17,6 +17,12 @@ class ImportCsvData
 {
     use FormatsLogMessage;
 
+    private const DEFAULT_SOURCE_ALIASES = [
+        'principal',
+        'carteira principal',
+        'fonte principal',
+    ];
+
     private const REQUIRED_HEADERS = [
         'TITLE', 'AMOUNT', 'STATUS', 'TYPE', 'PAYMENT_DATE',
         'DUE_DATE', 'CREATED_AT', 'CATEGORY_NAME', 'SOURCE_NAME',
@@ -183,8 +189,13 @@ class ImportCsvData
     private function findOrCreateSourceId(?string $sourceName): ?int
     {
         $normalizedSourceName = trim((string) $sourceName);
+        $normalizedSourceAlias = mb_strtolower($normalizedSourceName);
 
-        if ($normalizedSourceName === '' || $normalizedSourceName === '-') {
+        if (
+            $normalizedSourceName === ''
+            || $normalizedSourceName === '-'
+            || in_array($normalizedSourceAlias, self::DEFAULT_SOURCE_ALIASES, true)
+        ) {
             return $this->getDefaultSourceId();
         }
 

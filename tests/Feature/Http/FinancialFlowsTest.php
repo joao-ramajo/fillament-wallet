@@ -252,6 +252,36 @@ CSV;
     ]);
 });
 
+test('deve importar csv com fonte Principal mapeando para carteira principal do usuario', function () {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+
+    $csv = <<<'CSV'
+TITLE;AMOUNT;STATUS;TYPE;PAYMENT_DATE;DUE_DATE;CREATED_AT;CATEGORY_NAME;SOURCE_NAME
+Mercado;9900;paid;expense;2026-03-01 10:00:00;-;2026-03-01 10:00:00;-;Principal
+CSV;
+
+    $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
+
+    $response = $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson(route('api.csv.import'), [
+            'file' => $file,
+        ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('expenses', [
+        'title' => 'Mercado',
+        'source_id' => $defaultSourceId,
+    ]);
+
+    $this->assertDatabaseMissing('sources', [
+        'user_id' => $user->id,
+        'name' => 'Principal',
+    ]);
+});
+
 test('deve exportar csv com coluna de fonte', function () {
     $user = User::factory()->create();
     $token = authTokenFor($user);

@@ -10,10 +10,16 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class SourcesSummarySheet implements XlsxSheet
 {
+    private const HEADER_BG = 'F3F4F6';
+    private const HEADER_FONT = '111827';
+    private const TABLE_BORDER_COLOR = 'D1D5DB';
+    private const STRIPE_BG = 'F9FAFB';
+
     public function addTo(Spreadsheet $spreadsheet): void
     {
         $sheet = new Worksheet($spreadsheet, 'Resumo por Fonte');
@@ -29,25 +35,16 @@ class SourcesSummarySheet implements XlsxSheet
         $lastRow = count($data) + 1;
         $totalRow = $lastRow;
 
-        $sheet->getStyle("A{$totalRow}:D{$totalRow}")->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'E5E7EB'], // cinza claro
-            ],
-        ]);
-
         $this->setupColumnWidths($sheet);
         $this->applyHeaderStyles($sheet);
-        $this->applyRowStyles($sheet, $lastRow);
+        $this->applyRowStyles($sheet, $lastRow, $totalRow);
         $this->freezeHeader($sheet);
+        $sheet->setAutoFilter("A1:D{$lastRow}");
     }
 
     private function getUserId(): int
     {
-        return app()->environment() === 'local' ? 1 : Auth::id();
+        return Auth::id() ?? 0;
     }
 
     private function setupHeaders(Worksheet $sheet): void
@@ -118,31 +115,77 @@ class SourcesSummarySheet implements XlsxSheet
             'font' => [
                 'bold' => true,
                 'size' => 11,
+                'color' => ['rgb' => self::HEADER_FONT],
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'DBEAFE'],
+                'startColor' => ['rgb' => self::HEADER_BG],
             ],
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
                 'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => self::TABLE_BORDER_COLOR],
+                ],
             ],
         ]);
 
         $sheet->getRowDimension(1)->setRowHeight(32);
     }
 
-    private function applyRowStyles(Worksheet $sheet, int $lastRow): void
+    private function applyRowStyles(Worksheet $sheet, int $lastRow, int $totalRow): void
     {
+        if ($lastRow < 2) {
+            return;
+        }
+
+        $sheet->getStyle("A2:D{$lastRow}")->applyFromArray([
+            'font' => [
+                'size' => 10,
+                'color' => ['rgb' => self::HEADER_FONT],
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => self::TABLE_BORDER_COLOR],
+                ],
+            ],
+        ]);
+
         for ($i = 2; $i <= $lastRow; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(22);
+
             $sheet->getStyle("A{$i}:D{$i}")
                 ->getAlignment()
                 ->setVertical(Alignment::VERTICAL_CENTER);
 
             $sheet->getStyle("B{$i}:D{$i}")
                 ->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+            if ($i % 2 === 0) {
+                $sheet->getStyle("A{$i}:D{$i}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => self::STRIPE_BG],
+                    ],
+                ]);
+            }
         }
+
+        $sheet->getStyle("A{$totalRow}:D{$totalRow}")->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => self::HEADER_FONT],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E5E7EB'],
+            ],
+        ]);
     }
 
     private function freezeHeader(Worksheet $sheet): void

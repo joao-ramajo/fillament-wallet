@@ -18,7 +18,11 @@ class ExpensesListSheet implements XlsxSheet
 {
     private const HEADER_RANGE = 'A1:G1';
     private const HEADER_ROW_HEIGHT = 32;
-    private const DATA_ROW_HEIGHT = 18;
+    private const DATA_ROW_HEIGHT = 22;
+    private const TABLE_BORDER_COLOR = 'D1D5DB';
+    private const HEADER_BG = 'F3F4F6';
+    private const HEADER_FONT = '111827';
+    private const STRIPE_BG = 'F9FAFB';
 
     public function addTo(Spreadsheet $spreadsheet): void
     {
@@ -36,14 +40,16 @@ class ExpensesListSheet implements XlsxSheet
 
         $this->setupRowHeights($sheet, $lastRow);
         $this->applyHeaderStyles($sheet);
+        $this->applyTableStyles($sheet, $lastRow);
         $this->applyColumnAlignments($sheet, $lastRow);
         $this->applyConditionalFormatting($sheet, $rawData);
         $this->freezeHeader($sheet);
+        $sheet->setAutoFilter("A1:G{$lastRow}");
     }
 
     private function getUserId(): int
     {
-        return app()->environment() === 'local' ? 1 : Auth::id();
+        return Auth::id() ?? 0;
     }
 
     private function setupHeaders($sheet): void
@@ -91,17 +97,57 @@ class ExpensesListSheet implements XlsxSheet
             'font' => [
                 'bold' => true,
                 'size' => 11,
-                'color' => ['rgb' => '1F2937'],
+                'color' => ['rgb' => self::HEADER_FONT],
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'DBEAFE'],
+                'startColor' => ['rgb' => self::HEADER_BG],
             ],
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => self::TABLE_BORDER_COLOR],
+                ],
+            ],
         ]);
+    }
+
+    private function applyTableStyles($sheet, int $lastRow): void
+    {
+        if ($lastRow < 2) {
+            return;
+        }
+
+        $sheet->getStyle("A2:G{$lastRow}")->applyFromArray([
+            'font' => [
+                'size' => 10,
+                'color' => ['rgb' => self::HEADER_FONT],
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => self::TABLE_BORDER_COLOR],
+                ],
+            ],
+        ]);
+
+        for ($row = 2; $row <= $lastRow; $row++) {
+            if ($row % 2 === 0) {
+                $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => self::STRIPE_BG],
+                    ],
+                ]);
+            }
+        }
     }
 
     private function applyColumnAlignments($sheet, int $lastRow): void
@@ -126,10 +172,7 @@ class ExpensesListSheet implements XlsxSheet
     {
         $sheet->getStyle("B2:B{$lastRow}")->applyFromArray([
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_LEFT,
-            ],
-            'font' => [
-                'size' => 10,
+                'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],
         ]);
     }
@@ -185,14 +228,21 @@ class ExpensesListSheet implements XlsxSheet
             $sheet->getStyle("C{$rowNum}")->applyFromArray([
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => '10B981'], // verde
+                    'color' => ['rgb' => '047857'],
                 ],
             ]);
         } elseif ($status === 'pending') {
             $sheet->getStyle("C{$rowNum}")->applyFromArray([
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'F59E0B'], // laranja
+                    'color' => ['rgb' => 'B45309'],
+                ],
+            ]);
+        } elseif ($status === 'overdue') {
+            $sheet->getStyle("C{$rowNum}")->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'B91C1C'],
                 ],
             ]);
         }
@@ -209,28 +259,25 @@ class ExpensesListSheet implements XlsxSheet
 
     private function formatAsIncome($sheet, int $rowNum): void
     {
-        // Coluna Tipo
         $sheet->getStyle("E{$rowNum}")->applyFromArray([
             'font' => [
-                'color' => ['rgb' => '3B82F6'], // azul
+                'color' => ['rgb' => '1D4ED8'],
             ],
         ]);
 
-        // Coluna Valor
         $sheet->getStyle("B{$rowNum}")->applyFromArray([
             'font' => [
                 'bold' => true,
-                'color' => ['rgb' => '3B82F6'], // azul
+                'color' => ['rgb' => '1D4ED8'],
             ],
         ]);
     }
 
     private function formatAsExpense($sheet, int $rowNum): void
     {
-        // Coluna Tipo
         $sheet->getStyle("E{$rowNum}")->applyFromArray([
             'font' => [
-                'color' => ['rgb' => 'EF4444'], // vermelho
+                'color' => ['rgb' => '334155'],
             ],
         ]);
     }
