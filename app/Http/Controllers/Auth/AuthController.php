@@ -17,7 +17,6 @@ use App\Http\Requests\Auth\WebLoginRequest;
 use App\Http\Requests\Auth\WebRegisterRequest;
 use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Psr\Log\LoggerInterface;
 
 class AuthController extends Controller

@@ -42,12 +42,9 @@ class SyncUsersSource extends Command
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
                 $this->info(sprintf('Fonte padrão criada (ID %d).', $sourceId));
-            } else {
-                if (is_int($sourceId) || is_string($sourceId)) {
-                    $this->line(sprintf('Fonte padrão já existe (ID %s).', $sourceId));
-                }
+            } elseif (is_int($sourceId) || is_string($sourceId)) {
+                $this->line(sprintf('Fonte padrão já existe (ID %s).', $sourceId));
             }
 
             $updated = DB::table('expenses')

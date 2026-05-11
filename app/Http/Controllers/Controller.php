@@ -13,9 +13,7 @@ abstract class Controller
     {
         $userId = Auth::id();
 
-        if (! is_int($userId)) {
-            throw new AuthenticationException();
-        }
+        throw_unless(is_int($userId), AuthenticationException::class);
 
         return $userId;
     }

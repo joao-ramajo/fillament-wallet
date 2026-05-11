@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\Strategy;
 
+use RuntimeException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use stdClass;
 
 class CsvExportStrategy implements ExportStrategyInterface
 {
     public function execute(): StreamedResponse
     {
         $user = Auth::user();
-        if (! $user instanceof User) {
-            throw new \RuntimeException('Usuário autenticado não encontrado.');
-        }
+        throw_unless($user instanceof User, RuntimeException::class, 'Usuário autenticado não encontrado.');
 
         $name = Str::slug($user->name);
 
@@ -36,9 +34,7 @@ class CsvExportStrategy implements ExportStrategyInterface
     {
         return function () use ($userId): void {
             $file = fopen('php://output', 'w');
-            if ($file === false) {
-                throw new \RuntimeException('Não foi possível abrir o stream de saída.');
-            }
+            throw_if($file === false, RuntimeException::class, 'Não foi possível abrir o stream de saída.');
 
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 

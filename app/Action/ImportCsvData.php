@@ -79,7 +79,7 @@ class ImportCsvData
                 return false;
             }
 
-            $header[0] = preg_replace('/^\x{FEFF}/u', '', (string) $header[0]);
+            $header[0] = preg_replace('/^\x{FEFF}/u', '', $header[0]);
             /** @var list<string> $header */
             $header = array_map(static fn (?string $value): string => (string) $value, $header);
 
@@ -113,8 +113,6 @@ class ImportCsvData
                 );
 
                 $row = array_combine($header, $data);
-                /** @var array<string, string> $row */
-                $row = $row;
 
                 if ($this->isDuplicate($row)) {
                     continue;

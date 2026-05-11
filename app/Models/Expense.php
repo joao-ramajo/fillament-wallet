@@ -97,7 +97,7 @@ class Expense extends Model
     protected function setAmountAttribute(mixed $value): void
     {
         if (is_int($value)) {
-            $this->attributes['amount'] = (int) $value;
+            $this->attributes['amount'] = $value;
 
             return;
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strategy;
 
+use RuntimeException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,16 +14,13 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use stdClass;
 
 class XlsxExportStrategy implements ExportStrategyInterface
 {
     public function execute(): StreamedResponse
     {
         $user = Auth::user();
-        if (! $user instanceof User) {
-            throw new \RuntimeException('Usuário autenticado não encontrado.');
-        }
+        throw_unless($user instanceof User, RuntimeException::class, 'Usuário autenticado não encontrado.');
 
         $name = Str::slug($user->name);
 
