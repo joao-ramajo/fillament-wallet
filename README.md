@@ -2,8 +2,7 @@
 
 > Um gerenciador de gastos pessoais simples, eficiente e sem complicações
 
-[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
-[![Filament](https://img.shields.io/badge/Filament-Admin-F59E0B?style=flat)](https://filamentphp.com)
+[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 [🔗 Ver Demo ao Vivo](https://fillament-wallet.salgadinhos-web.blog)
@@ -50,17 +49,17 @@ A maioria dos aplicativos de controle financeiro sofrem de:
 
 Este projeto foi construído com tecnologias modernas e confiáveis:
 
-- **Laravel 12** - Framework PHP robusto e elegante
-- **Filament** - Admin panel poderoso para Laravel
-- **Blade Components** - Sistema de templates do Laravel
+- **Laravel 13** - Framework PHP robusto e elegante
+- **Vite 7** - Build e assets do backend
 - **MySQL** - Banco de dados relacional via Docker
-- **Docker** - Containerização para ambiente consistente
+- **Laravel Sail** - Infraestrutura local em containers
+- **Pest + PHPStan + Pint + Rector** - Testes, análise estática e padronização
 
 ### Arquitetura
 
-- **Tipo**: Monolito server-side
+- **Tipo**: API Laravel com assets via Vite
 - **Padrão**: DDD Lite (Domain-Driven Design simplificado)
-- **Stack**: Full-stack Laravel (Frontend + Backend integrados)
+- **Stack**: Backend Laravel com frontend web separado no workspace
 
 ---
 
@@ -72,52 +71,63 @@ Antes de iniciar, certifique-se de ter instalado:
 
 - [Docker](https://www.docker.com/get-started) (para Laravel Sail)
 - [Composer](https://getcomposer.org/) (gerenciador de dependências PHP)
+- [Node.js](https://nodejs.org/) (para instalar e compilar os assets)
 
 ### Instalação
 
 1. **Clone o repositório**
 ```bash
 git clone https://github.com/seu-usuario/fillament-wallet.git
-cd fillament-wallet
+cd fillament-wallet/kado-backend
 ```
 
-2. **Instale as dependências**
+2. **Instale as dependências PHP**
 ```bash
 composer install
 ```
 
-3. **Configure o ambiente**
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-4. **Suba os containers Docker**
+3. **Suba a infraestrutura Docker**
 ```bash
 ./vendor/bin/sail up -d
 ```
 
-5. **Execute as migrations**
+4. **Configure o projeto**
 ```bash
-./vendor/bin/sail artisan migrate
+composer setup
+```
+
+5. **Inicie o ambiente de desenvolvimento**
+```bash
+composer dev
 ```
 
 6. **Acesse a aplicação**
 ```
-http://localhost
+http://127.0.0.1:8000
 ```
+
+> `composer setup` instala dependências PHP/Node, cria `.env` se necessário, gera a `APP_KEY`, roda as migrations e compila os assets.
 
 ### Comandos Úteis
 
 ```bash
-# Rodar o projeto em desenvolvimento
+# Subir a infraestrutura Docker do backend
 ./vendor/bin/sail up -d
 
-# Parar o projeto
+# Parar a infraestrutura Docker do backend
 ./vendor/bin/sail down
 
+# Rodar backend, fila, logs e Vite em desenvolvimento
+composer dev
+
 # Executar testes
-./vendor/bin/sail artisan test
+composer test
+
+# Rodar verificações de qualidade
+composer lint:all:check
+
+# Aplicar correções automáticas de estilo/análise
+composer lint:fix
 
 # Acessar o container
 ./vendor/bin/sail shell
@@ -155,7 +165,7 @@ O projeto segue um estilo **neo-brutalista**, priorizando:
 O projeto conta com testes básicos para garantir a estabilidade das operações principais.
 
 ```bash
-./vendor/bin/sail artisan test
+composer test
 ```
 
 **Nota**: Como as operações são relativamente simples, a cobertura de testes é focada nos fluxos principais, sem necessidade de testes complexos.
@@ -196,4 +206,3 @@ Contribuições são bem-vindas! Este projeto aceita:
 
 - **Demo ao vivo**: [https://fillament-wallet.salgadinhos-web.blog](https://fillament-wallet.salgadinhos-web.blog)
 - **Documentação do Laravel**: [https://laravel.com/docs](https://laravel.com/docs)
-- **Documentação do Filament**: [https://filamentphp.com/docs](https://filamentphp.com/docs)
