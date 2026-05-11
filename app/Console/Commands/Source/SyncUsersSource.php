@@ -51,7 +51,7 @@ class SyncUsersSource extends Command
                 ->where('user_id', $userId)
                 ->update(['source_id' => $sourceId]);
 
-            $this->line('Despesas atualizadas: ' . $updated);
+            $this->line('Despesas atualizadas: '.$updated);
         });
 
         $this->info('Sincronização concluída com sucesso.');

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Strategy;
 
-use RuntimeException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CsvExportStrategy implements ExportStrategyInterface
@@ -20,7 +20,7 @@ class CsvExportStrategy implements ExportStrategyInterface
 
         $name = Str::slug($user->name);
 
-        $fileName = $name . '-fillament-wallet-'.Str::uuid().'.csv';
+        $fileName = $name.'-fillament-wallet-'.Str::uuid().'.csv';
 
         $callback = $this->generate($user->id);
 

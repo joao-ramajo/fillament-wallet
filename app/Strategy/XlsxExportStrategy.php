@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Strategy;
 
-use RuntimeException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class XlsxExportStrategy implements ExportStrategyInterface
@@ -24,7 +24,7 @@ class XlsxExportStrategy implements ExportStrategyInterface
 
         $name = Str::slug($user->name);
 
-        $fileName = $name . '-fillament-wallet-'.Str::uuid().'.xlsx';
+        $fileName = $name.'-fillament-wallet-'.Str::uuid().'.xlsx';
 
         $callback = function () use ($user): void {
             $spreadsheet = new Spreadsheet;

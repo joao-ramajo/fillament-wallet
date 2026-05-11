@@ -43,7 +43,7 @@ class SourcesSummarySheet implements XlsxSheet
         $this->applyRowStyles($sheet, $lastRow, $totalRow);
         $this->applyCellFormats($sheet, $lastRow);
         $this->freezeHeader($sheet);
-        $sheet->setAutoFilter('A1:D' . $lastRow);
+        $sheet->setAutoFilter('A1:D'.$lastRow);
     }
 
     private function getUserId(): int
@@ -174,7 +174,7 @@ class SourcesSummarySheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle('A2:D' . $lastRow)->applyFromArray([
+        $sheet->getStyle('A2:D'.$lastRow)->applyFromArray([
             'font' => [
                 'size' => 10,
                 'color' => ['rgb' => self::HEADER_FONT],
@@ -231,7 +231,7 @@ class SourcesSummarySheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle('B2:D' . $lastRow)
+        $sheet->getStyle('B2:D'.$lastRow)
             ->getNumberFormat()
             ->setFormatCode('[$R$-416] #,##0.00');
     }

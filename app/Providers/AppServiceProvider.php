@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Route::bind('uuid', fn(string $value): Uuid => new Uuid($value));
+        Route::bind('uuid', fn (string $value): Uuid => new Uuid($value));
     }
 
     /** @param list<class-string> $classes */

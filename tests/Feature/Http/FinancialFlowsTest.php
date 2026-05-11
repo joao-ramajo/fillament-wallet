@@ -17,7 +17,7 @@ test('deve criar despesa na fonte padrao e refletir no resumo geral e nos detalh
     $token = authTokenFor($user);
     $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Aluguel',
             'amount' => 120000,
@@ -28,7 +28,7 @@ test('deve criar despesa na fonte padrao e refletir no resumo geral e nos detalh
 
     $response->assertStatus(201);
 
-    $summary = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $summary = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $summary->assertStatus(200)
@@ -38,7 +38,7 @@ test('deve criar despesa na fonte padrao e refletir no resumo geral e nos detalh
             'expected_total' => -120000,
         ]);
 
-    $sourceDetails = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $sourceDetails = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.sources.details'));
 
     $source = collect($sourceDetails->json())->firstWhere('id', $defaultSource->id);
@@ -54,7 +54,7 @@ test('deve criar nova fonte e operacoes nela nao devem afetar resumo geral da fo
     $user = User::factory()->create();
     $token = authTokenFor($user);
 
-    $createSource = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $createSource = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.sources.create'), [
             'name' => 'Carteira Viagem',
             'color' => '#22aa99',
@@ -65,7 +65,7 @@ test('deve criar nova fonte e operacoes nela nao devem afetar resumo geral da fo
 
     $newSourceId = $createSource->json('data.id');
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Hotel',
             'amount' => 50000,
@@ -75,7 +75,7 @@ test('deve criar nova fonte e operacoes nela nao devem afetar resumo geral da fo
         ])
         ->assertStatus(201);
 
-    $summary = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $summary = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $summary->assertStatus(200)
@@ -85,7 +85,7 @@ test('deve criar nova fonte e operacoes nela nao devem afetar resumo geral da fo
             'expected_total' => 0,
         ]);
 
-    $sourceDetails = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $sourceDetails = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.sources.details'));
 
     $createdSource = collect($sourceDetails->json())->firstWhere('id', $newSourceId);
@@ -124,7 +124,7 @@ test('deve calcular expected_total considerando registros pendentes e pagos', fu
         'status' => 'pending',
     ]);
 
-    $summary = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $summary = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $summary->assertStatus(200)
@@ -149,7 +149,7 @@ test('deve marcar despesa como paga e manter expected_total consistente', functi
         'payment_date' => null,
     ]);
 
-    $before = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $before = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $before->assertJson([
@@ -157,7 +157,7 @@ test('deve marcar despesa como paga e manter expected_total consistente', functi
         'expected_total' => -7000,
     ]);
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.mark-as-paid', ['id' => $expense->id]))
         ->assertStatus(200);
 
@@ -168,7 +168,7 @@ test('deve marcar despesa como paga e manter expected_total consistente', functi
 
     expect(Expense::query()->findOrFail($expense->id)->payment_date)->not->toBeNull();
 
-    $after = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $after = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $after->assertJson([
@@ -190,7 +190,7 @@ CSV;
 
     $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.csv.import'), [
             'file' => $file,
         ]);
@@ -241,7 +241,7 @@ CSV;
 
     $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.csv.import'), [
             'file' => $file,
         ]);
@@ -267,7 +267,7 @@ CSV;
 
     $file = UploadedFile::fake()->createWithContent('import.csv', $csv);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.csv.import'), [
             'file' => $file,
         ]);
@@ -304,7 +304,7 @@ test('deve exportar csv com coluna de fonte', function (): void {
         'type' => 'income',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->get(route('api.csv.export'));
 
     $response->assertOk();

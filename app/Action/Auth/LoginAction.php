@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 class LoginAction
 {
     /**
-     * @param array{email: string, password: string, remember?: bool|null} $credentials
+     * @param  array{email: string, password: string, remember?: bool|null}  $credentials
      * @return array{name: string, token: string}
      */
     public function execute(array $credentials): array

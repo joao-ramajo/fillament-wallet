@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Date;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Source;
 use App\Models\User;
+use Illuminate\Support\Facades\Date;
 
 test('quero criar uma despesa com sucesso em uma fonte secundaria', function (): void {
     $user = User::factory()->create();
@@ -16,7 +16,7 @@ test('quero criar uma despesa com sucesso em uma fonte secundaria', function ():
         'is_default' => false,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Internet',
             'amount' => 9900,
@@ -63,7 +63,7 @@ test('quero listar minhas todas as minhas despesas com sucesso', function (): vo
         'status' => 'paid',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses'));
 
     $response->assertOk()
@@ -86,7 +86,7 @@ test('quero listar apenas as despesas pagas com sucesso', function (): void {
         'status' => 'pending',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', ['status' => 'paid']));
 
     $response->assertOk()
@@ -153,7 +153,7 @@ test('na listagem de despesas devo conseguir filtrar por categoria e mes', funct
         'updated_at' => '2026-02-13 10:00:00',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', [
             'category_id' => $categoryA->id,
             'month' => 1,
@@ -183,7 +183,7 @@ test('quero lsitar todas as despesas pendentes', function (): void {
         'status' => 'paid',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', ['status' => 'pending']));
 
     $response->assertOk()
@@ -214,7 +214,7 @@ test('na listagem de despesas devo conseguir buscar por query ignorando maiuscul
         'title' => '99 Taxi',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', ['query' => 'uber']));
 
     $response->assertOk()
@@ -242,12 +242,12 @@ test('na listagem de despesas devo conseguir buscar por query ignorando acentos'
         'title' => 'Mercado',
     ]);
 
-    $responseMaca = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $responseMaca = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', ['query' => 'maca']));
     $responseMaca->assertOk()
         ->assertJsonCount(1);
 
-    $responsePao = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $responsePao = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-expenses', ['query' => 'pao']));
     $responsePao->assertOk()
         ->assertJsonCount(1);
@@ -267,7 +267,7 @@ test('quero editar uma despesa com sucesso', function (): void {
         'status' => 'pending',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
             'title' => 'Conta atualizada',
             'amount' => 2500,
@@ -298,7 +298,7 @@ test('quero editar uma despesa para uma entrada com sucesso', function (): void 
         'status' => 'pending',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
             'title' => 'Salario freelance',
             'amount' => 450000,
@@ -329,7 +329,7 @@ test('ao editar uma despesa paga devo conseguir informar payment_date somente co
         'payment_date' => null,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
             'title' => 'Parcela cartao',
             'amount' => 15000,
@@ -357,7 +357,7 @@ test('ao editar uma despesa paga com payment_date invalido deve retornar erro de
         'payment_date' => null,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
             'title' => 'Conta internet',
             'amount' => 12000,
@@ -384,7 +384,7 @@ test('ao editar uma despesa paga com payment_date no futuro deve retornar erro d
         'payment_date' => null,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.expenses.update', ['id' => $expense->id]), [
             'title' => 'Conta energia',
             'amount' => 18000,
@@ -444,7 +444,7 @@ test('quero ver meus resumos gerais com o total recebido, total gasto e saldo es
         'amount' => 999999,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $response->assertOk()
@@ -468,13 +468,13 @@ test('uma nova despesa na fonte principal deve alterar o valor corretamente para
         'amount' => 8000,
     ]);
 
-    $before = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $before = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $before->assertOk()
         ->assertJson(['expected_total' => 8000]);
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Conta energia',
             'amount' => 1200,
@@ -484,7 +484,7 @@ test('uma nova despesa na fonte principal deve alterar o valor corretamente para
         ])
         ->assertCreated();
 
-    $after = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $after = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $after->assertOk()
@@ -496,13 +496,13 @@ test('adicionar um novo gasto deve alterar o total gasto', function (): void {
     $token = $user->createToken('test')->plainTextToken;
     $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
 
-    $before = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $before = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $before->assertOk()
         ->assertJson(['total_expense' => 0]);
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Mercado',
             'amount' => 3200,
@@ -512,7 +512,7 @@ test('adicionar um novo gasto deve alterar o total gasto', function (): void {
         ])
         ->assertCreated();
 
-    $after = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $after = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.get-summary'));
 
     $after->assertOk()
@@ -527,7 +527,7 @@ test('ao adicionar despesas a uma categoria especifica, a contagem de despesas n
         'user_id' => $user->id,
     ]);
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Despesa 1',
             'amount' => 1000,
@@ -538,7 +538,7 @@ test('ao adicionar despesas a uma categoria especifica, a contagem de despesas n
         ])
         ->assertCreated();
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Despesa 2',
             'amount' => 2000,
@@ -549,7 +549,7 @@ test('ao adicionar despesas a uma categoria especifica, a contagem de despesas n
         ])
         ->assertCreated();
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.categories.list'));
 
     $selected = collect($response->json())->firstWhere('id', $category->id);
@@ -572,16 +572,16 @@ test('ao apagar uma despesa a categoria deve ser decrementada a quantidade de de
         'type' => 'expense',
     ]);
 
-    $before = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $before = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.categories.list'));
     $beforeCategory = collect($before->json())->firstWhere('id', $category->id);
     expect($beforeCategory['expenses_count'])->toBe(1);
 
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->deleteJson(route('api.expenses.delete', ['id' => $expense->id]))
         ->assertOk();
 
-    $after = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $after = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.categories.list'));
     $afterCategory = collect($after->json())->firstWhere('id', $category->id);
     expect($afterCategory['expenses_count'])->toBe(0);
@@ -625,7 +625,7 @@ test('na listagem de categorias devo conseguir filtrar por mes via query param',
         'updated_at' => '2026-02-10 10:00:00',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.categories.list', ['month' => 1]));
 
     $response->assertOk();
@@ -641,7 +641,7 @@ test('ao filtrar categorias por mes invalido deve retornar erro de validacao', f
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.categories.list', ['month' => 13]));
 
     $response->assertStatus(422)
@@ -658,7 +658,7 @@ test('quero editar uma categoria com sucesso alterando apenas nome e cor', funct
         'color' => '#111111',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.categories.update', ['id' => $category->id]), [
             'name' => 'Lazer e viagens',
             'color' => '#22c55e',
@@ -684,7 +684,7 @@ test('na edicao de categoria deve retornar erro de validacao para payload invali
         'user_id' => $user->id,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.categories.update', ['id' => $category->id]), [
             'name' => '',
             'color' => '#fff',
@@ -708,7 +708,7 @@ test('na edicao de categoria nao devo conseguir usar um nome ja existente para o
         'name' => 'Lazer',
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.categories.update', ['id' => $categoryToUpdate->id]), [
             'name' => 'Transporte',
             'color' => '#3b82f6',
@@ -729,7 +729,7 @@ test('na edicao de categoria nao devo conseguir alterar categoria de outro usuar
         'user_id' => $otherUser->id,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->putJson(route('api.categories.update', ['id' => $category->id]), [
             'name' => 'Tentativa',
             'color' => '#ef4444',
@@ -782,7 +782,7 @@ test('nas fontes devo conseguir ver corretamente os valores de total recebido, t
         'amount' => 500,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->getJson(route('api.sources.details'));
 
     $response->assertOk();
@@ -817,7 +817,7 @@ test('devo conseguir marcar uma despesa como paga somente se ela estiver pendent
         'payment_date' => now()->subDay(),
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.mark-as-paid', ['id' => $expense->id]));
 
     $response->assertStatus(400)
@@ -842,7 +842,7 @@ test('marcar uma despesa como paga deve adicionar a data de pagamento como a dat
             'payment_date' => null,
         ]);
 
-        $this->withHeader('Authorization', 'Bearer ' . $token)
+        $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.expenses.mark-as-paid', ['id' => $expense->id]))
             ->assertOk();
 
@@ -864,7 +864,7 @@ test('devo conseguir excluir uma despesa com sucesso', function (): void {
         'source_id' => $defaultSourceId,
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->deleteJson(route('api.expenses.delete', ['id' => $expense->id]));
 
     $response->assertOk();
@@ -880,7 +880,7 @@ test('ao criar uma despesa paga devo conseguir informar payment_date somente com
     $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
     $paymentDate = '2026-03-02';
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Parcela cartao',
             'amount' => 15000,
@@ -905,7 +905,7 @@ test('ao criar uma despesa paga com payment_date invalido deve retornar erro de 
     $token = $user->createToken('test')->plainTextToken;
     $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Conta internet',
             'amount' => 12000,
@@ -925,7 +925,7 @@ test('ao criar uma despesa paga com payment_date no futuro deve retornar erro de
     $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
     $futureDate = now()->addDay()->format('Y-m-d');
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Conta energia',
             'amount' => 18000,

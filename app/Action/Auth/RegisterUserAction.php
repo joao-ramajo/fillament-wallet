@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 class RegisterUserAction
 {
     /**
-     * @param array{name: string, email: string, password: string, terms?: bool} $data
+     * @param  array{name: string, email: string, password: string, terms?: bool}  $data
      * @return array{name: string, token: string}
      */
     public function execute(array $data): array

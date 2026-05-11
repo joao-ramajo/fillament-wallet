@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Action\Xlsx;
 
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Domain\Interfaces\XlsxSheet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ExpensesListSheet implements XlsxSheet
 {
@@ -52,7 +53,7 @@ class ExpensesListSheet implements XlsxSheet
         $this->applyCellFormats($sheet, $lastRow);
         $this->applyConditionalFormatting($sheet, $rawData);
         $this->freezeHeader($sheet);
-        $sheet->setAutoFilter('A1:G' . $lastRow);
+        $sheet->setAutoFilter('A1:G'.$lastRow);
     }
 
     private function getUserId(): int
@@ -137,7 +138,7 @@ class ExpensesListSheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle('A2:G' . $lastRow)->applyFromArray([
+        $sheet->getStyle('A2:G'.$lastRow)->applyFromArray([
             'font' => [
                 'size' => 10,
                 'color' => ['rgb' => self::HEADER_FONT],
@@ -178,14 +179,14 @@ class ExpensesListSheet implements XlsxSheet
 
     private function applyDescriptionAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('A2:A' . $lastRow)
+        $sheet->getStyle('A2:A'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyValueAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('B2:B' . $lastRow)->applyFromArray([
+        $sheet->getStyle('B2:B'.$lastRow)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],
@@ -194,35 +195,35 @@ class ExpensesListSheet implements XlsxSheet
 
     private function applyStatusAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('C2:C' . $lastRow)
+        $sheet->getStyle('C2:C'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     private function applyCategoryAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('D2:D' . $lastRow)
+        $sheet->getStyle('D2:D'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyTypeAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('E2:E' . $lastRow)
+        $sheet->getStyle('E2:E'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     private function applySourceAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('F2:F' . $lastRow)
+        $sheet->getStyle('F2:F'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyDateAlignment(Worksheet $sheet, int $lastRow): void
     {
-        $sheet->getStyle('G2:G' . $lastRow)
+        $sheet->getStyle('G2:G'.$lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
@@ -233,11 +234,11 @@ class ExpensesListSheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle('B2:B' . $lastRow)
+        $sheet->getStyle('B2:B'.$lastRow)
             ->getNumberFormat()
             ->setFormatCode('[$R$-416] #,##0.00');
 
-        $sheet->getStyle('G2:G' . $lastRow)
+        $sheet->getStyle('G2:G'.$lastRow)
             ->getNumberFormat()
             ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
     }
@@ -256,21 +257,21 @@ class ExpensesListSheet implements XlsxSheet
     private function formatStatus(Worksheet $sheet, int $rowNum, string $status): void
     {
         if ($status === 'paid') {
-            $sheet->getStyle('C' . $rowNum)->applyFromArray([
+            $sheet->getStyle('C'.$rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => '047857'],
                 ],
             ]);
         } elseif ($status === 'pending') {
-            $sheet->getStyle('C' . $rowNum)->applyFromArray([
+            $sheet->getStyle('C'.$rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'B45309'],
                 ],
             ]);
         } elseif ($status === 'overdue') {
-            $sheet->getStyle('C' . $rowNum)->applyFromArray([
+            $sheet->getStyle('C'.$rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'B91C1C'],
@@ -290,13 +291,13 @@ class ExpensesListSheet implements XlsxSheet
 
     private function formatAsIncome(Worksheet $sheet, int $rowNum): void
     {
-        $sheet->getStyle('E' . $rowNum)->applyFromArray([
+        $sheet->getStyle('E'.$rowNum)->applyFromArray([
             'font' => [
                 'color' => ['rgb' => '1D4ED8'],
             ],
         ]);
 
-        $sheet->getStyle('B' . $rowNum)->applyFromArray([
+        $sheet->getStyle('B'.$rowNum)->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => '1D4ED8'],
@@ -306,7 +307,7 @@ class ExpensesListSheet implements XlsxSheet
 
     private function formatAsExpense(Worksheet $sheet, int $rowNum): void
     {
-        $sheet->getStyle('E' . $rowNum)->applyFromArray([
+        $sheet->getStyle('E'.$rowNum)->applyFromArray([
             'font' => [
                 'color' => ['rgb' => '334155'],
             ],
@@ -413,7 +414,7 @@ class ExpensesListSheet implements XlsxSheet
             return null;
         }
 
-        $excelDate = ExcelDate::PHPToExcel(\Illuminate\Support\Facades\Date::parse($date));
+        $excelDate = ExcelDate::PHPToExcel(Date::parse($date));
 
         if (is_float($excelDate)) {
             return $excelDate;

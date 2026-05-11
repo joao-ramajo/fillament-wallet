@@ -13,7 +13,7 @@ test('usuário autenticado cria uma despesa para uma fonte especificada com suce
     ]);
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Aluguel',
             'amount' => 120000,
@@ -35,7 +35,7 @@ test('usuário autenticado cria uma despesa sem especificar a fonte e a despesa 
 
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Aluguel',
             'amount' => 120000,

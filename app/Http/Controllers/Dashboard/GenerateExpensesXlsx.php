@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Action\Xlsx\GenerateExpensesXlsxAction;
 use App\DTO\Xlsx\GenerateExpensesXlsxInput;
+use App\Http\Controllers\Controller;
 use App\Support\Logging\FormatsLogMessage;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GenerateExpensesXlsx extends Controller
 {

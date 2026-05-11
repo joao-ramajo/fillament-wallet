@@ -12,7 +12,7 @@ test('usuário pode deletar uma despesa', function (): void {
 
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
         ->deleteJson(route('api.expenses.delete', ['id' => $expense->id]));
 
     $response->assertStatus(200);

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Routing\Redirector;
-use Illuminate\Http\RedirectResponse;
 use App\Action\Auth\WebLoginAction;
 use App\Action\Auth\WebLogoutAction;
 use App\Action\Auth\WebRegisterAction;
@@ -16,7 +14,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\WebLoginRequest;
 use App\Http\Requests\Auth\WebRegisterRequest;
 use App\Support\Logging\FormatsLogMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Psr\Log\LoggerInterface;
 
 class AuthController extends Controller

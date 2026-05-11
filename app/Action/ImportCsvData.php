@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Action;
 
-use Throwable;
 use App\Models\Category;
 use App\Models\Source;
 use App\Support\Logging\FormatsLogMessage;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 class ImportCsvData
 {
