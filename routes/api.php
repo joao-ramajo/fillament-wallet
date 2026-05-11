@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CreditCard\PayCreditCardStatementController;
 use App\Http\Controllers\Dashboard\GenerateExpenseCsv;
 use App\Http\Controllers\Dashboard\GenerateExpensesXlsx;
 use App\Http\Controllers\Dashboard\GetExpensesController;
@@ -31,6 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.sources.details');
         Route::post('/', CreateSourceController::class)
             ->name('api.sources.create');
+    });
+
+    Route::prefix('credit-cards/statements')->group(function () {
+        Route::post('/{statementId}/pay', PayCreditCardStatementController::class)
+            ->name('api.credit-cards.statements.pay');
     });
 
     Route::prefix('expenses')->group(function () {

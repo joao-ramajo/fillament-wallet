@@ -19,8 +19,12 @@ class UpdateExpenseAction
             throw new DomainException('Você não pode alterar este registro');
         }
 
+        if ($expense->origin_type === Expense::ORIGIN_CREDIT_CARD || $expense->occurrence_type === Expense::OCCURRENCE_INVOICE_PAYMENT) {
+            throw new DomainException('Registros de cartão devem ser gerenciados pelo fluxo da fatura.');
+        }
+
         if (($data['status'] ?? null) === 'paid') {
-            $data['payment_date'] = isset($data['payment_date']) && $data['payment_date'] !== null
+            $data['payment_date'] = isset($data['payment_date'])
                 ? Carbon::createFromFormat('Y-m-d', $data['payment_date'])->startOfDay()
                 : now();
         } else {

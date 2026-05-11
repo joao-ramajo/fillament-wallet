@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail\User;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailable;
@@ -28,7 +29,6 @@ class WelcomeMail extends Mailable
         );
     }
 
-
     public function content(): Content
     {
         return new Content(
@@ -40,11 +40,7 @@ class WelcomeMail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
+    /** @return array<int, \Illuminate\Mail\Mailables\Attachment> */
     public function attachments(): array
     {
         return [];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Dashboard;
 
 use App\Action\Dashboard\GetSummaryAction;
@@ -22,7 +24,6 @@ class GetSummaryController extends Controller
     public function __invoke()
     {
         $user = Auth::user();
-
         $defaultSourceId = $user->sources()
             ->where('is_default', true)
             ->value('id');

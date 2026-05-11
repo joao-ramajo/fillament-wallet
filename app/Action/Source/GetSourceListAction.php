@@ -25,7 +25,11 @@ class GetSourceListAction
             'user_id' => $input->userId,
         ]);
 
-        $sources = Source::where('user_id', $input->userId)->get()->toArray();
+        $sources = Source::where('user_id', $input->userId)
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get()
+            ->toArray();
 
         $this->logger->info($this->formatLogMessage('completed'), [
             'user_id' => $input->userId,

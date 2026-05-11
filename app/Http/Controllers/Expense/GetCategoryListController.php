@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Expense;
 
 use App\Action\Category\GetCategoryListAction;
@@ -31,7 +33,7 @@ class GetCategoryListController extends Controller
         ]);
 
         $output = $this->getCategoryListAction->execute(
-            new GetCategoryListInput($userId, $month)
+            new GetCategoryListInput($userId, $month !== null ? (int) $month : null)
         );
 
         return response()->json($output->toArray());

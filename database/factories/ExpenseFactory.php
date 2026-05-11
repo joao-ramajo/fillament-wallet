@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\Source;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,15 +20,20 @@ class ExpenseFactory extends Factory
             'type' => $this->faker->randomElement(['expense', 'income']),
             'status' => $this->faker->randomElement(['pending', 'paid']),
             'payment_date' => null,
+            'purchase_date' => null,
             'due_date' => now()->addDays(rand(1, 30)),
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
+            'source_id' => Source::factory(),
+            'origin_type' => Expense::ORIGIN_DIRECT,
+            'occurrence_type' => Expense::OCCURRENCE_DIRECT,
+            'credit_card_statement_id' => null,
+            'installment_group_id' => null,
+            'installment_number' => null,
+            'installment_total' => null,
         ];
     }
 
-    /**
-     * Estado: despesa paga
-     */
     public function paid(): static
     {
         return $this->state(fn () => [
@@ -34,9 +42,6 @@ class ExpenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Estado: pendente
-     */
     public function pending(): static
     {
         return $this->state(fn () => [
@@ -45,9 +50,6 @@ class ExpenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Sem categoria
-     */
     public function withoutCategory(): static
     {
         return $this->state(fn () => [

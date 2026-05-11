@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Dashboard;
 
 use App\Action\Dashboard\GetExpensesAction;
@@ -37,7 +39,13 @@ class GetExpensesController extends Controller
         ]);
 
         $output = $this->getExpensesAction->execute(
-            new GetExpensesInput($userId, $status, $query, $categoryId, $month)
+            new GetExpensesInput(
+                $userId,
+                $status,
+                $query,
+                $categoryId !== null ? (int) $categoryId : null,
+                $month !== null ? (int) $month : null,
+            )
         );
 
         return response()->json($output->toArray());

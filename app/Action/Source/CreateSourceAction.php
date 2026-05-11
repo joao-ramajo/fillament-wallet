@@ -24,15 +24,20 @@ class CreateSourceAction
         $this->logger->info($this->formatLogMessage('started'), [
             'user_id' => $input->userId,
             'name' => $input->name,
+            'type' => $input->type,
             'allow_negative' => $input->allowNegative,
         ]);
 
         $source = Source::create([
             'user_id' => $input->userId,
             'name' => $input->name,
+            'type' => $input->type,
             'color' => $input->color,
-            'allow_negative' => $input->allowNegative,
+            'allow_negative' => $input->type === Source::TYPE_CREDIT_CARD ? false : $input->allowNegative,
             'is_default' => false,
+            'credit_limit' => $input->creditLimit,
+            'statement_closing_day' => $input->statementClosingDay,
+            'statement_due_day' => $input->statementDueDay,
         ]);
 
         $this->logger->info($this->formatLogMessage('completed'), [

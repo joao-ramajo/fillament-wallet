@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 test('cria uma conta de usuário com sucesso e retorna seu nome e token', function () {

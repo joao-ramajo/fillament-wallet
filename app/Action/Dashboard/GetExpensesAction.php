@@ -6,6 +6,7 @@ namespace App\Action\Dashboard;
 
 use App\DTO\Dashboard\GetExpensesInput;
 use App\DTO\Dashboard\GetExpensesOutput;
+use App\Models\Expense;
 use App\Support\Logging\FormatsLogMessage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,7 @@ class GetExpensesAction
         $query = DB::table('expenses')
             ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
             ->join('sources', 'expenses.source_id', '=', 'sources.id')
+            ->leftJoin('credit_card_statements', 'expenses.credit_card_statement_id', '=', 'credit_card_statements.id')
             ->where('expenses.user_id', $input->userId);
 
         if ($input->status !== null && $input->status !== 'all') {
@@ -51,18 +53,37 @@ class GetExpensesAction
                     $monthQuery
                         ->where(function ($paidQuery) use ($input) {
                             $paidQuery
+                                ->where('expenses.occurrence_type', Expense::OCCURRENCE_PURCHASE)
+                                ->whereMonth('expenses.due_date', $input->month);
+                        })
+                        ->orWhere(function ($paidQuery) use ($input) {
+                            $paidQuery
+                                ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
                                 ->where('expenses.status', 'paid')
                                 ->whereNotNull('expenses.payment_date')
                                 ->whereMonth('expenses.payment_date', $input->month);
                         })
                         ->orWhere(function ($unpaidQuery) use ($input) {
                             $unpaidQuery
+                                ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
                                 ->where('expenses.status', '!=', 'paid')
                                 ->whereMonth('expenses.created_at', $input->month);
                         });
                 });
             } else {
-                $query->whereMonth('expenses.created_at', $input->month);
+                $query->where(function ($monthQuery) use ($input) {
+                    $monthQuery
+                        ->where(function ($purchaseQuery) use ($input) {
+                            $purchaseQuery
+                                ->where('expenses.occurrence_type', Expense::OCCURRENCE_PURCHASE)
+                                ->whereMonth('expenses.due_date', $input->month);
+                        })
+                        ->orWhere(function ($defaultQuery) use ($input) {
+                            $defaultQuery
+                                ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
+                                ->whereMonth('expenses.created_at', $input->month);
+                        });
+                });
             }
         }
 
@@ -79,7 +100,15 @@ class GetExpensesAction
                 'expenses.type',
                 'expenses.status',
                 'expenses.source_id',
+                'sources.type as source_type',
                 'sources.name as source_name',
+                'expenses.origin_type',
+                'expenses.occurrence_type',
+                'expenses.installment_number',
+                'expenses.installment_total',
+                'expenses.purchase_date',
+                'expenses.credit_card_statement_id',
+                'credit_card_statements.reference_month as statement_reference_month',
             )
             ->get();
 

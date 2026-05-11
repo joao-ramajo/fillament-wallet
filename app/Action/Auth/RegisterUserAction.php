@@ -26,6 +26,7 @@ class RegisterUserAction
         Source::create([
             'user_id' => $user->id,
             'name' => 'Carteira principal',
+            'type' => Source::TYPE_CASH_LIKE,
             'color' => '#34c38f',
             'is_default' => true,
         ]);

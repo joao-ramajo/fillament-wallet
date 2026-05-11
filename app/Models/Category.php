@@ -1,33 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int|null $user_id
+ * @property string $color
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User|null $user
+ * @property-read Collection<int, Expense> $expenses
+ */
 class Category extends Model
 {
+    /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
 
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'user_id',
-        'color'
+        'color',
     ];
 
-    /**
-     * A categoria pertence a um usuário (ou null para categoria padrão)
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * A categoria pode ter várias despesas
-     */
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Action\Auth\WebLoginAction;
@@ -37,9 +39,6 @@ use Psr\Log\LoggerInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         $this->bindChannelLogger('auth', [
@@ -95,9 +94,6 @@ class AppServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Route::bind('uuid', function (string $value) {

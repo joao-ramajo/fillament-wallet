@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Action\Dashboard;
 
+use App\Models\CreditCardStatement;
 use App\DTO\Dashboard\GetSummaryInput;
 use App\DTO\Dashboard\GetSummaryOutput;
 use App\Models\Expense;
+use App\Models\Source;
 use App\Support\Logging\FormatsLogMessage;
 use Psr\Log\LoggerInterface;
 
@@ -28,40 +30,62 @@ class GetSummaryAction
 
         $startedAt = microtime(true);
 
-        $totalReceive = Expense::where('user_id', $input->userId)
-            ->where('type', 'income')
-            ->where('status', 'paid')
-            ->where('source_id', $input->defaultSourceId)
-            ->sum('amount');
+        $cashExpenseQuery = Expense::query()
+            ->join('sources', 'expenses.source_id', '=', 'sources.id')
+            ->where('expenses.user_id', $input->userId)
+            ->where('sources.type', Source::TYPE_CASH_LIKE)
+            ->where('expenses.source_id', $input->defaultSourceId);
 
-        $totalExpense = Expense::where('user_id', $input->userId)
-            ->where('type', 'expense')
-            ->where('status', 'paid')
-            ->where('source_id', $input->defaultSourceId)
-            ->sum('amount');
+        $totalReceive = (clone $cashExpenseQuery)
+            ->where('expenses.type', 'income')
+            ->where('expenses.status', 'paid')
+            ->sum('expenses.amount');
 
-        $totalIncomePending = Expense::where('user_id', $input->userId)
-            ->where('type', 'income')
-            ->where('status', 'pending')
-            ->where('source_id', $input->defaultSourceId)
-            ->sum('amount');
+        $totalExpense = (clone $cashExpenseQuery)
+            ->where('expenses.type', 'expense')
+            ->where('expenses.status', 'paid')
+            ->sum('expenses.amount');
 
-        $totalExpensePending = Expense::where('user_id', $input->userId)
-            ->where('type', 'expense')
-            ->where('status', 'pending')
-            ->where('source_id', $input->defaultSourceId)
-            ->sum('amount');
+        $totalIncomePending = (clone $cashExpenseQuery)
+            ->where('expenses.type', 'income')
+            ->where('expenses.status', 'pending')
+            ->sum('expenses.amount');
+
+        $totalExpensePending = (clone $cashExpenseQuery)
+            ->where('expenses.type', 'expense')
+            ->where('expenses.status', 'pending')
+            ->sum('expenses.amount');
 
         $expectedTotal = ($totalReceive + $totalIncomePending) - ($totalExpense + $totalExpensePending);
+        $creditCardOpenTotal = CreditCardStatement::query()
+            ->join('sources', 'credit_card_statements.source_id', '=', 'sources.id')
+            ->where('sources.user_id', $input->userId)
+            ->where('credit_card_statements.status', '!=', CreditCardStatement::STATUS_PAID)
+            ->sum('credit_card_statements.total_amount');
+        $creditCardLimitUsed = Expense::query()
+            ->join('sources', 'expenses.source_id', '=', 'sources.id')
+            ->where('expenses.user_id', $input->userId)
+            ->where('sources.type', Source::TYPE_CREDIT_CARD)
+            ->where('expenses.occurrence_type', Expense::OCCURRENCE_PURCHASE)
+            ->where('expenses.status', '!=', 'paid')
+            ->sum('expenses.amount');
 
         $this->logger->info($this->formatLogMessage('completed'), [
             'user_id' => $input->userId,
             'total_receive' => $totalReceive,
             'total_expense' => $totalExpense,
             'expected_total' => $expectedTotal,
+            'credit_card_open_total' => $creditCardOpenTotal,
+            'credit_card_limit_used' => $creditCardLimitUsed,
             'query_time_ms' => (int) ((microtime(true) - $startedAt) * 1000),
         ]);
 
-        return new GetSummaryOutput((int) $totalReceive, (int) $totalExpense, (int) $expectedTotal);
+        return new GetSummaryOutput(
+            (int) $totalReceive,
+            (int) $totalExpense,
+            (int) $expectedTotal,
+            (int) $creditCardOpenTotal,
+            (int) $creditCardLimitUsed,
+        );
     }
 }

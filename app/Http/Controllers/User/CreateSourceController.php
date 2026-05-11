@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
 use App\Action\Source\CreateSourceAction;
@@ -33,8 +35,12 @@ class CreateSourceController extends Controller
         $input = new CreateSourceInput(
             userId: $userId,
             name: $validated['name'],
+            type: $validated['type'] ?? 'cash_like',
             color: $validated['color'],
             allowNegative: $validated['allow_negative'] ?? false,
+            creditLimit: $validated['credit_limit'] ?? null,
+            statementClosingDay: $validated['statement_closing_day'] ?? null,
+            statementDueDay: $validated['statement_due_day'] ?? null,
         );
 
         $output = $this->createSourceAction->execute($input);

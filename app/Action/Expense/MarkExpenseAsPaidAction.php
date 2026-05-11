@@ -46,6 +46,10 @@ class MarkExpenseAsPaidAction
             throw new DomainException('Apenas despesas pendentes ou atrasadas podem ser marcadas como pagas.');
         }
 
+        if ($expense->origin_type === Expense::ORIGIN_CREDIT_CARD) {
+            throw new DomainException('Compras no cartão devem ser quitadas pelo pagamento da fatura.');
+        }
+
         $expense->update([
             'status' => 'paid',
             'payment_date' => now(),

@@ -10,6 +10,8 @@ readonly class GetSummaryOutput
         public int $totalReceive,
         public int $totalExpense,
         public int $expectedTotal,
+        public int $creditCardOpenTotal,
+        public int $creditCardLimitUsed,
     ) {
     }
 
@@ -19,6 +21,8 @@ readonly class GetSummaryOutput
             'total_receive' => $this->totalReceive,
             'total_expense' => $this->totalExpense,
             'expected_total' => $this->expectedTotal,
+            'credit_card_open_total' => $this->creditCardOpenTotal,
+            'credit_card_limit_used' => $this->creditCardLimitUsed,
         ];
     }
 }

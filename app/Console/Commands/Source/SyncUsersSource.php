@@ -1,31 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands\Source;
 
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class SyncUsersSource extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:sync-users-source';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Sincroniza todos os usuários para garantir que possuem uma fonte padrão e atualiza as despesas existentes para usar essa fonte.';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Iniciando sincronização de fontes dos usuários...');
 
@@ -61,5 +49,7 @@ class SyncUsersSource extends Command
         });
 
         $this->info('Sincronização concluída com sucesso.');
+
+        return self::SUCCESS;
     }
 }

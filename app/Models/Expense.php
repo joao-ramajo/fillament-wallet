@@ -1,32 +1,79 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property float $amount
+ * @property int $user_id
+ * @property string $status
+ * @property string $type
+ * @property string $origin_type
+ * @property string $occurrence_type
+ * @property Carbon|null $payment_date
+ * @property Carbon|null $purchase_date
+ * @property Carbon|null $due_date
+ * @property int|null $category_id
+ * @property int|null $source_id
+ * @property int|null $credit_card_statement_id
+ * @property string|null $installment_group_id
+ * @property int|null $installment_number
+ * @property int|null $installment_total
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $user
+ * @property-read Category|null $category
+ * @property-read Source|null $source
+ * @property-read CreditCardStatement|null $creditCardStatement
+ */
 class Expense extends Model
 {
     /** @use HasFactory<\Database\Factories\ExpenseFactory> */
     use HasFactory;
 
+    public const ORIGIN_DIRECT = 'direct';
+    public const ORIGIN_CREDIT_CARD = 'credit_card';
+
+    public const OCCURRENCE_DIRECT = 'direct';
+    public const OCCURRENCE_PURCHASE = 'purchase';
+    public const OCCURRENCE_INVOICE_PAYMENT = 'invoice_payment';
+
+    /** @var list<string> */
     protected $fillable = [
         'title',
         'amount',
         'user_id',
         'status',
         'type',
+        'origin_type',
+        'occurrence_type',
         'payment_date',
+        'purchase_date',
         'due_date',
         'category_id',
         'source_id',
+        'credit_card_statement_id',
+        'installment_group_id',
+        'installment_number',
+        'installment_total',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'payment_date' => 'datetime',
+        'purchase_date' => 'date',
         'due_date' => 'date',
+        'installment_number' => 'integer',
+        'installment_total' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -34,23 +81,21 @@ class Expense extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getAmountAttribute($value)
+    public function getAmountAttribute(mixed $value): float
     {
-        return $value / 100;
+        return ((float) $value) / 100;
     }
 
-    public function setAmountAttribute($value)
+    public function setAmountAttribute(mixed $value): void
     {
-        // Se já for inteiro ou string só com números → já está em centavos
         if (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, ',')) {
             $this->attributes['amount'] = (int) $value;
+
             return;
         }
 
-        // Se tiver pontuação, trata como valor em reais
         $clean = preg_replace('/[^\d.,]/', '', (string) $value);
 
-        // Remove milhares e normaliza decimal
         if (str_contains($clean, ',')) {
             $clean = str_replace('.', '', $clean);
             $clean = str_replace(',', '.', $clean);
@@ -59,7 +104,7 @@ class Expense extends Model
         $this->attributes['amount'] = (int) round(((float) $clean) * 100);
     }
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::saving(function ($expense) {
             if (!isset($expense->payment_date) && $expense->status === 'paid') {
@@ -68,13 +113,18 @@ class Expense extends Model
         });
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function source()
+    public function source(): BelongsTo
     {
         return $this->belongsTo(Source::class);
+    }
+
+    public function creditCardStatement(): BelongsTo
+    {
+        return $this->belongsTo(CreditCardStatement::class, 'credit_card_statement_id');
     }
 }

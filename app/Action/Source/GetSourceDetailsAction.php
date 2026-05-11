@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Action\Source;
 
+use App\Models\CreditCardStatement;
 use App\DTO\Source\GetSourceDetailsInput;
 use App\DTO\Source\GetSourceDetailsOutput;
 use App\Models\Expense;
 use App\Models\Source;
+use App\Support\CreditCard\CreditCardStatementService;
 use App\Support\Logging\FormatsLogMessage;
 use Psr\Log\LoggerInterface;
 
@@ -17,6 +19,7 @@ class GetSourceDetailsAction
 
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly CreditCardStatementService $creditCardStatementService,
     ) {
     }
 
@@ -30,6 +33,48 @@ class GetSourceDetailsAction
         $sources = Source::where('user_id', $input->userId)->get();
 
         $items = $sources->map(function (Source $source) use ($input) {
+            if ($source->isCreditCard()) {
+                $currentStatement = CreditCardStatement::where('source_id', $source->id)
+                    ->where('status', '!=', CreditCardStatement::STATUS_PAID)
+                    ->orderBy('due_at')
+                    ->first();
+
+                if ($currentStatement !== null) {
+                    $currentStatement = $this->creditCardStatementService->sync($currentStatement);
+                }
+
+                $usedLimit = Expense::where('user_id', $input->userId)
+                    ->where('source_id', $source->id)
+                    ->where('occurrence_type', Expense::OCCURRENCE_PURCHASE)
+                    ->where('status', '!=', 'paid')
+                    ->sum('amount');
+
+                $expensesCount = Expense::where('user_id', $input->userId)
+                    ->where('source_id', $source->id)
+                    ->where('occurrence_type', Expense::OCCURRENCE_PURCHASE)
+                    ->count();
+
+                return [
+                    'id' => $source->id,
+                    'name' => $source->name,
+                    'type' => $source->type,
+                    'color' => $source->color,
+                    'is_default' => $source->is_default,
+                    'expenses_count' => $expensesCount,
+                    'credit_limit' => $source->credit_limit,
+                    'used_limit' => $usedLimit,
+                    'available_limit' => max(0, (int) $source->credit_limit - (int) $usedLimit),
+                    'current_statement' => $currentStatement === null ? null : [
+                        'id' => $currentStatement->id,
+                        'reference_month' => $currentStatement->reference_month->toDateString(),
+                        'closing_at' => $currentStatement->closing_at->toDateString(),
+                        'due_at' => $currentStatement->due_at->toDateString(),
+                        'status' => $currentStatement->status,
+                        'total_amount' => $currentStatement->total_amount,
+                    ],
+                ];
+            }
+
             $totalIncome = Expense::where('user_id', $input->userId)
                 ->where('source_id', $source->id)
                 ->where('type', 'income')
@@ -47,11 +92,17 @@ class GetSourceDetailsAction
             return [
                 'id' => $source->id,
                 'name' => $source->name,
+                'type' => $source->type,
                 'color' => $source->color,
+                'is_default' => $source->is_default,
                 'expenses_count' => $expensesCount,
                 'total_income' => $totalIncome,
                 'total_expense' => $totalExpense,
                 'balance' => $totalIncome - $totalExpense,
+                'credit_limit' => null,
+                'used_limit' => null,
+                'available_limit' => null,
+                'current_statement' => null,
             ];
         })->values()->all();
 

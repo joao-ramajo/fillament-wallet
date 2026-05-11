@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Expense;
 
 use App\Action\Expense\CreateExpense;
 use App\Http\Requests\Expense\CreateExpenseRequest;
+use DomainException;
 use Illuminate\Support\Facades\Auth;
 
 class CreateExpenseController
@@ -17,14 +18,20 @@ class CreateExpenseController
 
     public function __invoke(CreateExpenseRequest $request)
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        $data['userId'] = Auth::id();
+            $data['userId'] = Auth::id();
 
-        $this->createExpense->execute($data);
+            $this->createExpense->execute($data);
 
-        return response()->json([
-            'message' => 'Movimentação registrada com sucesso.'
-        ], 201);
+            return response()->json([
+                'message' => 'Movimentação registrada com sucesso.'
+            ], 201);
+        } catch (DomainException $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 400);
+        }
     }
 }

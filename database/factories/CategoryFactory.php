@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Category;
@@ -19,9 +21,6 @@ class CategoryFactory extends Factory
         ];
     }
 
-    /**
-     * Categoria global (sem dono)
-     */
     public function global(): static
     {
         return $this->state(fn () => [
@@ -29,9 +28,6 @@ class CategoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Categoria específica de um usuário
-     */
     public function forUser(User $user): static
     {
         return $this->state(fn () => [

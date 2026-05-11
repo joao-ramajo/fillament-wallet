@@ -1,11 +1,11 @@
 services:
     laravel.test:
         build:
-            context: './vendor/laravel/sail/runtimes/8.5'
+            context: ./vendor/laravel/sail/runtimes/8.5
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.5/app'
+        image: sail-8.5/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -70,9 +70,8 @@ services:
                 - local
             retries: 3
             timeout: 5s
-
     phpmyadmin:
-        image: phpmyadmin/phpmyadmin:latest
+        image: 'phpmyadmin/phpmyadmin:latest'
         ports:
             - '8081:80'
         environment:
@@ -82,7 +81,7 @@ services:
         networks:
             - sail
         depends_on:
-        - mysql
+            - mysql
 networks:
     sail:
         driver: bridge
