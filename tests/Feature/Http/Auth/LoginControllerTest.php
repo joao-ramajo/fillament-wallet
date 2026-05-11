@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-test('usuário consegue fazer login', function () {
+test('usuário consegue fazer login', function (): void {
     $user = User::factory()->create([
         'password' => bcrypt('password'),
     ]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Action;
 
+use Throwable;
 use App\Models\Category;
 use App\Models\Source;
 use App\Support\Logging\FormatsLogMessage;
@@ -42,7 +43,7 @@ class ImportCsvData
 
         $validator = Validator::make(
             ['file' => $file],
-            ['file' => 'required|file|mimes:csv,txt|max:10240']
+            ['file' => ['required', 'file', 'mimes:csv,txt', 'max:10240']]
         );
 
         if ($validator->fails()) {
@@ -65,7 +66,7 @@ class ImportCsvData
             }
 
             $header = fgetcsv($handle, 0, ';');
-            $header[0] = preg_replace('/^\x{FEFF}/u', '', $header[0]);
+            $header[0] = preg_replace('/^\x{FEFF}/u', '', (string) $header[0]);
 
             if (! $this->validateHeaders($header)) {
                 fclose($handle);
@@ -87,7 +88,7 @@ class ImportCsvData
 
                 // 👇 normaliza encoding
                 $data = array_map(
-                    fn ($v) => trim(
+                    fn ($v): string => trim(
                         mb_convert_encoding($v, 'UTF-8', 'UTF-8,ISO-8859-1,WINDOWS-1252')
                     ),
                     $data
@@ -122,7 +123,7 @@ class ImportCsvData
                 }
             }
 
-            if (! empty($batch)) {
+            if ($batch !== []) {
                 DB::table('expenses')->insert($batch);
             }
 
@@ -135,11 +136,11 @@ class ImportCsvData
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $throwable) {
             DB::rollBack();
             $this->logger->error($this->formatLogMessage('failed'), [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -172,8 +173,8 @@ class ImportCsvData
             return null;
         }
 
-        $category = Category::where('name', $categoryName)
-            ->where(function ($query) {
+        $category = Category::query()->where('name', $categoryName)
+            ->where(function ($query): void {
                 $query
                     ->whereNull('user_id')
                     ->orWhere('user_id', Auth::id());
@@ -181,7 +182,7 @@ class ImportCsvData
             ->first();
 
         if (! $category) {
-            $category = Category::create([
+            return Category::query()->create([
                 'name' => $categoryName,
                 'user_id' => Auth::id(),
             ]);

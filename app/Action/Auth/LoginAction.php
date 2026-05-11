@@ -12,11 +12,9 @@ class LoginAction
 {
     public function execute(array $credentials): array
     {
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::query()->where('email', $credentials['email'])->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw new DomainException('Credenciais inválidas.');
-        }
+        throw_if(! $user || ! Hash::check($credentials['password'], $user->password), DomainException::class, 'Credenciais inválidas.');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

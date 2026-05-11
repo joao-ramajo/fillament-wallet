@@ -10,14 +10,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->date('due_date')->nullable()->after('payment_date');
         });
     }
 
     public function down(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->dropColumn('due_date');
         });
     }

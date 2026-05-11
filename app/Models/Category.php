@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,17 +23,15 @@ use Illuminate\Support\Carbon;
  * @property-read User|null $user
  * @property-read Collection<int, Expense> $expenses
  */
+#[Fillable([
+    'name',
+    'user_id',
+    'color',
+])]
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'name',
-        'user_id',
-        'color',
-    ];
 
     public function user(): BelongsTo
     {

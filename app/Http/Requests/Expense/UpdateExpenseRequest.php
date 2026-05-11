@@ -19,12 +19,12 @@ class UpdateExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'amount' => 'required|integer|min:0',
-            'type' => 'required|string',
-            'status' => 'required',
-            'category_id' => 'nullable|exists:categories,id',
-            'source_id' => 'sometimes|exists:sources,id',
+            'title' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:0'],
+            'type' => ['required', 'string'],
+            'status' => ['required'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'source_id' => ['sometimes', 'exists:sources,id'],
             'purchase_date' => [
                 'nullable',
                 'date_format:Y-m-d',

@@ -29,10 +29,10 @@ class DeleteExpenseController extends Controller
                 ->json([
                     'message' => 'Despesa deletada com sucesso.',
                 ], 200);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()
                 ->json([
-                    'message' => $e->getMessage(),
+                    'message' => $domainException->getMessage(),
                 ], 400);
         }
     }

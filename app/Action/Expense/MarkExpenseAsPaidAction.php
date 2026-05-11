@@ -26,7 +26,7 @@ class MarkExpenseAsPaidAction
             'expense_id' => $input->expenseId,
         ]);
 
-        $expense = Expense::find($input->expenseId);
+        $expense = Expense::query()->find($input->expenseId);
 
         if (! $expense || $expense->user_id !== $input->userId) {
             $this->logger->warning($this->formatLogMessage('expense not found for user'), [
@@ -45,9 +45,7 @@ class MarkExpenseAsPaidAction
             throw new DomainException('Apenas despesas pendentes ou atrasadas podem ser marcadas como pagas.');
         }
 
-        if ($expense->origin_type === Expense::ORIGIN_CREDIT_CARD) {
-            throw new DomainException('Compras no cartão devem ser quitadas pelo pagamento da fatura.');
-        }
+        throw_if($expense->origin_type === Expense::ORIGIN_CREDIT_CARD, DomainException::class, 'Compras no cartão devem ser quitadas pelo pagamento da fatura.');
 
         $expense->update([
             'status' => 'paid',

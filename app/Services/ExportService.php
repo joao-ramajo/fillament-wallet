@@ -20,7 +20,7 @@ class ExportService
 
         $type = $request->get('type') ?? 'csv';
 
-        $final = app($mapper[$type]);
+        $final = resolve($mapper[$type]);
 
         return $final->execute();
     }

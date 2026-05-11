@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Support\Facades\Date;
 use Carbon\Carbon;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +37,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Source|null $source
  * @property-read CreditCardStatement|null $creditCardStatement
  */
+#[Fillable([
+    'title',
+    'amount',
+    'user_id',
+    'status',
+    'type',
+    'origin_type',
+    'occurrence_type',
+    'payment_date',
+    'purchase_date',
+    'due_date',
+    'category_id',
+    'source_id',
+    'credit_card_statement_id',
+    'installment_group_id',
+    'installment_number',
+    'installment_total',
+])]
 class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */
@@ -50,26 +70,6 @@ class Expense extends Model
 
     public const OCCURRENCE_INVOICE_PAYMENT = 'invoice_payment';
 
-    /** @var list<string> */
-    protected $fillable = [
-        'title',
-        'amount',
-        'user_id',
-        'status',
-        'type',
-        'origin_type',
-        'occurrence_type',
-        'payment_date',
-        'purchase_date',
-        'due_date',
-        'category_id',
-        'source_id',
-        'credit_card_statement_id',
-        'installment_group_id',
-        'installment_number',
-        'installment_total',
-    ];
-
     /** @var array<string, string> */
     protected $casts = [
         'payment_date' => 'datetime',
@@ -84,12 +84,12 @@ class Expense extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getAmountAttribute(mixed $value): float
+    protected function getAmountAttribute(mixed $value): float
     {
         return ((float) $value) / 100;
     }
 
-    public function setAmountAttribute(mixed $value): void
+    protected function setAmountAttribute(mixed $value): void
     {
         if (is_numeric($value) && ! str_contains((string) $value, '.') && ! str_contains((string) $value, ',')) {
             $this->attributes['amount'] = (int) $value;
@@ -99,7 +99,7 @@ class Expense extends Model
 
         $clean = preg_replace('/[^\d.,]/', '', (string) $value);
 
-        if (str_contains($clean, ',')) {
+        if (str_contains((string) $clean, ',')) {
             $clean = str_replace('.', '', $clean);
             $clean = str_replace(',', '.', $clean);
         }
@@ -109,9 +109,9 @@ class Expense extends Model
 
     protected static function booted(): void
     {
-        static::saving(function ($expense) {
+        static::saving(function ($expense): void {
             if (! isset($expense->payment_date) && $expense->status === 'paid') {
-                $expense->payment_date = Carbon::parse($expense->payment_date);
+                $expense->payment_date = Date::parse($expense->payment_date);
             }
         });
     }

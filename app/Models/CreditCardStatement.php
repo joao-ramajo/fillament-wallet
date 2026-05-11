@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,16 @@ use Illuminate\Support\Carbon;
  * @property-read Source|null $paymentSource
  * @property-read Collection<int, Expense> $expenses
  */
+#[Fillable([
+    'source_id',
+    'reference_month',
+    'closing_at',
+    'due_at',
+    'status',
+    'total_amount',
+    'paid_at',
+    'payment_source_id',
+])]
 class CreditCardStatement extends Model
 {
     use HasFactory;
@@ -36,18 +47,6 @@ class CreditCardStatement extends Model
     public const STATUS_CLOSED = 'closed';
 
     public const STATUS_PAID = 'paid';
-
-    /** @var list<string> */
-    protected $fillable = [
-        'source_id',
-        'reference_month',
-        'closing_at',
-        'due_at',
-        'status',
-        'total_amount',
-        'paid_at',
-        'payment_source_id',
-    ];
 
     /** @var array<string, string> */
     protected $casts = [

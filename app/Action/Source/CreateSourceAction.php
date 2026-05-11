@@ -27,7 +27,7 @@ class CreateSourceAction
             'allow_negative' => $input->allowNegative,
         ]);
 
-        $source = Source::create([
+        $source = Source::query()->create([
             'user_id' => $input->userId,
             'name' => $input->name,
             'type' => $input->type,

@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->string('origin_type')->default('direct')->after('type');
             $table->string('occurrence_type')->default('direct')->after('origin_type');
             $table->foreignId('credit_card_statement_id')
@@ -27,7 +27,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('credit_card_statement_id');
             $table->dropColumn([
                 'origin_type',

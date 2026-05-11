@@ -13,7 +13,7 @@ class RegisterUserAction
 {
     public function execute(array $data): array
     {
-        $user = User::create([
+        $user = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
@@ -23,7 +23,7 @@ class RegisterUserAction
 
         event(new UserRegistered($user->name, $user->email));
 
-        Source::create([
+        Source::query()->create([
             'user_id' => $user->id,
             'name' => 'Carteira principal',
             'type' => Source::TYPE_CASH_LIKE,

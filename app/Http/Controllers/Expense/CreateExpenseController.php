@@ -27,9 +27,9 @@ class CreateExpenseController
             return response()->json([
                 'message' => 'Movimentação registrada com sucesso.',
             ], 201);
-        } catch (DomainException $exception) {
+        } catch (DomainException $domainException) {
             return response()->json([
-                'message' => $exception->getMessage(),
+                'message' => $domainException->getMessage(),
             ], 400);
         }
     }

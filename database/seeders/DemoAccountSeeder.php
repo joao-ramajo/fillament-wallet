@@ -16,36 +16,33 @@ class DemoAccountSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::transaction(function () {
-            $user = User::updateOrCreate(
-                ['email' => 'demo@kado.local'],
-                [
-                    'name' => 'Conta Demo Kado',
-                    'password' => Hash::make('Aa123123'),
-                ]
-            );
+        DB::transaction(function (): void {
+            $user = User::query()->updateOrCreate(['email' => 'demo@kado.local'], [
+                'name' => 'Conta Demo Kado',
+                'password' => Hash::make('Aa123123'),
+            ]);
 
             // Mantem o seeder idempotente sem acumular dados antigos.
-            Expense::where('user_id', $user->id)->delete();
-            Category::where('user_id', $user->id)->delete();
-            Source::where('user_id', $user->id)->delete();
+            Expense::query()->where('user_id', $user->id)->delete();
+            Category::query()->where('user_id', $user->id)->delete();
+            Source::query()->where('user_id', $user->id)->delete();
 
             $sources = [
-                'principal' => Source::create([
+                'principal' => Source::query()->create([
                     'user_id' => $user->id,
                     'name' => 'Carteira principal',
                     'color' => '#3B82F6',
                     'is_default' => true,
                     'allow_negative' => true,
                 ]),
-                'reserva' => Source::create([
+                'reserva' => Source::query()->create([
                     'user_id' => $user->id,
                     'name' => 'Reserva de emergência',
                     'color' => '#10B981',
                     'is_default' => false,
                     'allow_negative' => false,
                 ]),
-                'viagem' => Source::create([
+                'viagem' => Source::query()->create([
                     'user_id' => $user->id,
                     'name' => 'Fundo viagem',
                     'color' => '#8B5CF6',
@@ -55,27 +52,27 @@ class DemoAccountSeeder extends Seeder
             ];
 
             $categories = [
-                'moradia' => Category::create([
+                'moradia' => Category::query()->create([
                     'name' => 'Moradia',
                     'color' => '#EF4444',
                     'user_id' => $user->id,
                 ]),
-                'alimentacao' => Category::create([
+                'alimentacao' => Category::query()->create([
                     'name' => 'Alimentação',
                     'color' => '#F59E0B',
                     'user_id' => $user->id,
                 ]),
-                'transporte' => Category::create([
+                'transporte' => Category::query()->create([
                     'name' => 'Transporte',
                     'color' => '#06B6D4',
                     'user_id' => $user->id,
                 ]),
-                'lazer' => Category::create([
+                'lazer' => Category::query()->create([
                     'name' => 'Lazer',
                     'color' => '#A855F7',
                     'user_id' => $user->id,
                 ]),
-                'saude' => Category::create([
+                'saude' => Category::query()->create([
                     'name' => 'Saúde',
                     'color' => '#14B8A6',
                     'user_id' => $user->id,
@@ -242,7 +239,7 @@ class DemoAccountSeeder extends Seeder
         ];
 
         foreach ($expenses as $item) {
-            Expense::create([
+            Expense::query()->create([
                 'title' => $item['title'],
                 'amount' => $item['amount'],
                 'user_id' => $userId,

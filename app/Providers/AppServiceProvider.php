@@ -94,9 +94,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Route::bind('uuid', function (string $value) {
-            return new Uuid($value);
-        });
+        Route::bind('uuid', fn(string $value): Uuid => new Uuid($value));
     }
 
     private function bindChannelLogger(string $channel, array $classes): void
@@ -104,8 +102,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app
             ->when($classes)
             ->needs(LoggerInterface::class)
-            ->give(function ($app) use ($channel) {
-                return $app->make(LogManager::class)->channel($channel);
-            });
+            ->give(fn($app) => $app->make(LogManager::class)->channel($channel));
     }
 }

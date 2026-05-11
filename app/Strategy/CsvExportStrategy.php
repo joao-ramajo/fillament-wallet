@@ -17,19 +17,19 @@ class CsvExportStrategy implements ExportStrategyInterface
 
         $name = Str::slug($user->name);
 
-        $fileName = "{$name}-fillament-wallet-".Str::uuid().'.csv';
+        $fileName = $name . '-fillament-wallet-'.Str::uuid().'.csv';
 
         $callback = $this->generate($user->id);
 
         return response()->streamDownload($callback, $fileName, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
         ]);
     }
 
     public function generate(int $userId): callable
     {
-        return function () use ($userId) {
+        return function () use ($userId): void {
             $file = fopen('php://output', 'w');
 
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
@@ -61,8 +61,8 @@ class CsvExportStrategy implements ExportStrategyInterface
                     'categories.name as category_name',
                     'sources.name as source_name',
                 )
-                ->orderBy('expenses.created_at', 'desc')
-                ->chunk(1000, function ($expenses) use ($file) {
+                ->latest('expenses.created_at')
+                ->chunk(1000, function ($expenses) use ($file): void {
                     foreach ($expenses as $expense) {
                         fputcsv($file, [
                             $expense->title ?? '-',

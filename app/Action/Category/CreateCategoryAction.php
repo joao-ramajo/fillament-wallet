@@ -34,7 +34,7 @@ class CreateCategoryAction
             throw new DomainException('Categoria já registrada.');
         }
 
-        $category = Category::create([
+        $category = Category::query()->create([
             'name' => $input->name,
             'user_id' => $input->userId,
             'color' => $input->color,

@@ -28,9 +28,9 @@ class PayCreditCardStatementController extends Controller
             return response()->json([
                 'message' => 'Fatura paga com sucesso.',
             ], 200);
-        } catch (DomainException $exception) {
+        } catch (DomainException $domainException) {
             return response()->json([
-                'message' => $exception->getMessage(),
+                'message' => $domainException->getMessage(),
             ], 400);
         }
     }

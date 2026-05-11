@@ -17,8 +17,8 @@ class SyncUsersSource extends Command
     {
         $this->info('Iniciando sincronização de fontes dos usuários...');
 
-        DB::table('users')->get()->each(function ($user) {
-            $this->line("Processando usuário ID {$user->id}...");
+        DB::table('users')->get()->each(function ($user): void {
+            $this->line(sprintf('Processando usuário ID %s...', $user->id));
 
             $sourceId = DB::table('sources')
                 ->where('user_id', $user->id)
@@ -36,16 +36,16 @@ class SyncUsersSource extends Command
                     'updated_at' => now(),
                 ]);
 
-                $this->info("Fonte padrão criada (ID {$sourceId}).");
+                $this->info(sprintf('Fonte padrão criada (ID %d).', $sourceId));
             } else {
-                $this->line("Fonte padrão já existe (ID {$sourceId}).");
+                $this->line(sprintf('Fonte padrão já existe (ID %s).', $sourceId));
             }
 
             $updated = DB::table('expenses')
                 ->where('user_id', $user->id)
                 ->update(['source_id' => $sourceId]);
 
-            $this->line("Despesas atualizadas: {$updated}");
+            $this->line('Despesas atualizadas: ' . $updated);
         });
 
         $this->info('Sincronização concluída com sucesso.');

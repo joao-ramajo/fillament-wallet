@@ -42,10 +42,10 @@ class CreateCategoryController extends Controller
             $output = $this->createCategoryAction->execute($input);
 
             return response()->json($output->toArray(), 201);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()
                 ->json([
-                    'message' => $e->getMessage(),
+                    'message' => $domainException->getMessage(),
                 ], 400);
         }
     }

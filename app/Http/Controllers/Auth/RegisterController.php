@@ -29,10 +29,10 @@ class RegisterController extends Controller
                 ],
                 'token' => $result['token'],
             ], 201);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()
                 ->json([
-                    'message' => $e->getMessage(),
+                    'message' => $domainException->getMessage(),
                 ], 400);
         }
     }

@@ -19,40 +19,30 @@ class PayCreditCardStatementAction
 
     public function execute(int $statementId, int $userId, int $paymentSourceId): void
     {
-        DB::transaction(function () use ($statementId, $userId, $paymentSourceId) {
+        DB::transaction(function () use ($statementId, $userId, $paymentSourceId): void {
             $statement = CreditCardStatement::query()
                 ->whereKey($statementId)
                 ->whereHas('source', fn ($query) => $query->where('user_id', $userId))
                 ->first();
 
-            if ($statement === null) {
-                throw new DomainException('Fatura não encontrada.');
-            }
+            throw_if($statement === null, DomainException::class, 'Fatura não encontrada.');
 
             $statement = $this->creditCardStatementService->sync($statement);
 
-            if ($statement->status === CreditCardStatement::STATUS_PAID) {
-                throw new DomainException('Esta fatura já foi paga.');
-            }
+            throw_if($statement->status === CreditCardStatement::STATUS_PAID, DomainException::class, 'Esta fatura já foi paga.');
 
-            if ($statement->total_amount <= 0) {
-                throw new DomainException('Não é possível pagar uma fatura sem valor.');
-            }
+            throw_if($statement->total_amount <= 0, DomainException::class, 'Não é possível pagar uma fatura sem valor.');
 
             $paymentSource = Source::query()
                 ->where('user_id', $userId)
                 ->whereKey($paymentSourceId)
                 ->first();
 
-            if ($paymentSource === null) {
-                throw new DomainException('Fonte de pagamento não encontrada.');
-            }
+            throw_if($paymentSource === null, DomainException::class, 'Fonte de pagamento não encontrada.');
 
-            if ($paymentSource->isCreditCard()) {
-                throw new DomainException('A fatura deve ser paga com uma fonte de caixa.');
-            }
+            throw_if($paymentSource->isCreditCard(), DomainException::class, 'A fatura deve ser paga com uma fonte de caixa.');
 
-            Expense::create([
+            Expense::query()->create([
                 'title' => sprintf(
                     'Pagamento de fatura - %s - %s',
                     $statement->source->name,

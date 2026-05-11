@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })
-    ->booted(function () {
+    ->booted(function (): void {
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }

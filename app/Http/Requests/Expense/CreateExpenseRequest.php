@@ -19,19 +19,19 @@ class CreateExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'amount' => 'required|integer|min:0',
-            'type' => 'required|string',
-            'status' => 'required',
-            'category_id' => 'nullable|exists:categories,id',
-            'source_id' => 'nullable|exists:sources,id',
+            'title' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:0'],
+            'type' => ['required', 'string'],
+            'status' => ['required'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'source_id' => ['nullable', 'exists:sources,id'],
             'purchase_date' => [
                 'nullable',
                 'date_format:Y-m-d',
                 'date',
                 'before_or_equal:today',
             ],
-            'installment_total' => 'nullable|integer|between:1,24',
+            'installment_total' => ['nullable', 'integer', 'between:1,24'],
             'payment_date' => [
                 'nullable',
                 'date_format:Y-m-d',

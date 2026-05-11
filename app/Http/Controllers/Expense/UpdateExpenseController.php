@@ -26,10 +26,10 @@ class UpdateExpenseController extends Controller
                 ->json([
                     'message' => 'Registro atualizado com sucesso',
                 ], 200);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()
                 ->json([
-                    'message' => $e->getMessage(),
+                    'message' => $domainException->getMessage(),
                 ], 400);
         }
     }

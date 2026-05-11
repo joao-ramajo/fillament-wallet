@@ -24,7 +24,7 @@ class GetSourceListAction
             'user_id' => $input->userId,
         ]);
 
-        $sources = Source::where('user_id', $input->userId)
+        $sources = Source::query()->where('user_id', $input->userId)
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get()

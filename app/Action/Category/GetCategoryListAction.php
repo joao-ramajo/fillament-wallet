@@ -27,25 +27,25 @@ class GetCategoryListAction
 
         $startedAt = microtime(true);
 
-        $applyMonthFilter = function ($query) use ($input) {
+        $applyMonthFilter = function ($query) use ($input): void {
             if ($input->month !== null) {
                 $query->whereMonth('created_at', $input->month);
             }
         };
 
         $categories = Category::query()
-            ->where(function ($q) use ($input) {
+            ->where(function ($q) use ($input): void {
                 $q->where('user_id', $input->userId)
                     ->orWhereNull('user_id');
             })
             ->withCount([
-                'expenses as expenses_count' => function ($q) use ($input, $applyMonthFilter) {
+                'expenses as expenses_count' => function ($q) use ($input, $applyMonthFilter): void {
                     $q->where('user_id', $input->userId);
                     $applyMonthFilter($q);
                 },
             ])
             ->withSum([
-                'expenses as expenses_total_amount' => function ($q) use ($input, $applyMonthFilter) {
+                'expenses as expenses_total_amount' => function ($q) use ($input, $applyMonthFilter): void {
                     $q->where('user_id', $input->userId)->where('type', 'expense');
                     $applyMonthFilter($q);
                 },

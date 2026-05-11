@@ -21,9 +21,9 @@ class XlsxExportStrategy
 
         $name = Str::slug($user->name);
 
-        $fileName = "{$name}-fillament-wallet-".Str::uuid().'.xlsx';
+        $fileName = $name . '-fillament-wallet-'.Str::uuid().'.xlsx';
 
-        $callback = function () use ($user) {
+        $callback = function () use ($user): void {
             $spreadsheet = new Spreadsheet;
             $sheet = $spreadsheet->getActiveSheet();
 
@@ -76,8 +76,8 @@ class XlsxExportStrategy
                     'categories.name as category_name',
                     'bank_accounts.name as bank_account_name'
                 )
-                ->orderBy('expenses.created_at', 'desc')
-                ->chunk(1000, function ($expenses) use ($sheet, &$row) {
+                ->latest('expenses.created_at')
+                ->chunk(1000, function ($expenses) use ($sheet, &$row): void {
                     foreach ($expenses as $expense) {
                         $sheet->setCellValue('A'.$row, $expense->title ?? '-');
                         $sheet->setCellValue('B'.$row, $expense->amount);
@@ -97,7 +97,7 @@ class XlsxExportStrategy
 
         return response()->streamDownload($callback, $fileName, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
             'Cache-Control' => 'max-age=0',
         ]);
     }

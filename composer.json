@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "doctrine/dbal": "^4.3",
+        "driftingly/rector-laravel": "^2.3",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
@@ -27,6 +28,7 @@
         "pestphp/pest": "^4.1",
         "pestphp/pest-plugin-laravel": "^4.0",
         "phpstan/phpstan": "^2.1",
+        "rector/rector": "^2.4",
         "squizlabs/php_codesniffer": "^3.9"
     },
     "autoload": {
@@ -76,8 +78,8 @@
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
-        "stan": [
-            "docker exec -it filament-wallet-laravel.test-1 ./vendor/bin/phpstan analyse -c phpstan.neon"
+        "lint:static": [
+            "./vendor/bin/phpstan analyse -c phpstan.neon"
         ],
         "lint:style:fix": [
             "./vendor/bin/pint"

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +28,15 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, Category> $categories
  * @property-read Collection<int, Source> $sources
  */
+#[Fillable([
+    'name',
+    'email',
+    'password',
+])]
+#[Hidden([
+    'password',
+    'remember_token',
+])]
 class User extends Authenticatable
 {
     use HasApiTokens;
@@ -34,19 +45,6 @@ class User extends Authenticatable
     use HasFactory;
 
     use Notifiable;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
-    /** @var list<string> */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
 
     /** @return array<string, string> */
     protected function casts(): array

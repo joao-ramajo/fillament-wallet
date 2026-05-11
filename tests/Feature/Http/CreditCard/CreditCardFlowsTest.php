@@ -8,11 +8,11 @@ use App\Models\Expense;
 use App\Models\Source;
 use App\Models\User;
 
-test('deve criar um cartão de crédito com limite e ciclo de fatura', function () {
+test('deve criar um cartão de crédito com limite e ciclo de fatura', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', "Bearer {$token}")
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.sources.create'), [
             'name' => 'Visa Black',
             'type' => 'credit_card',
@@ -36,7 +36,7 @@ test('deve criar um cartão de crédito com limite e ciclo de fatura', function 
     ]);
 });
 
-test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', function () {
+test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
     $categoryId = Category::factory()->create(['user_id' => $user->id])->id;
@@ -47,7 +47,7 @@ test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', 
         'statement_due_day' => 10,
     ]);
 
-    $response = $this->withHeader('Authorization', "Bearer {$token}")
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Notebook',
             'amount' => 300000,
@@ -61,7 +61,7 @@ test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', 
 
     $response->assertCreated();
 
-    $expenses = Expense::where('user_id', $user->id)
+    $expenses = Expense::query()->where('user_id', $user->id)
         ->where('source_id', $creditCard->id)
         ->orderBy('installment_number')
         ->get();
@@ -71,7 +71,7 @@ test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', 
     expect($expenses->pluck('installment_number')->all())->toBe([1, 2, 3]);
     expect($expenses->pluck('status')->unique()->all())->toBe(['pending']);
 
-    $statements = CreditCardStatement::where('source_id', $creditCard->id)
+    $statements = CreditCardStatement::query()->where('source_id', $creditCard->id)
         ->orderBy('reference_month')
         ->get();
 
@@ -83,7 +83,7 @@ test('deve gerar parcelas e faturas corretas para compra parcelada no cartão', 
     ]);
 });
 
-test('compra no cartão nao deve afetar o caixa principal antes do pagamento da fatura', function () {
+test('compra no cartão nao deve afetar o caixa principal antes do pagamento da fatura', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
     $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
@@ -100,7 +100,7 @@ test('compra no cartão nao deve afetar o caixa principal antes do pagamento da 
         'amount' => 500000,
     ]);
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Celular',
             'amount' => 120000,
@@ -112,7 +112,7 @@ test('compra no cartão nao deve afetar o caixa principal antes do pagamento da 
         ])
         ->assertCreated();
 
-    $summary = $this->withHeader('Authorization', "Bearer {$token}")
+    $summary = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->getJson(route('api.get-summary'));
 
     $summary->assertOk()
@@ -125,7 +125,7 @@ test('compra no cartão nao deve afetar o caixa principal antes do pagamento da 
         ]);
 });
 
-test('deve pagar a fatura integralmente e baixar o caixa', function () {
+test('deve pagar a fatura integralmente e baixar o caixa', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
     $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
@@ -142,7 +142,7 @@ test('deve pagar a fatura integralmente e baixar o caixa', function () {
         'amount' => 400000,
     ]);
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Mesa',
             'amount' => 90000,
@@ -154,9 +154,9 @@ test('deve pagar a fatura integralmente e baixar o caixa', function () {
         ])
         ->assertCreated();
 
-    $statement = CreditCardStatement::where('source_id', $creditCard->id)->firstOrFail();
+    $statement = CreditCardStatement::query()->where('source_id', $creditCard->id)->firstOrFail();
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.credit-cards.statements.pay', ['statementId' => $statement->id]), [
             'payment_source_id' => $defaultSource->id,
         ])
@@ -165,7 +165,7 @@ test('deve pagar a fatura integralmente e baixar o caixa', function () {
     $statement->refresh();
     expect($statement->status)->toBe('paid');
 
-    $purchase = Expense::where('credit_card_statement_id', $statement->id)->firstOrFail();
+    $purchase = Expense::query()->where('credit_card_statement_id', $statement->id)->firstOrFail();
     expect($purchase->status)->toBe('paid');
 
     $this->assertDatabaseHas('expenses', [
@@ -176,7 +176,7 @@ test('deve pagar a fatura integralmente e baixar o caixa', function () {
         'status' => 'paid',
     ]);
 
-    $summary = $this->withHeader('Authorization', "Bearer {$token}")
+    $summary = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->getJson(route('api.get-summary'));
 
     $summary->assertOk()
@@ -189,14 +189,14 @@ test('deve pagar a fatura integralmente e baixar o caixa', function () {
         ]);
 });
 
-test('nao deve permitir marcar compra de cartão como paga manualmente', function () {
+test('nao deve permitir marcar compra de cartão como paga manualmente', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
     $creditCard = Source::factory()->creditCard()->create([
         'user_id' => $user->id,
     ]);
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Curso',
             'amount' => 150000,
@@ -208,9 +208,9 @@ test('nao deve permitir marcar compra de cartão como paga manualmente', functio
         ])
         ->assertCreated();
 
-    $expense = Expense::where('source_id', $creditCard->id)->firstOrFail();
+    $expense = Expense::query()->where('source_id', $creditCard->id)->firstOrFail();
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.mark-as-paid', ['id' => $expense->id]))
         ->assertStatus(400)
         ->assertJson([
@@ -218,7 +218,7 @@ test('nao deve permitir marcar compra de cartão como paga manualmente', functio
         ]);
 });
 
-test('nao deve permitir pagar fatura usando outro cartão', function () {
+test('nao deve permitir pagar fatura usando outro cartão', function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
     $creditCard = Source::factory()->creditCard()->create([
@@ -230,7 +230,7 @@ test('nao deve permitir pagar fatura usando outro cartão', function () {
         'name' => 'Amex',
     ]);
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'TV',
             'amount' => 230000,
@@ -242,9 +242,9 @@ test('nao deve permitir pagar fatura usando outro cartão', function () {
         ])
         ->assertCreated();
 
-    $statement = CreditCardStatement::where('source_id', $creditCard->id)->firstOrFail();
+    $statement = CreditCardStatement::query()->where('source_id', $creditCard->id)->firstOrFail();
 
-    $this->withHeader('Authorization', "Bearer {$token}")
+    $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.credit-cards.statements.pay', ['statementId' => $statement->id]), [
             'payment_source_id' => $otherCreditCard->id,
         ])

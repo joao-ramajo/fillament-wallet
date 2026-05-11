@@ -43,7 +43,7 @@ class SourcesSummarySheet implements XlsxSheet
         $this->applyRowStyles($sheet, $lastRow, $totalRow);
         $this->applyCellFormats($sheet, $lastRow);
         $this->freezeHeader($sheet);
-        $sheet->setAutoFilter("A1:D{$lastRow}");
+        $sheet->setAutoFilter('A1:D' . $lastRow);
     }
 
     private function getUserId(): int
@@ -86,7 +86,7 @@ class SourcesSummarySheet implements XlsxSheet
         $totalIncome = 0;
         $totalExpense = 0;
 
-        $rows = array_map(function ($row) use (&$totalIncome, &$totalExpense) {
+        $rows = array_map(function ($row) use (&$totalIncome, &$totalExpense): array {
             $income = (int) $row->total_income;
             $expense = (int) $row->total_expense;
 
@@ -145,7 +145,7 @@ class SourcesSummarySheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle("A2:D{$lastRow}")->applyFromArray([
+        $sheet->getStyle('A2:D' . $lastRow)->applyFromArray([
             'font' => [
                 'size' => 10,
                 'color' => ['rgb' => self::HEADER_FONT],
@@ -161,16 +161,16 @@ class SourcesSummarySheet implements XlsxSheet
         for ($i = 2; $i <= $lastRow; $i++) {
             $sheet->getRowDimension($i)->setRowHeight(22);
 
-            $sheet->getStyle("A{$i}:D{$i}")
+            $sheet->getStyle(sprintf('A%d:D%d', $i, $i))
                 ->getAlignment()
                 ->setVertical(Alignment::VERTICAL_CENTER);
 
-            $sheet->getStyle("B{$i}:D{$i}")
+            $sheet->getStyle(sprintf('B%d:D%d', $i, $i))
                 ->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
             if ($i % 2 === 0) {
-                $sheet->getStyle("A{$i}:D{$i}")->applyFromArray([
+                $sheet->getStyle(sprintf('A%d:D%d', $i, $i))->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => self::STRIPE_BG],
@@ -179,7 +179,7 @@ class SourcesSummarySheet implements XlsxSheet
             }
         }
 
-        $sheet->getStyle("A{$totalRow}:D{$totalRow}")->applyFromArray([
+        $sheet->getStyle(sprintf('A%d:D%d', $totalRow, $totalRow))->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => self::HEADER_FONT],
@@ -202,7 +202,7 @@ class SourcesSummarySheet implements XlsxSheet
             return;
         }
 
-        $sheet->getStyle("B2:D{$lastRow}")
+        $sheet->getStyle('B2:D' . $lastRow)
             ->getNumberFormat()
             ->setFormatCode('[$R$-416] #,##0.00');
     }

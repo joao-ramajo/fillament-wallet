@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\Source;
 use App\Models\User;
 
-test('usuário autenticado cria uma despesa para uma fonte especificada com sucesso', function () {
+test('usuário autenticado cria uma despesa para uma fonte especificada com sucesso', function (): void {
     $user = User::factory()->create();
 
     $source = Source::factory()->create([
@@ -13,7 +13,7 @@ test('usuário autenticado cria uma despesa para uma fonte especificada com suce
     ]);
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', "Bearer $token")
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Aluguel',
             'amount' => 120000,
@@ -30,12 +30,12 @@ test('usuário autenticado cria uma despesa para uma fonte especificada com suce
     ]);
 });
 
-test('usuário autenticado cria uma despesa sem especificar a fonte e a despesa é associada à fonte padrão', function () {
+test('usuário autenticado cria uma despesa sem especificar a fonte e a despesa é associada à fonte padrão', function (): void {
     $user = User::factory()->create();
 
     $token = $user->createToken('test')->plainTextToken;
 
-    $response = $this->withHeader('Authorization', "Bearer $token")
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
         ->postJson(route('api.expenses.create'), [
             'title' => 'Aluguel',
             'amount' => 120000,

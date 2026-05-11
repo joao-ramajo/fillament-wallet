@@ -48,21 +48,21 @@ class GetExpensesAction
 
         if ($input->month !== null) {
             if ($input->categoryId !== null) {
-                $query->where(function ($monthQuery) use ($input) {
+                $query->where(function ($monthQuery) use ($input): void {
                     $monthQuery
-                        ->where(function ($paidQuery) use ($input) {
+                        ->where(function ($paidQuery) use ($input): void {
                             $paidQuery
                                 ->where('expenses.occurrence_type', Expense::OCCURRENCE_PURCHASE)
                                 ->whereMonth('expenses.due_date', $input->month);
                         })
-                        ->orWhere(function ($paidQuery) use ($input) {
+                        ->orWhere(function ($paidQuery) use ($input): void {
                             $paidQuery
                                 ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
                                 ->where('expenses.status', 'paid')
                                 ->whereNotNull('expenses.payment_date')
                                 ->whereMonth('expenses.payment_date', $input->month);
                         })
-                        ->orWhere(function ($unpaidQuery) use ($input) {
+                        ->orWhere(function ($unpaidQuery) use ($input): void {
                             $unpaidQuery
                                 ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
                                 ->where('expenses.status', '!=', 'paid')
@@ -70,14 +70,14 @@ class GetExpensesAction
                         });
                 });
             } else {
-                $query->where(function ($monthQuery) use ($input) {
+                $query->where(function ($monthQuery) use ($input): void {
                     $monthQuery
-                        ->where(function ($purchaseQuery) use ($input) {
+                        ->where(function ($purchaseQuery) use ($input): void {
                             $purchaseQuery
                                 ->where('expenses.occurrence_type', Expense::OCCURRENCE_PURCHASE)
                                 ->whereMonth('expenses.due_date', $input->month);
                         })
-                        ->orWhere(function ($defaultQuery) use ($input) {
+                        ->orWhere(function ($defaultQuery) use ($input): void {
                             $defaultQuery
                                 ->where('expenses.occurrence_type', '!=', Expense::OCCURRENCE_PURCHASE)
                                 ->whereMonth('expenses.created_at', $input->month);
@@ -87,7 +87,7 @@ class GetExpensesAction
         }
 
         $expenses = $query
-            ->orderBy('expenses.created_at', 'desc')
+            ->latest('expenses.created_at')
             ->select(
                 'expenses.id',
                 'expenses.title',
@@ -113,7 +113,7 @@ class GetExpensesAction
 
         if ($input->query !== null && trim($input->query) !== '') {
             $normalizedQuery = $this->normalizeSearchTerm($input->query);
-            $expenses = $expenses->filter(function ($expense) use ($normalizedQuery) {
+            $expenses = $expenses->filter(function ($expense) use ($normalizedQuery): bool {
                 $normalizedTitle = $this->normalizeSearchTerm((string) $expense->title);
 
                 return str_contains($normalizedTitle, $normalizedQuery);

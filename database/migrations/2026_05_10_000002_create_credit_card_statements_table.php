@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('credit_card_statements', function (Blueprint $table) {
+        Schema::create('credit_card_statements', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('source_id')->constrained('sources')->cascadeOnDelete();
             $table->date('reference_month');

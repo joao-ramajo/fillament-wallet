@@ -27,7 +27,7 @@ class WebRegisterAction
             'email' => $input->email,
         ]);
 
-        $user = User::create([
+        $user = User::query()->create([
             'name' => $input->name,
             'email' => $input->email,
             'password' => Hash::make($input->password),

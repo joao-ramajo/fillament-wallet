@@ -10,14 +10,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             // Primeiro remove a constraint
             $table->dropForeign(['user_id']);
 

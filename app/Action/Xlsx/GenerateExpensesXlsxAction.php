@@ -44,7 +44,7 @@ class GenerateExpensesXlsxAction
 
     private function generateResponse(Spreadsheet $spreadsheet): StreamedResponse
     {
-        $response = new StreamedResponse(function () use ($spreadsheet) {
+        $response = new StreamedResponse(function () use ($spreadsheet): void {
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
         });

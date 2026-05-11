@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Routing\Redirector;
+use Illuminate\Http\RedirectResponse;
 use App\Action\Auth\WebLoginAction;
 use App\Action\Auth\WebLogoutAction;
 use App\Action\Auth\WebRegisterAction;
@@ -49,7 +51,7 @@ class AuthController extends Controller
         if ($output->success) {
             $request->session()->regenerate();
 
-            return redirect()->route('web.dashboard');
+            return to_route('web.dashboard');
         }
 
         return back()->withErrors([
@@ -72,10 +74,10 @@ class AuthController extends Controller
             )
         );
 
-        return redirect()->route('web.dashboard');
+        return to_route('web.dashboard');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): Redirector|RedirectResponse
     {
         $userId = Auth::id() ?? 0;
         $this->logger->info($this->formatLogMessage('logout request received'), [

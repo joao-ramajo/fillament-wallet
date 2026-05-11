@@ -32,9 +32,9 @@ class UpdateCategoryController extends Controller
             $output = $this->updateCategoryAction->execute($input);
 
             return response()->json($output->toArray(), 200);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()->json([
-                'message' => $e->getMessage(),
+                'message' => $domainException->getMessage(),
             ], 400);
         }
     }

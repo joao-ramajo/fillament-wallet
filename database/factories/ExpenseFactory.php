@@ -21,7 +21,7 @@ class ExpenseFactory extends Factory
             'status' => $this->faker->randomElement(['pending', 'paid']),
             'payment_date' => null,
             'purchase_date' => null,
-            'due_date' => now()->addDays(rand(1, 30)),
+            'due_date' => now()->addDays(random_int(1, 30)),
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
             'source_id' => Source::factory(),
@@ -36,7 +36,7 @@ class ExpenseFactory extends Factory
 
     public function paid(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'status' => 'paid',
             'payment_date' => now(),
         ]);
@@ -44,7 +44,7 @@ class ExpenseFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'status' => 'pending',
             'payment_date' => null,
         ]);
@@ -52,7 +52,7 @@ class ExpenseFactory extends Factory
 
     public function withoutCategory(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'category_id' => null,
         ]);
     }

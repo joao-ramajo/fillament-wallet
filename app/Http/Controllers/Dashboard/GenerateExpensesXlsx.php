@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Dashboard;
 
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Action\Xlsx\GenerateExpensesXlsxAction;
 use App\DTO\Xlsx\GenerateExpensesXlsxInput;
 use App\Support\Logging\FormatsLogMessage;
@@ -19,7 +20,7 @@ class GenerateExpensesXlsx
         private readonly LoggerInterface $logger,
     ) {}
 
-    public function __invoke()
+    public function __invoke(): StreamedResponse
     {
         $userId = Auth::id();
         $this->logger->info($this->formatLogMessage('request received'), [

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Action\Expense;
 
+use Illuminate\Support\Facades\Date;
 use App\Models\Expense;
 use App\Models\Source;
 use App\Support\CreditCard\CreditCardStatementService;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class CreateExpense
 
     public function execute(array $data): void
     {
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data): void {
             $source = $this->resolveSource($data['userId'], $data['source_id'] ?? null);
 
             if ($source->isCreditCard()) {
@@ -38,15 +38,9 @@ class CreateExpense
     {
         $query = Source::query()->where('user_id', $userId);
 
-        if ($sourceId !== null) {
-            $source = $query->where('id', $sourceId)->first();
-        } else {
-            $source = $query->where('is_default', true)->first();
-        }
+        $source = $sourceId !== null ? $query->where('id', $sourceId)->first() : $query->where('is_default', true)->first();
 
-        if ($source === null) {
-            throw new DomainException('Fonte não encontrada para este usuário.');
-        }
+        throw_if($source === null, DomainException::class, 'Fonte não encontrada para este usuário.');
 
         return $source;
     }
@@ -57,11 +51,11 @@ class CreateExpense
 
         if ($data['status'] === 'paid') {
             $paymentDate = isset($data['payment_date'])
-                ? Carbon::createFromFormat('Y-m-d', $data['payment_date'])->startOfDay()
+                ? Date::createFromFormat('Y-m-d', $data['payment_date'])->startOfDay()
                 : now();
         }
 
-        Expense::create([
+        Expense::query()->create([
             'title' => $data['title'],
             'amount' => $data['amount'],
             'type' => $data['type'],
@@ -78,13 +72,9 @@ class CreateExpense
 
     private function createCreditCardPurchase(Source $source, array $data): void
     {
-        if (($data['type'] ?? null) !== 'expense') {
-            throw new DomainException('Cartão de crédito aceita apenas despesas.');
-        }
+        throw_if(($data['type'] ?? null) !== 'expense', DomainException::class, 'Cartão de crédito aceita apenas despesas.');
 
-        if (($data['status'] ?? null) === 'paid') {
-            throw new DomainException('Compras no cartão devem ser quitadas pelo pagamento da fatura.');
-        }
+        throw_if(($data['status'] ?? null) === 'paid', DomainException::class, 'Compras no cartão devem ser quitadas pelo pagamento da fatura.');
 
         $purchaseDate = isset($data['purchase_date'])
             ? CarbonImmutable::createFromFormat('Y-m-d', $data['purchase_date'])
@@ -99,7 +89,7 @@ class CreateExpense
             $installmentDate = $purchaseDate->addMonthsNoOverflow($index);
             $statement = $this->creditCardStatementService->resolveForInstallment($source, $installmentDate);
 
-            Expense::create([
+            Expense::query()->create([
                 'title' => $data['title'],
                 'amount' => $installmentAmount,
                 'type' => 'expense',

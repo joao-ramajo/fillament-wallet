@@ -25,23 +25,23 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', RegisterController::class)->name('api.register');
 Route::post('/login', LoginController::class)->name('api.login');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/users/sources', GetSourceListController::class)
         ->name('api.users.sources');
 
-    Route::prefix('sources')->group(function () {
+    Route::prefix('sources')->group(function (): void {
         Route::get('/', GetSourceDetailsController::class)
             ->name('api.sources.details');
         Route::post('/', CreateSourceController::class)
             ->name('api.sources.create');
     });
 
-    Route::prefix('credit-cards/statements')->group(function () {
+    Route::prefix('credit-cards/statements')->group(function (): void {
         Route::post('/{statementId}/pay', PayCreditCardStatementController::class)
             ->name('api.credit-cards.statements.pay');
     });
 
-    Route::prefix('expenses')->group(function () {
+    Route::prefix('expenses')->group(function (): void {
         Route::post('/', CreateExpenseController::class)
             ->name('api.expenses.create');
         Route::put('/{id}', UpdateExpenseController::class)
@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.expenses.delete');
     });
 
-    Route::prefix('categories')->group(function () {
+    Route::prefix('categories')->group(function (): void {
         Route::get('/', GetCategoryListController::class)
             ->name('api.categories.list');
         Route::post('/', CreateCategoryController::class)
@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.categories.update');
     });
 
-    Route::prefix('dashboard')->group(function () {
+    Route::prefix('dashboard')->group(function (): void {
         Route::get('/summary', GetSummaryController::class)
             ->name('api.get-summary');
         Route::get('/expenses', GetExpensesController::class)

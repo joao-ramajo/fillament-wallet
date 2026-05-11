@@ -18,7 +18,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $name) {
-            Category::firstOrCreate([
+            Category::query()->firstOrCreate([
                 'name' => $name,
                 'user_id' => null,
             ]);

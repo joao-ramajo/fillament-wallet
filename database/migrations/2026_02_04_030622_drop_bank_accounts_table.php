@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         // Remove coluna de expenses
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             if (Schema::hasColumn('expenses', 'bank_account_id')) {
                 $table->dropForeign(['bank_account_id']);
                 $table->dropColumn('bank_account_id');
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         // Recria tabela
-        Schema::create('bank_accounts', function (Blueprint $table) {
+        Schema::create('bank_accounts', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('type')->nullable();
@@ -33,7 +33,7 @@ return new class extends Migration
         });
 
         // Recria coluna
-        Schema::table('expenses', function (Blueprint $table) {
+        Schema::table('expenses', function (Blueprint $table): void {
             $table->foreignId('bank_account_id')
                 ->nullable()
                 ->constrained('bank_accounts')

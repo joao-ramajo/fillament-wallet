@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-test('cria uma conta de usuário com sucesso e retorna seu nome e token', function () {
+test('cria uma conta de usuário com sucesso e retorna seu nome e token', function (): void {
     $response = $this->postJson(route('api.register', [
         'name' => 'John Doe',
         'email' => 'john.doe@gmail.com',
@@ -23,7 +23,7 @@ test('cria uma conta de usuário com sucesso e retorna seu nome e token', functi
         'email' => 'john.doe@gmail.com',
     ]);
 
-    $id = User::where('email', 'john.doe@gmail.com')->first()->id;
+    $id = User::query()->where('email', 'john.doe@gmail.com')->first()->id;
 
     $this->assertDatabaseHas('sources', [
         'user_id' => $id,

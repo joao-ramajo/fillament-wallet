@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Dashboard;
 
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Strategy\CsvExportStrategy;
 
 class GenerateExpenseCsv
@@ -12,7 +13,7 @@ class GenerateExpenseCsv
         protected readonly CsvExportStrategy $csvExport
     ) {}
 
-    public function __invoke()
+    public function __invoke(): StreamedResponse
     {
         return $this->csvExport->execute();
     }

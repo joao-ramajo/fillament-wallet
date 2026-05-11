@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Database\Factories\SourceFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,17 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read Collection<int, CreditCardStatement> $statements
  */
+#[Fillable([
+    'user_id',
+    'name',
+    'type',
+    'color',
+    'is_default',
+    'allow_negative',
+    'credit_limit',
+    'statement_closing_day',
+    'statement_due_day',
+])]
 class Source extends Model
 {
     /** @use HasFactory<SourceFactory> */
@@ -34,19 +46,6 @@ class Source extends Model
     public const TYPE_CASH_LIKE = 'cash_like';
 
     public const TYPE_CREDIT_CARD = 'credit_card';
-
-    /** @var list<string> */
-    protected $fillable = [
-        'user_id',
-        'name',
-        'type',
-        'color',
-        'is_default',
-        'allow_negative',
-        'credit_limit',
-        'statement_closing_day',
-        'statement_due_day',
-    ];
 
     /** @var array<string, string> */
     protected $casts = [

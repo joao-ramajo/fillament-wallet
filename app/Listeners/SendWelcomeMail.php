@@ -11,6 +11,6 @@ class SendWelcomeMail
 {
     public function handle(UserRegistered $event): void
     {
-        SendWelcomeMailJob::dispatch($event->name, $event->email);
+        dispatch(new SendWelcomeMailJob($event->name, $event->email));
     }
 }

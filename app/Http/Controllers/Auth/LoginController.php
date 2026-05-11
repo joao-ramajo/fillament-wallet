@@ -33,9 +33,9 @@ class LoginController extends Controller
                 ],
                 'token' => $result['token'],
             ], 200);
-        } catch (DomainException $e) {
+        } catch (DomainException $domainException) {
             return response()->json([
-                'message' => $e->getMessage(),
+                'message' => $domainException->getMessage(),
             ], 400);
         }
     }

@@ -8,6 +8,9 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Category>
+ */
 class CategoryFactory extends Factory
 {
     protected $model = Category::class;
@@ -23,14 +26,14 @@ class CategoryFactory extends Factory
 
     public function global(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'user_id' => null,
         ]);
     }
 
     public function forUser(User $user): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'user_id' => $user->id,
         ]);
     }

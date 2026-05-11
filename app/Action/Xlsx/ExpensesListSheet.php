@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Action\Xlsx;
 
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Domain\Interfaces\XlsxSheet;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
@@ -52,7 +52,7 @@ class ExpensesListSheet implements XlsxSheet
         $this->applyCellFormats($sheet, $lastRow);
         $this->applyConditionalFormatting($sheet, $rawData);
         $this->freezeHeader($sheet);
-        $sheet->setAutoFilter("A1:G{$lastRow}");
+        $sheet->setAutoFilter('A1:G' . $lastRow);
     }
 
     private function getUserId(): int
@@ -60,13 +60,13 @@ class ExpensesListSheet implements XlsxSheet
         return Auth::id() ?? 0;
     }
 
-    private function setupHeaders($sheet): void
+    private function setupHeaders(Worksheet $sheet): void
     {
         $headers = $this->getHeaders();
         $sheet->fromArray([$headers], null, 'A1');
     }
 
-    private function setupColumnWidths($sheet): void
+    private function setupColumnWidths(Worksheet $sheet): void
     {
         $widths = [
             'A' => 35, // Descrição
@@ -83,12 +83,12 @@ class ExpensesListSheet implements XlsxSheet
         }
     }
 
-    private function insertData($sheet, array $data): void
+    private function insertData(Worksheet $sheet, array $data): void
     {
         $sheet->fromArray($data, null, 'A2');
     }
 
-    private function setupRowHeights($sheet, int $lastRow): void
+    private function setupRowHeights(Worksheet $sheet, int $lastRow): void
     {
         // Cabeçalho
         $sheet->getRowDimension(1)->setRowHeight(self::HEADER_ROW_HEIGHT);
@@ -99,7 +99,7 @@ class ExpensesListSheet implements XlsxSheet
         }
     }
 
-    private function applyHeaderStyles($sheet): void
+    private function applyHeaderStyles(Worksheet $sheet): void
     {
         $sheet->getStyle(self::HEADER_RANGE)->applyFromArray([
             'font' => [
@@ -124,13 +124,13 @@ class ExpensesListSheet implements XlsxSheet
         ]);
     }
 
-    private function applyTableStyles($sheet, int $lastRow): void
+    private function applyTableStyles(Worksheet $sheet, int $lastRow): void
     {
         if ($lastRow < 2) {
             return;
         }
 
-        $sheet->getStyle("A2:G{$lastRow}")->applyFromArray([
+        $sheet->getStyle('A2:G' . $lastRow)->applyFromArray([
             'font' => [
                 'size' => 10,
                 'color' => ['rgb' => self::HEADER_FONT],
@@ -148,7 +148,7 @@ class ExpensesListSheet implements XlsxSheet
 
         for ($row = 2; $row <= $lastRow; $row++) {
             if ($row % 2 === 0) {
-                $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+                $sheet->getStyle(sprintf('A%d:G%d', $row, $row))->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => self::STRIPE_BG],
@@ -158,7 +158,7 @@ class ExpensesListSheet implements XlsxSheet
         }
     }
 
-    private function applyColumnAlignments($sheet, int $lastRow): void
+    private function applyColumnAlignments(Worksheet $sheet, int $lastRow): void
     {
         $this->applyDescriptionAlignment($sheet, $lastRow);
         $this->applyValueAlignment($sheet, $lastRow);
@@ -171,14 +171,14 @@ class ExpensesListSheet implements XlsxSheet
 
     private function applyDescriptionAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("A2:A{$lastRow}")
+        $sheet->getStyle('A2:A' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyValueAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("B2:B{$lastRow}")->applyFromArray([
+        $sheet->getStyle('B2:B' . $lastRow)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],
@@ -187,55 +187,55 @@ class ExpensesListSheet implements XlsxSheet
 
     private function applyStatusAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("C2:C{$lastRow}")
+        $sheet->getStyle('C2:C' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     private function applyCategoryAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("D2:D{$lastRow}")
+        $sheet->getStyle('D2:D' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyTypeAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("E2:E{$lastRow}")
+        $sheet->getStyle('E2:E' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     private function applySourceAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("F2:F{$lastRow}")
+        $sheet->getStyle('F2:F' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT);
     }
 
     private function applyDateAlignment($sheet, int $lastRow): void
     {
-        $sheet->getStyle("G2:G{$lastRow}")
+        $sheet->getStyle('G2:G' . $lastRow)
             ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
-    private function applyCellFormats($sheet, int $lastRow): void
+    private function applyCellFormats(Worksheet $sheet, int $lastRow): void
     {
         if ($lastRow < 2) {
             return;
         }
 
-        $sheet->getStyle("B2:B{$lastRow}")
+        $sheet->getStyle('B2:B' . $lastRow)
             ->getNumberFormat()
             ->setFormatCode('[$R$-416] #,##0.00');
 
-        $sheet->getStyle("G2:G{$lastRow}")
+        $sheet->getStyle('G2:G' . $lastRow)
             ->getNumberFormat()
             ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
     }
 
-    private function applyConditionalFormatting($sheet, array $rawData): void
+    private function applyConditionalFormatting(Worksheet $sheet, array $rawData): void
     {
         foreach ($rawData as $index => $row) {
             $rowNum = $index + 2;
@@ -248,21 +248,21 @@ class ExpensesListSheet implements XlsxSheet
     private function formatStatus($sheet, int $rowNum, string $status): void
     {
         if ($status === 'paid') {
-            $sheet->getStyle("C{$rowNum}")->applyFromArray([
+            $sheet->getStyle('C' . $rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => '047857'],
                 ],
             ]);
         } elseif ($status === 'pending') {
-            $sheet->getStyle("C{$rowNum}")->applyFromArray([
+            $sheet->getStyle('C' . $rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'B45309'],
                 ],
             ]);
         } elseif ($status === 'overdue') {
-            $sheet->getStyle("C{$rowNum}")->applyFromArray([
+            $sheet->getStyle('C' . $rowNum)->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'B91C1C'],
@@ -282,13 +282,13 @@ class ExpensesListSheet implements XlsxSheet
 
     private function formatAsIncome($sheet, int $rowNum): void
     {
-        $sheet->getStyle("E{$rowNum}")->applyFromArray([
+        $sheet->getStyle('E' . $rowNum)->applyFromArray([
             'font' => [
                 'color' => ['rgb' => '1D4ED8'],
             ],
         ]);
 
-        $sheet->getStyle("B{$rowNum}")->applyFromArray([
+        $sheet->getStyle('B' . $rowNum)->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => '1D4ED8'],
@@ -298,14 +298,14 @@ class ExpensesListSheet implements XlsxSheet
 
     private function formatAsExpense($sheet, int $rowNum): void
     {
-        $sheet->getStyle("E{$rowNum}")->applyFromArray([
+        $sheet->getStyle('E' . $rowNum)->applyFromArray([
             'font' => [
                 'color' => ['rgb' => '334155'],
             ],
         ]);
     }
 
-    private function freezeHeader($sheet): void
+    private function freezeHeader(Worksheet $sheet): void
     {
         $sheet->freezePane('A2');
     }
@@ -329,7 +329,7 @@ class ExpensesListSheet implements XlsxSheet
             ->where('expenses.user_id', $this->getUserId())
             ->leftJoin('categories', 'expenses.category_id', '=', 'categories.id')
             ->leftJoin('sources', 'expenses.source_id', '=', 'sources.id')
-            ->orderByDesc('expenses.created_at')
+            ->latest('expenses.created_at')
             ->select(
                 'expenses.title',
                 'expenses.amount',
@@ -345,17 +345,15 @@ class ExpensesListSheet implements XlsxSheet
 
     private function normalizeValues(array $values): array
     {
-        return array_map(function ($row) {
-            return [
-                $row->title,
-                $this->normalizeMoney((int) $row->amount),
-                $this->translateStatus($row->status),
-                $row->category ?? '-',
-                $this->translateType($row->type),
-                $row->source ?? '-',
-                $this->toExcelDate($row->payment_date),
-            ];
-        }, $values);
+        return array_map(fn($row): array => [
+            $row->title,
+            $this->normalizeMoney((int) $row->amount),
+            $this->translateStatus($row->status),
+            $row->category ?? '-',
+            $this->translateType($row->type),
+            $row->source ?? '-',
+            $this->toExcelDate($row->payment_date),
+        ], $values);
     }
 
     private function normalizeMoney(int|string $amount): float
@@ -371,7 +369,7 @@ class ExpensesListSheet implements XlsxSheet
             return null;
         }
 
-        return ExcelDate::PHPToExcel(Carbon::parse($date));
+        return ExcelDate::PHPToExcel(\Illuminate\Support\Facades\Date::parse($date));
     }
 
     private function translateStatus(string $status): string

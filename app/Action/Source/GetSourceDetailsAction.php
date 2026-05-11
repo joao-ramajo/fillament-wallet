@@ -29,26 +29,26 @@ class GetSourceDetailsAction
         ]);
 
         $startedAt = microtime(true);
-        $sources = Source::where('user_id', $input->userId)->get();
+        $sources = Source::query()->where('user_id', $input->userId)->get();
 
-        $items = $sources->map(function (Source $source) use ($input) {
+        $items = $sources->map(function (Source $source) use ($input): array {
             if ($source->isCreditCard()) {
-                $currentStatement = CreditCardStatement::where('source_id', $source->id)
+                $currentStatement = CreditCardStatement::query()->where('source_id', $source->id)
                     ->where('status', '!=', CreditCardStatement::STATUS_PAID)
-                    ->orderBy('due_at')
+                    ->oldest('due_at')
                     ->first();
 
                 if ($currentStatement !== null) {
                     $currentStatement = $this->creditCardStatementService->sync($currentStatement);
                 }
 
-                $usedLimit = Expense::where('user_id', $input->userId)
+                $usedLimit = Expense::query()->where('user_id', $input->userId)
                     ->where('source_id', $source->id)
                     ->where('occurrence_type', Expense::OCCURRENCE_PURCHASE)
                     ->where('status', '!=', 'paid')
                     ->sum('amount');
 
-                $expensesCount = Expense::where('user_id', $input->userId)
+                $expensesCount = Expense::query()->where('user_id', $input->userId)
                     ->where('source_id', $source->id)
                     ->where('occurrence_type', Expense::OCCURRENCE_PURCHASE)
                     ->count();
@@ -63,28 +63,28 @@ class GetSourceDetailsAction
                     'credit_limit' => $source->credit_limit,
                     'used_limit' => $usedLimit,
                     'available_limit' => max(0, (int) $source->credit_limit - (int) $usedLimit),
-                    'current_statement' => $currentStatement === null ? null : [
+                    'current_statement' => $currentStatement instanceof CreditCardStatement ? [
                         'id' => $currentStatement->id,
                         'reference_month' => $currentStatement->reference_month->toDateString(),
                         'closing_at' => $currentStatement->closing_at->toDateString(),
                         'due_at' => $currentStatement->due_at->toDateString(),
                         'status' => $currentStatement->status,
                         'total_amount' => $currentStatement->total_amount,
-                    ],
+                    ] : null,
                 ];
             }
 
-            $totalIncome = Expense::where('user_id', $input->userId)
+            $totalIncome = Expense::query()->where('user_id', $input->userId)
                 ->where('source_id', $source->id)
                 ->where('type', 'income')
                 ->sum('amount');
 
-            $totalExpense = Expense::where('user_id', $input->userId)
+            $totalExpense = Expense::query()->where('user_id', $input->userId)
                 ->where('source_id', $source->id)
                 ->where('type', 'expense')
                 ->sum('amount');
 
-            $expensesCount = Expense::where('user_id', $input->userId)
+            $expensesCount = Expense::query()->where('user_id', $input->userId)
                 ->where('source_id', $source->id)
                 ->count();
 

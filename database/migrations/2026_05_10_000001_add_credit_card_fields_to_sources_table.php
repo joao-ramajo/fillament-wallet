@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('sources', function (Blueprint $table) {
+        Schema::table('sources', function (Blueprint $table): void {
             $table->string('type')->default('cash_like')->after('name');
             $table->integer('credit_limit')->nullable()->after('allow_negative');
             $table->unsignedTinyInteger('statement_closing_day')->nullable()->after('credit_limit');
@@ -20,7 +20,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('sources', function (Blueprint $table) {
+        Schema::table('sources', function (Blueprint $table): void {
             $table->dropColumn([
                 'type',
                 'credit_limit',
