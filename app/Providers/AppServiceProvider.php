@@ -30,7 +30,10 @@ use App\Http\Controllers\User\GetSourceDetailsController;
 use App\Http\Controllers\User\GetSourceListController;
 use App\Jobs\User\SendWelcomeMailJob;
 use App\Strategy\CsvExportStrategy;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Log\LogManager;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Psr\Log\LoggerInterface;
@@ -95,6 +98,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::bind('uuid', fn (string $value): Uuid => new Uuid($value));
+
+        Date::use(CarbonImmutable::class);
+
+        Model::preventLazyLoading(! $this->app->isProduction());
+
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        Model::preventAccessingMissingAttributes(! $this->app->isProduction());
     }
 
     /** @param list<class-string> $classes */

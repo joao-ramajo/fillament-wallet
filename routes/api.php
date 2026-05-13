@@ -20,6 +20,7 @@ use App\Http\Controllers\Expense\UpdateExpenseController;
 use App\Http\Controllers\User\CreateSourceController;
 use App\Http\Controllers\User\GetSourceDetailsController;
 use App\Http\Controllers\User\GetSourceListController;
+use App\Http\Controllers\User\UpdateSourceController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', RegisterController::class)->name('api.register');
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('api.sources.details');
         Route::post('/', CreateSourceController::class)
             ->name('api.sources.create');
+        Route::put('/{id}', UpdateSourceController::class)
+            ->name('api.sources.update');
     });
 
     Route::prefix('credit-cards/statements')->group(function (): void {

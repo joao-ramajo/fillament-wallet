@@ -15,7 +15,7 @@ Este arquivo define como agentes devem atuar especificamente dentro de `kado-bac
 - Respeitar as convenções do Laravel e a organização atual do backend.
 - Não mover ou reescrever fluxos existentes sem necessidade objetiva.
 - Toda mudança de comportamento deve considerar impacto em rotas, actions, requests, DTOs e testes.
-- Priorizar Laravel Sail para subir e operar a infraestrutura Docker do backend. Para o fluxo atual do projeto, os scripts `composer dev`, `composer test` e `composer lint:*` podem ser executados diretamente na raiz de `kado-backend/`.
+- Todo comando no backend deve ser executado via Laravel Sail, por exemplo `./vendor/bin/sail composer dev`, `./vendor/bin/sail composer test` e `./vendor/bin/sail composer lint:*`.
 - Ao criar novas regras permanentes, atualizar os arquivos em `AI/REGRAS/`.
 
 ## Fonte das regras

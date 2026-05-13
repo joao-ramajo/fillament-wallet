@@ -95,6 +95,95 @@ test('deve criar nova fonte e operacoes nela nao devem afetar resumo geral da fo
     expect($createdSource['balance'])->toBe(-50000);
 });
 
+test('deve atualizar uma fonte de caixa secundaria com sucesso', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $source = Source::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Carteira antiga',
+        'color' => '#111111',
+        'allow_negative' => false,
+    ]);
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->putJson(route('api.sources.update', ['id' => $source->id]), [
+            'name' => 'Carteira atualizada',
+            'color' => '#22aa99',
+            'allow_negative' => true,
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('message', 'Fonte atualizada com sucesso')
+        ->assertJsonPath('data.name', 'Carteira atualizada')
+        ->assertJsonPath('data.color', '#22aa99')
+        ->assertJsonPath('data.allow_negative', true);
+
+    $this->assertDatabaseHas('sources', [
+        'id' => $source->id,
+        'user_id' => $user->id,
+        'name' => 'Carteira atualizada',
+        'color' => '#22aa99',
+        'allow_negative' => true,
+    ]);
+});
+
+test('deve atualizar uma fonte de cartao com sucesso', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $source = Source::factory()->creditCard()->create([
+        'user_id' => $user->id,
+        'name' => 'Visa antiga',
+        'color' => '#111111',
+    ]);
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->putJson(route('api.sources.update', ['id' => $source->id]), [
+            'name' => 'Visa atualizada',
+            'color' => '#0055ff',
+            'credit_limit' => 750000,
+            'statement_closing_day' => 15,
+            'statement_due_day' => 20,
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('message', 'Fonte atualizada com sucesso')
+        ->assertJsonPath('data.name', 'Visa atualizada')
+        ->assertJsonPath('data.color', '#0055ff')
+        ->assertJsonPath('data.credit_limit', 750000)
+        ->assertJsonPath('data.statement_closing_day', 15)
+        ->assertJsonPath('data.statement_due_day', 20)
+        ->assertJsonPath('data.allow_negative', false);
+
+    $this->assertDatabaseHas('sources', [
+        'id' => $source->id,
+        'user_id' => $user->id,
+        'name' => 'Visa atualizada',
+        'color' => '#0055ff',
+        'credit_limit' => 750000,
+        'statement_closing_day' => 15,
+        'statement_due_day' => 20,
+        'allow_negative' => false,
+    ]);
+});
+
+test('deve bloquear edicao da fonte principal', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->putJson(route('api.sources.update', ['id' => $defaultSource->id]), [
+            'name' => 'Fonte principal editada',
+            'color' => '#22aa99',
+            'allow_negative' => true,
+        ]);
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'message' => 'A fonte principal não pode ser editada.',
+        ]);
+});
+
 test('deve calcular expected_total considerando registros pendentes e pagos', function (): void {
     $user = User::factory()->create();
     $token = authTokenFor($user);

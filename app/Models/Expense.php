@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,17 +21,17 @@ use Illuminate\Support\Facades\Date;
  * @property string $type
  * @property string $origin_type
  * @property string $occurrence_type
- * @property Carbon|null $payment_date
- * @property Carbon|null $purchase_date
- * @property Carbon|null $due_date
+ * @property CarbonImmutable|null $payment_date
+ * @property CarbonImmutable|null $purchase_date
+ * @property CarbonImmutable|null $due_date
  * @property int|null $category_id
  * @property int|null $source_id
  * @property int|null $credit_card_statement_id
  * @property string|null $installment_group_id
  * @property int|null $installment_number
  * @property int|null $installment_total
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User $user
  * @property-read Category|null $category
  * @property-read Source|null $source
