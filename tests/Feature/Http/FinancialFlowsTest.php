@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\CreditCardStatement;
 use App\Models\Expense;
 use App\Models\Source;
 use App\Models\User;
@@ -181,6 +182,104 @@ test('deve bloquear edicao da fonte principal', function (): void {
     $response->assertStatus(400)
         ->assertJson([
             'message' => 'A fonte principal não pode ser editada.',
+        ]);
+});
+
+test('deve excluir uma fonte de caixa secundaria e apagar suas despesas em cascata', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $source = Source::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Carteira viagem',
+        'color' => '#22aa99',
+        'allow_negative' => true,
+        'is_default' => false,
+    ]);
+
+    $expense = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $source->id,
+        'title' => 'Hotel',
+        'amount' => 50000,
+        'status' => 'paid',
+        'type' => 'expense',
+    ]);
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->deleteJson(route('api.sources.delete', ['id' => $source->id]));
+
+    $response->assertOk()
+        ->assertJsonPath('message', 'Fonte excluída com sucesso.');
+
+    $this->assertDatabaseMissing('sources', [
+        'id' => $source->id,
+    ]);
+
+    $this->assertDatabaseMissing('expenses', [
+        'id' => $expense->id,
+    ]);
+});
+
+test('deve excluir uma fonte de cartao e apagar despesas e faturas em cascata', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $source = Source::factory()->creditCard()->create([
+        'user_id' => $user->id,
+        'name' => 'Visa',
+        'color' => '#0055ff',
+        'credit_limit' => 750000,
+        'statement_closing_day' => 15,
+        'statement_due_day' => 20,
+    ]);
+    $statement = CreditCardStatement::factory()->create([
+        'source_id' => $source->id,
+        'reference_month' => now()->startOfMonth(),
+        'closing_at' => now()->startOfMonth()->day(15),
+        'due_at' => now()->startOfMonth()->day(20),
+    ]);
+
+    $purchase = Expense::factory()->create([
+        'user_id' => $user->id,
+        'source_id' => $source->id,
+        'title' => 'Notebook',
+        'amount' => 125000,
+        'status' => 'pending',
+        'type' => 'expense',
+        'origin_type' => Expense::ORIGIN_CREDIT_CARD,
+        'occurrence_type' => Expense::OCCURRENCE_PURCHASE,
+        'credit_card_statement_id' => $statement->id,
+    ]);
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->deleteJson(route('api.sources.delete', ['id' => $source->id]));
+
+    $response->assertOk()
+        ->assertJsonPath('message', 'Fonte excluída com sucesso.');
+
+    $this->assertDatabaseMissing('sources', [
+        'id' => $source->id,
+    ]);
+
+    $this->assertDatabaseMissing('expenses', [
+        'id' => $purchase->id,
+    ]);
+
+    $this->assertDatabaseMissing('credit_card_statements', [
+        'id' => $statement->id,
+    ]);
+});
+
+test('deve bloquear a exclusao da fonte principal', function (): void {
+    $user = User::factory()->create();
+    $token = authTokenFor($user);
+    $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->deleteJson(route('api.sources.delete', ['id' => $defaultSource->id]));
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'message' => 'A fonte principal não pode ser excluída.',
         ]);
 });
 

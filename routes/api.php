@@ -19,6 +19,7 @@ use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
 use App\Http\Controllers\Expense\UpdateCategoryController;
 use App\Http\Controllers\Expense\UpdateExpenseController;
 use App\Http\Controllers\User\CreateSourceController;
+use App\Http\Controllers\User\DeleteSourceController;
 use App\Http\Controllers\User\GetSourceDetailsController;
 use App\Http\Controllers\User\GetSourceListController;
 use App\Http\Controllers\User\UpdateSourceController;
@@ -36,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('api.sources.details');
         Route::post('/', CreateSourceController::class)
             ->name('api.sources.create');
+        Route::delete('/{id}', DeleteSourceController::class)
+            ->name('api.sources.delete');
         Route::put('/{id}', UpdateSourceController::class)
             ->name('api.sources.update');
     });
