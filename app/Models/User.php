@@ -24,6 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property array<int, string>|null $dashboard_summary_cards
  * @property-read Collection<int, Expense> $expenses
  * @property-read Collection<int, Category> $categories
  * @property-read Collection<int, Source> $sources
@@ -32,6 +33,7 @@ use Laravel\Sanctum\HasApiTokens;
     'name',
     'email',
     'password',
+    'dashboard_summary_cards',
 ])]
 #[Hidden([
     'password',
@@ -52,6 +54,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'dashboard_summary_cards' => 'array',
         ];
     }
 

@@ -11,6 +11,8 @@ use App\Action\Category\CreateCategoryAction;
 use App\Action\Category\GetCategoryListAction;
 use App\Action\Dashboard\GetExpensesAction;
 use App\Action\Dashboard\GetSummaryAction;
+use App\Action\Dashboard\GetSummaryCardsAction;
+use App\Action\Dashboard\UpdateSummaryCardsAction;
 use App\Action\Expense\MarkExpenseAsPaidAction;
 use App\Action\ImportCsvData;
 use App\Action\Source\CreateSourceAction;
@@ -21,7 +23,9 @@ use App\Domain\Uuid;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\GenerateExpensesXlsx;
 use App\Http\Controllers\Dashboard\GetExpensesController;
+use App\Http\Controllers\Dashboard\GetSummaryCardsController;
 use App\Http\Controllers\Dashboard\GetSummaryController;
+use App\Http\Controllers\Dashboard\UpdateSummaryCardsController;
 use App\Http\Controllers\Expense\CreateCategoryController;
 use App\Http\Controllers\Expense\GetCategoryListController;
 use App\Http\Controllers\Expense\MarkExpenseAsPaidController;
@@ -54,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
             GetExpensesController::class,
             GetSummaryAction::class,
             GetExpensesAction::class,
+            GetSummaryCardsController::class,
+            UpdateSummaryCardsController::class,
+            GetSummaryCardsAction::class,
+            UpdateSummaryCardsAction::class,
         ]);
 
         $this->bindChannelLogger('source', [

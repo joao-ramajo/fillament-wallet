@@ -14,6 +14,7 @@ use App\Models\Source;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Psr\Log\LoggerInterface;
 
 test('get expenses filtra por query, categoria e mês útil do fluxo', function (): void {
@@ -56,55 +57,97 @@ test('get expenses filtra por query, categoria e mês útil do fluxo', function 
 });
 
 test('get summary calcula caixa e cartão sem misturar contextos', function (): void {
-    $user = User::factory()->create();
-    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
-    $creditCard = Source::factory()->creditCard()->create(['user_id' => $user->id]);
+    Date::setTestNow('2026-05-14 10:00:00');
 
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'title' => 'Salário',
-        'type' => 'income',
-        'status' => 'paid',
-        'amount' => 500000,
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'title' => 'Aluguel',
-        'type' => 'expense',
-        'status' => 'pending',
-        'amount' => 120000,
-    ]);
+    try {
+        $user = User::factory()->create();
+        $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+        $creditCard = Source::factory()->creditCard()->create(['user_id' => $user->id]);
 
-    $statement = CreditCardStatement::factory()->create([
-        'source_id' => $creditCard->id,
-        'status' => CreditCardStatement::STATUS_OPEN,
-        'total_amount' => 80000,
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $creditCard->id,
-        'amount' => 80000,
-        'status' => 'pending',
-        'origin_type' => Expense::ORIGIN_CREDIT_CARD,
-        'occurrence_type' => Expense::OCCURRENCE_PURCHASE,
-        'credit_card_statement_id' => $statement->id,
-    ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'title' => 'Salário',
+            'type' => 'income',
+            'status' => 'paid',
+            'amount' => 500000,
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'title' => 'Aluguel',
+            'type' => 'expense',
+            'status' => 'pending',
+            'amount' => 120000,
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'title' => 'Supermercado',
+            'type' => 'expense',
+            'status' => 'paid',
+            'amount' => 120000,
+            'payment_date' => '2026-05-14 08:30:00',
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'title' => 'Farmácia',
+            'type' => 'expense',
+            'status' => 'paid',
+            'amount' => 25000,
+            'payment_date' => '2026-05-02 12:00:00',
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'title' => 'Café',
+            'type' => 'expense',
+            'status' => 'paid',
+            'amount' => 7000,
+            'payment_date' => '2026-04-30 09:00:00',
+        ]);
 
-    $logger = Mockery::mock(LoggerInterface::class);
-    $logger->shouldReceive('info')->twice();
+        $statement = CreditCardStatement::factory()->create([
+            'source_id' => $creditCard->id,
+            'status' => CreditCardStatement::STATUS_OPEN,
+            'total_amount' => 80000,
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $creditCard->id,
+            'amount' => 80000,
+            'status' => 'pending',
+            'origin_type' => Expense::ORIGIN_CREDIT_CARD,
+            'occurrence_type' => Expense::OCCURRENCE_PURCHASE,
+            'credit_card_statement_id' => $statement->id,
+        ]);
 
-    $summary = (new GetSummaryAction($logger))->execute(new GetSummaryInput(
-        userId: $user->id,
-        defaultSourceId: $defaultSourceId,
-    ));
+        $logger = Mockery::mock(LoggerInterface::class);
+        $logger->shouldReceive('info')->twice();
 
-    expect($summary->totalReceive)->toBe(500000)
-        ->and($summary->totalExpense)->toBe(0)
-        ->and($summary->expectedTotal)->toBe(380000)
-        ->and($summary->creditCardOpenTotal)->toBe(80000)
-        ->and($summary->creditCardLimitUsed)->toBe(80000);
+        $summary = (new GetSummaryAction($logger))->execute(new GetSummaryInput(
+            userId: $user->id,
+            defaultSourceId: $defaultSourceId,
+        ));
+
+        expect($summary->totalReceive)->toBe(500000)
+            ->and($summary->totalExpense)->toBe(152000)
+            ->and($summary->expectedTotal)->toBe(228000)
+            ->and($summary->finalBalance)->toBe(228000)
+            ->and($summary->totalReceive30Days)->toBe(500000)
+            ->and($summary->totalExpense30Days)->toBe(152000)
+            ->and($summary->totalIncomePending)->toBe(0)
+            ->and($summary->totalExpensePending)->toBe(120000)
+            ->and($summary->currentBalance)->toBe(348000)
+            ->and($summary->expectedExpenses)->toBe(272000)
+            ->and($summary->spentToday)->toBe(120000)
+            ->and($summary->spentMonth)->toBe(145000)
+            ->and($summary->creditCardOpenTotal)->toBe(80000)
+            ->and($summary->creditCardLimitUsed)->toBe(80000);
+    } finally {
+        Date::setTestNow();
+    }
 });
 
 test('import csv cria categoria e respeita alias da fonte padrão', function (): void {

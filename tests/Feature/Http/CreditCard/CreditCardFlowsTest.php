@@ -120,6 +120,8 @@ test('compra no cartão nao deve afetar o caixa principal antes do pagamento da 
             'total_receive' => 500000,
             'total_expense' => 0,
             'expected_total' => 500000,
+            'total_receive_30_days' => 500000,
+            'total_expense_30_days' => 0,
             'credit_card_open_total' => 120000,
             'credit_card_limit_used' => 120000,
         ]);
@@ -184,6 +186,8 @@ test('deve pagar a fatura integralmente e baixar o caixa', function (): void {
             'total_receive' => 400000,
             'total_expense' => 90000,
             'expected_total' => 310000,
+            'total_receive_30_days' => 400000,
+            'total_expense_30_days' => 90000,
             'credit_card_open_total' => 0,
             'credit_card_limit_used' => 0,
         ]);

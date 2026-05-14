@@ -540,124 +540,152 @@ test('ao editar uma despesa paga com payment_date no futuro deve retornar erro d
 });
 
 test('quero ver meus resumos gerais com o total recebido, total gasto e saldo esperado com sucesso', function (): void {
-    $user = User::factory()->create();
-    $token = $user->createToken('test')->plainTextToken;
-    $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
-    $secondarySourceId = Source::factory()->create([
-        'user_id' => $user->id,
-        'is_default' => false,
-    ])->id;
+    Date::setTestNow('2026-05-14 10:00:00');
 
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'type' => 'income',
-        'status' => 'paid',
-        'amount' => 10000,
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'type' => 'expense',
-        'status' => 'paid',
-        'amount' => 2500,
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'type' => 'income',
-        'status' => 'pending',
-        'amount' => 1500,
-    ]);
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSourceId,
-        'type' => 'expense',
-        'status' => 'pending',
-        'amount' => 700,
-    ]);
+    try {
+        $user = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+        $defaultSourceId = $user->sources()->where('is_default', true)->value('id');
+        $secondarySourceId = Source::factory()->create([
+            'user_id' => $user->id,
+            'is_default' => false,
+        ])->id;
 
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $secondarySourceId,
-        'type' => 'expense',
-        'status' => 'paid',
-        'amount' => 999999,
-    ]);
-
-    $response = $this->withHeader('Authorization', 'Bearer '.$token)
-        ->getJson(route('api.get-summary'));
-
-    $response->assertOk()
-        ->assertJson([
-            'total_receive' => 10000,
-            'total_expense' => 2500,
-            'expected_total' => 8300,
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'type' => 'income',
+            'status' => 'paid',
+            'amount' => 10000,
         ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'type' => 'expense',
+            'status' => 'paid',
+            'amount' => 2500,
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'type' => 'income',
+            'status' => 'pending',
+            'amount' => 1500,
+        ]);
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $defaultSourceId,
+            'type' => 'expense',
+            'status' => 'pending',
+            'amount' => 700,
+        ]);
+
+        Expense::factory()->create([
+            'user_id' => $user->id,
+            'source_id' => $secondarySourceId,
+            'type' => 'expense',
+            'status' => 'paid',
+            'amount' => 999999,
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.get-summary'));
+
+        $response->assertOk()
+            ->assertJson([
+                'total_receive' => 10000,
+                'total_expense' => 2500,
+                'expected_total' => 8300,
+                'total_receive_30_days' => 10000,
+                'total_expense_30_days' => 2500,
+            ]);
+    } finally {
+        Date::setTestNow();
+    }
 });
 
 test('uma nova despesa na fonte principal deve alterar o valor corretamente para o saldo esperado', function (): void {
-    $user = User::factory()->create();
-    $token = $user->createToken('test')->plainTextToken;
-    $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
+    Date::setTestNow('2026-05-14 10:00:00');
 
-    Expense::factory()->create([
-        'user_id' => $user->id,
-        'source_id' => $defaultSource->id,
-        'type' => 'income',
-        'status' => 'paid',
-        'amount' => 8000,
-    ]);
+    try {
+        $user = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+        $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
 
-    $before = $this->withHeader('Authorization', 'Bearer '.$token)
-        ->getJson(route('api.get-summary'));
-
-    $before->assertOk()
-        ->assertJson(['expected_total' => 8000]);
-
-    $this->withHeader('Authorization', 'Bearer '.$token)
-        ->postJson(route('api.expenses.create'), [
-            'title' => 'Conta energia',
-            'amount' => 1200,
-            'type' => 'expense',
-            'status' => 'pending',
+        Expense::factory()->create([
+            'user_id' => $user->id,
             'source_id' => $defaultSource->id,
-        ])
-        ->assertCreated();
+            'type' => 'income',
+            'status' => 'paid',
+            'amount' => 8000,
+        ]);
 
-    $after = $this->withHeader('Authorization', 'Bearer '.$token)
-        ->getJson(route('api.get-summary'));
+        $before = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.get-summary'));
 
-    $after->assertOk()
-        ->assertJson(['expected_total' => 6800]);
+        $before->assertOk()
+            ->assertJson(['expected_total' => 8000]);
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.expenses.create'), [
+                'title' => 'Conta energia',
+                'amount' => 1200,
+                'type' => 'expense',
+                'status' => 'pending',
+                'source_id' => $defaultSource->id,
+            ])
+            ->assertCreated();
+
+        $after = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.get-summary'));
+
+        $after->assertOk()
+            ->assertJson([
+                'expected_total' => 6800,
+                'total_receive_30_days' => 8000,
+                'total_expense_30_days' => 0,
+            ]);
+    } finally {
+        Date::setTestNow();
+    }
 });
 
 test('adicionar um novo gasto deve alterar o total gasto', function (): void {
-    $user = User::factory()->create();
-    $token = $user->createToken('test')->plainTextToken;
-    $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
+    Date::setTestNow('2026-05-14 10:00:00');
 
-    $before = $this->withHeader('Authorization', 'Bearer '.$token)
-        ->getJson(route('api.get-summary'));
+    try {
+        $user = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+        $defaultSource = $user->sources()->where('is_default', true)->firstOrFail();
 
-    $before->assertOk()
-        ->assertJson(['total_expense' => 0]);
+        $before = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.get-summary'));
 
-    $this->withHeader('Authorization', 'Bearer '.$token)
-        ->postJson(route('api.expenses.create'), [
-            'title' => 'Mercado',
-            'amount' => 3200,
-            'type' => 'expense',
-            'status' => 'paid',
-            'source_id' => $defaultSource->id,
-        ])
-        ->assertCreated();
+        $before->assertOk()
+            ->assertJson(['total_expense' => 0]);
 
-    $after = $this->withHeader('Authorization', 'Bearer '.$token)
-        ->getJson(route('api.get-summary'));
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.expenses.create'), [
+                'title' => 'Mercado',
+                'amount' => 3200,
+                'type' => 'expense',
+                'status' => 'paid',
+                'source_id' => $defaultSource->id,
+            ])
+            ->assertCreated();
 
-    $after->assertOk()
-        ->assertJson(['total_expense' => 3200]);
+        $after = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.get-summary'));
+
+        $after->assertOk()
+            ->assertJson([
+                'total_expense' => 3200,
+                'total_receive_30_days' => 0,
+                'total_expense_30_days' => 3200,
+            ]);
+    } finally {
+        Date::setTestNow();
+    }
 });
 
 test('ao adicionar despesas a uma categoria especifica, a contagem de despesas nela deve ser incrementada com sucesso', function (): void {
